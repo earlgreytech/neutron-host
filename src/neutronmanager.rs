@@ -333,5 +333,6 @@ mod tests {
         assert_eq!(manager.peek_result_key(&key).unwrap()[0], 4);
         assert_eq!(manager.pop_stack().unwrap()[0], 3);
         manager.pop_context().unwrap();
+        assert_eq!(manager.peek_result_key(&key).unwrap()[0], 5); //note: unsure if this behavior is correct
     }
 }
