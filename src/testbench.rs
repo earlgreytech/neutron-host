@@ -5,7 +5,7 @@ use crate::db::*;
 use std::path::PathBuf;
 use crate::syscall_interfaces::storage;
 use crate::interface::*;
-use crate::neutronmanager::*;
+use crate::codata::*;
 use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
 use crate::syscall_interfaces::logging;
@@ -19,23 +19,23 @@ pub struct Testbench{
 }
 
 impl storage::GlobalStorage for Testbench{
-    fn store_state(&mut self, stack: &mut NeutronManager) -> Result<(), NeutronError>{
+    fn store_state(&mut self, stack: &mut CoData) -> Result<(), NeutronError>{
         let key = stack.pop_stack()?;
         let value = stack.pop_stack()?;
         self.write_state_key(stack, NEUTRONDB_USER_SPACE, &key, &value)
     }
-    fn load_state(&mut self, stack: &mut NeutronManager) -> Result<(), NeutronError>{
+    fn load_state(&mut self, stack: &mut CoData) -> Result<(), NeutronError>{
         let key = stack.pop_stack()?;
         let value = self.read_state_key(stack, NEUTRONDB_USER_SPACE, &key)?;
         stack.push_stack(&value)?;
         Ok(())
     }
-    fn key_exists(&mut self, _stack: &mut NeutronManager) -> Result<(), NeutronError>{
+    fn key_exists(&mut self, _stack: &mut CoData) -> Result<(), NeutronError>{
         Err(Unrecoverable(UnrecoverableError::NotImplemented))
     }
 }
 impl Testbench{
-    fn compile_log_message(&mut self, stack: &mut NeutronManager) -> Result<String, NeutronError>{
+    fn compile_log_message(&mut self, stack: &mut CoData) -> Result<String, NeutronError>{
         let count = stack.pop_stack()?;
         if count.len() < 1{
             return Err(NeutronError::Recoverable(RecoverableError::StackItemTooSmall));
@@ -58,22 +58,22 @@ impl Testbench{
     }
 }
 impl logging::LoggingInterface for Testbench{
-    fn log_debug(&mut self, stack: &mut NeutronManager) -> Result<(), NeutronError>{
+    fn log_debug(&mut self, stack: &mut CoData) -> Result<(), NeutronError>{
         let msg = &self.compile_log_message(stack)?;
         (self as &mut dyn CallSystem).log_debug(&msg);
         Ok(())
     }
-    fn log_info(&mut self, stack: &mut NeutronManager) -> Result<(), NeutronError>{
+    fn log_info(&mut self, stack: &mut CoData) -> Result<(), NeutronError>{
         let msg = &self.compile_log_message(stack)?;
         (self as &mut dyn CallSystem).log_info(&msg);
         Ok(())
     }
-    fn log_warning(&mut self, stack: &mut NeutronManager) -> Result<(), NeutronError>{
+    fn log_warning(&mut self, stack: &mut CoData) -> Result<(), NeutronError>{
         let msg = &self.compile_log_message(stack)?;
         (self as &mut dyn CallSystem).log_warning(&msg);
         Ok(())
     }
-    fn log_error(&mut self, stack: &mut NeutronManager) -> Result<(), NeutronError>{
+    fn log_error(&mut self, stack: &mut CoData) -> Result<(), NeutronError>{
         let msg = self.compile_log_message(stack)?;
         (self as &mut dyn CallSystem).log_error(&msg);
         Ok(())
@@ -81,7 +81,7 @@ impl logging::LoggingInterface for Testbench{
 }
 
 impl CallSystem for Testbench{
-    fn system_call(&mut self, stack: &mut NeutronManager, feature: u32, function: u32) -> Result<u32, NeutronError>{
+    fn system_call(&mut self, stack: &mut CoData, feature: u32, function: u32) -> Result<u32, NeutronError>{
         //go through each interface implementations until one returns true or an error occurs
         if (self as &mut dyn storage::GlobalStorage).try_syscall(stack, feature, function)? == true{
             return Ok(0);
@@ -100,7 +100,7 @@ impl CallSystem for Testbench{
     }
     /// Read a state key from the database using the permanent storage feature set
     /// Used for reading core contract bytecode by VMs
-    fn read_state_key(&mut self, stack: &mut NeutronManager, space: u8, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
+    fn read_state_key(&mut self, stack: &mut CoData, space: u8, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
         let mut k = vec![space];
         k.extend_from_slice(key);
         match self.db.read_key(&stack.current_context().self_address.to_short_address(), &k) {
@@ -114,7 +114,7 @@ impl CallSystem for Testbench{
     }
     /// Write a state key to the database using the permanent storage feature set
     /// Used for writing bytecode etc by VMs
-    fn write_state_key(&mut self, stack: &mut NeutronManager, space: u8, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
+    fn write_state_key(&mut self, stack: &mut CoData, space: u8, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
         let mut k = vec![space];
         k.extend_from_slice(key);
         if self.db.write_key(&stack.current_context().self_address.to_short_address(), &k, value).is_err(){
@@ -127,7 +127,7 @@ impl CallSystem for Testbench{
 
 impl Testbench{
     /// Begins execution using the top context within the stack
-    pub fn execute_top_context(&mut self, stack: &mut NeutronManager) -> Result<NeutronVMResult, NeutronError>{
+    pub fn execute_top_context(&mut self, stack: &mut CoData) -> Result<NeutronVMResult, NeutronError>{
         /*
         self.db.checkpoint().unwrap();
         if stack.current_context().self_address.version == 2 {
@@ -153,8 +153,8 @@ impl Testbench{
     }
     
     /// Deploy a smart contract from an ELF executable file
-    pub fn deploy_from_elf(&mut self, stack: &mut NeutronManager, file: String) -> Result<NeutronVMResult, NeutronError>{
-        assert!(stack.context_count()? == 1, "Exactly one context should be pushed to the NeutronManager");
+    pub fn deploy_from_elf(&mut self, stack: &mut CoData, file: String) -> Result<NeutronVMResult, NeutronError>{
+        assert!(stack.context_count()? == 1, "Exactly one context should be pushed to the CoData");
         let path = PathBuf::from(file);
         let file = elf::File::open_path(&path).unwrap();
     

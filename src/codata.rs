@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 
 #[derive(Default)]
-pub struct NeutronManager{
+pub struct CoData{
     context_stack: Vec<ExecutionContext>,
     stacks: [Vec<Vec<u8>>; 2],
     maps: Vec<HashMap<Vec<u8>, Vec<u8>>>,
@@ -17,9 +17,9 @@ pub struct NeutronManager{
     top_result_map: usize
 }
 
-impl NeutronManager{
-    pub fn new() -> NeutronManager{
-        let mut manager = NeutronManager::default();
+impl CoData{
+    pub fn new() -> CoData{
+        let mut manager = CoData::default();
         manager.maps.push(HashMap::<Vec<u8>, Vec<u8>>::default()); //add output map (note: this is flipped when context is pushed)
         manager.maps.push(HashMap::<Vec<u8>, Vec<u8>>::default()); //add input map
         manager.top_input_map = 1;
@@ -27,7 +27,6 @@ impl NeutronManager{
         manager.top_result_map = 1;
         manager.input_stack = 0;
         manager.output_stack = 1;
-        //manager.stacks.push(Vec::<Vec<u8>>::default());
         manager
     }
 
@@ -267,7 +266,7 @@ mod tests {
     use super::*;
     #[test]
     fn test_call_map_flow(){
-        let mut manager = NeutronManager::new();
+        let mut manager = CoData::new();
         let c1 = ExecutionContext::default();
         let c2 = ExecutionContext::default();
         let c3 = ExecutionContext::default();
@@ -313,7 +312,7 @@ mod tests {
     }
     #[test]
     fn test_element_stack_flow(){
-        let mut manager = NeutronManager::new();
+        let mut manager = CoData::new();
         let c1 = ExecutionContext::default();        
         let key = [0];
         //ABI data
