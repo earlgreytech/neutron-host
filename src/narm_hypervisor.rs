@@ -19,6 +19,12 @@ impl VMHypervisor for NarmHypervisor{
     fn execute(&mut self, codata: &mut CoData) -> Result<VMResult, NeutronError>{
         Ok(VMResult::Ended)
     }
+    fn set_result(&mut self, code: u32){
+
+    }
+    fn set_error(&mut self, code: u32){
+        
+    }
 }
 
 

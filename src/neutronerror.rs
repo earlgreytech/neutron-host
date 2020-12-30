@@ -27,7 +27,8 @@ pub enum RecoverableError{
     ContractSignaledError,
     ContractExecutionError,
     InvalidHypervisorInterrupt,
-    StackItemTooSmall
+    StackItemTooSmall,
+    InvalidVM
 
 }
 

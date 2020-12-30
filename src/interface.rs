@@ -122,7 +122,6 @@ pub struct NeutronVersion{
     pub root_vm: u8,
     pub vm_version: u8,
     pub flags: u16,
-    pub qtum_version: u32
 }
 
 

@@ -154,7 +154,7 @@ impl Testbench{
     
     /// Deploy a smart contract from an ELF executable file
     pub fn deploy_from_elf(&mut self, stack: &mut CoData, file: String) -> Result<NeutronVMResult, NeutronError>{
-        assert!(stack.context_count()? == 1, "Exactly one context should be pushed to the CoData");
+        assert!(stack.context_count() == 1, "Exactly one context should be pushed to the CoData");
         let path = PathBuf::from(file);
         let file = elf::File::open_path(&path).unwrap();
     

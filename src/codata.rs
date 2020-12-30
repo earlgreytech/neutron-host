@@ -204,8 +204,8 @@ impl CoData{
         }
     }
     /// The total number of smart contract contexts currently involved in the overall execution
-    pub fn context_count(&self) -> Result<usize, NeutronError>{
-        Ok(self.context_stack.len())
+    pub fn context_count(&self) -> usize{
+        self.context_stack.len()
     }
 
 	/// Retrieves the context information of the current smart contract execution

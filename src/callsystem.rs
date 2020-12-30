@@ -3,12 +3,17 @@ use std::collections::hash_map::*;
 use crate::codata::*;
 use std::cell::*;
 
+pub enum ElementResult{
+    Result(u32),
+    NewCall
+}
+
 pub trait CallSystem{
-    fn call(&self, manager: &mut CoData, feature: u32, function: u32);
+    fn call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>;
 }
 
 pub trait ElementAPI{
-    fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, feature: u32, function: u32) -> Result<u32, NeutronError>;
+    fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>;
 }
 
 /// Manages ElementAPIs. This structure is only provided for convenience and not necessarily a required structure
@@ -24,9 +29,9 @@ impl RefCallSystem{
     }
 }
 impl CallSystem for RefCallSystem{
-    fn call(&self, manager: &mut CoData, feature: u32, function: u32){
+    fn call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         let mut t = self.elements.get(&feature).unwrap().borrow_mut();
-        t.system_call(self, manager, feature, function).unwrap();
+        t.system_call(self, manager, feature, function)
     }
 }
 
@@ -37,44 +42,44 @@ mod tests {
     struct TestElementA{
     }
     impl ElementAPI for TestElementA{
-        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<u32, NeutronError>{
+        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             callsystem.call(manager, 2, 0);
-            Ok(0)
+            Ok(ElementResult::Result(0))
         }
     }
     #[derive(Default)]
     struct TestElementB{
     }
     impl ElementAPI for TestElementB{
-        fn system_call(&mut self, _callsystem: &dyn CallSystem, _manager: &mut CoData, _feature: u32, _function: u32) -> Result<u32, NeutronError>{
-            Ok(0)
+        fn system_call(&mut self, _callsystem: &dyn CallSystem, _manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
+            Ok(ElementResult::Result(0))
         }
     }
     #[derive(Default)]
     struct TestElementFail{
     }
     impl ElementAPI for TestElementFail{
-        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<u32, NeutronError>{
+        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             callsystem.call(manager, 3, 0);
-            Ok(0)
+            Ok(ElementResult::Result(0))
         }
     }
     #[derive(Default)]
     struct TestElementFailA{
     }
     impl ElementAPI for TestElementFailA{
-        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<u32, NeutronError>{
+        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             callsystem.call(manager, 5, 0);
-            Ok(0)
+            Ok(ElementResult::Result(0))
         }
     }
     #[derive(Default)]
     struct TestElementFailB{
     }
     impl ElementAPI for TestElementFailB{
-        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<u32, NeutronError>{
+        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             callsystem.call(manager, 4, 0);
-            Ok(0)
+            Ok(ElementResult::Result(0))
         }
     }
     #[derive(Default)]
@@ -82,11 +87,11 @@ mod tests {
         test: u32
     }
     impl ElementAPI for TestElementC{
-        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, feature: u32, _function: u32) -> Result<u32, NeutronError>{
+        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             self.test = feature;
             callsystem.call(manager, 1, 0);
             callsystem.call(manager, 1, 0);
-            Ok(0)
+            Ok(ElementResult::Result(0))
         }
     }
     use super::*;
