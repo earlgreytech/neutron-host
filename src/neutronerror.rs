@@ -8,11 +8,10 @@ pub enum UnrecoverableError{
     NotImplemented,
     StateOutOfRent,
     ContextIndexEmpty,
-    UnknownVM,
     DatabaseCommitError,
     DatabaseWritingError,
-    ErrorInitializingVM
-
+    ErrorInitializingVM,
+    OutOfGas
 }
 
 //TODO: this later needs to be moved/copied to neutron-constants for sharing with neutron-star

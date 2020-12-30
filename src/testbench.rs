@@ -149,7 +149,7 @@ impl Testbench{
             return Err(Unrecoverable(UnrecoverableError::UnknownVM));
         }
         */
-        Err(NeutronError::Unrecoverable(UnrecoverableError::UnknownVM))
+        Err(NeutronError::Recoverable(RecoverableError::InvalidVM))
     }
     
     /// Deploy a smart contract from an ELF executable file
