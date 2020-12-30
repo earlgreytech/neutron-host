@@ -2,16 +2,9 @@ use crate::narm::narmvm::*;
 use crate::codata::*;
 use std::collections::hash_map::*;
 use crate::neutronerror::*;
+use crate::vmmanager::*;
 
-pub trait VMHypervisor{
-    //note: hypervisors should own the relevant VM. Each execution (ie, sub-call etc) will produce a new VMHypervisor
-    fn execute(&mut self, codata: &mut CoData) -> Result<VMResult, NeutronError>;
-}
 
-pub enum VMResult{
-    Ended,
-    ElementCall(u32)
-}
 
 #[derive(Default)]
 pub struct NarmHypervisor{
@@ -23,16 +16,12 @@ impl NarmHypervisor{
 }
 
 impl VMHypervisor for NarmHypervisor{
-    /// returns ElementAPI ID?
     fn execute(&mut self, codata: &mut CoData) -> Result<VMResult, NeutronError>{
         Ok(VMResult::Ended)
     }
 }
 
-#[derive(Default)]
-pub struct VMManager{
-    pub vm_builders: HashMap<u32, fn() -> Box<dyn VMHypervisor>>
-}
+
 
 /*
 
@@ -44,7 +33,7 @@ Create VM/hypervisor "builders" and populate into VMManger
 
 foreach transaction{
     Create codata, populate with transaction ABI data
-    Call ??? to begin execution
+    Call NeutronManager to begin execution
 }
 
 Workflow for sub-call:

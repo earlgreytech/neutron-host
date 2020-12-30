@@ -7,6 +7,8 @@ pub mod codata;
 pub mod neutronerror;
 pub mod narm_hypervisor;
 pub mod callsystem;
+pub mod vmmanager;
+pub mod manager;
 
 extern crate num;
 #[macro_use]

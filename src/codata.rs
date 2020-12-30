@@ -5,6 +5,7 @@ use crate::neutronerror::NeutronError::*;
 use std::collections::HashMap;
 
 
+
 #[derive(Default)]
 pub struct CoData{
     context_stack: Vec<ExecutionContext>,
@@ -14,7 +15,12 @@ pub struct CoData{
     output_stack: usize,
     top_input_map: usize,
     top_output_map: usize,
-    top_result_map: usize
+    top_result_map: usize,
+    
+    //various fields that aren't really CoData, but are most convenient to track here
+    pub gas_remaining: u64,
+    pub vm_writeable_memory: u32,
+    pub vm_read_only_memory: u32
 }
 
 impl CoData{
