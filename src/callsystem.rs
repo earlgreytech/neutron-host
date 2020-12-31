@@ -10,6 +10,7 @@ pub enum ElementResult{
 
 pub trait CallSystem{
     fn call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>;
+    fn private_call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>;
 }
 
 pub trait ElementAPI{
@@ -30,6 +31,11 @@ impl RefCallSystem{
 }
 impl CallSystem for RefCallSystem{
     fn call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
+        let function = function & 0x8000_0000; //public calls can not set the top bit, which is reserved for private functions
+        let mut t = self.elements.get(&feature).unwrap().borrow_mut();
+        t.system_call(self, manager, feature, function)
+    }
+    fn private_call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         let mut t = self.elements.get(&feature).unwrap().borrow_mut();
         t.system_call(self, manager, feature, function)
     }

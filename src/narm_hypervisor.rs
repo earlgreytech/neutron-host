@@ -3,6 +3,7 @@ use crate::codata::*;
 use std::collections::hash_map::*;
 use crate::neutronerror::*;
 use crate::vmmanager::*;
+use crate::callsystem::*;
 
 
 
@@ -23,7 +24,15 @@ impl VMHypervisor for NarmHypervisor{
 
     }
     fn set_error(&mut self, code: u32){
-        
+
+    }
+    /// Creates the initial state, including potentially storing state to the database, decoding of bytecode, etc
+    fn enter_state(&mut self, codata: &mut CoData, callsystem: &dyn CallSystem) -> Result<(), NeutronError>{
+        Ok(())
+    }
+    /// Called when exiting the VM, should commit state etc
+    fn exit_state(&mut self, codata: &mut CoData, callsystem: &dyn CallSystem) -> Result<(), NeutronError>{
+        Ok(())
     }
 }
 

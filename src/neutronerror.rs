@@ -11,7 +11,8 @@ pub enum UnrecoverableError{
     DatabaseCommitError,
     DatabaseWritingError,
     ErrorInitializingVM,
-    OutOfGas
+    OutOfGas,
+    TopLevelError(RecoverableError)
 }
 
 //TODO: this later needs to be moved/copied to neutron-constants for sharing with neutron-star
@@ -23,11 +24,10 @@ pub enum RecoverableError{
     InvalidSystemFeature,
     ErrorCopyingIntoVM,
     ErrorCopyingFromVM,
-    ContractSignaledError,
     ContractExecutionError,
     InvalidHypervisorInterrupt,
     StackItemTooSmall,
-    InvalidVM
+    InvalidVM,
 
 }
 
