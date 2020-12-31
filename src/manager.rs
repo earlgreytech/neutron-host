@@ -46,10 +46,8 @@ impl Manager{
                     return Ok(VMResult::Ended);
                 },
                 VMResult::ElementCall(element, function) => {
-                    codata.enter_element();
                     match callsystem.call(codata, element, function){
                         Ok(v) => {
-                            codata.exit_element();
                             match v{
                                 ElementResult::Result(result) => {
                                     hypervisor.set_result(result);
@@ -71,7 +69,6 @@ impl Manager{
                             }
                         },
                         Err(e) => {
-                            codata.exit_element();
                             match e{
                                 NeutronError::Recoverable(v) => {
                                     dbg!(&v);
@@ -125,9 +122,11 @@ mod tests {
 
     #[derive(Default)]
     struct TestVM{
+        self_calls: usize
     }
     impl VMHypervisor for TestVM{
         fn execute(&mut self, codata: &mut CoData) -> Result<VMResult, NeutronError>{
+            self.self_calls += 1;
             match codata.pop_stack().unwrap_or(vec![0])[0]{
                 1 => {
                     codata.push_key(&[1], &[1])?;
@@ -135,10 +134,45 @@ mod tests {
                 },
                 _ => {}
             }
-            if codata.peek_key(&[0])?[0] == 0{
-                return Ok(VMResult::ElementCall(1, 1));
+            match codata.peek_key(&[0])?[0]{
+                0 => {
+                    assert_eq!(self.self_calls, 1);
+                    return Ok(VMResult::ElementCall(1, 0));
+                },
+                1 => {
+                    let result = codata.peek_result_key(&[2]).unwrap_or(vec![0])[0];
+                    if result == 3{
+                        //returns from call 2
+                        codata.push_key(&[3], &[1])?;
+                        return Ok(VMResult::Ended);
+                    }else{
+                        //will call 2
+                        assert!(self.self_calls <= 10);
+                        codata.push_key(&[0], &[2])?;
+                        codata.push_key(&[1], &[2])?;
+                        return Ok(VMResult::ElementCall(1, 2));
+                    }
+                },
+                2 => {
+                    assert_eq!(self.self_calls, 1);
+                    //sub-contract call
+                    assert!(codata.peek_key(&[1]).unwrap()[0] == 2);
+                    codata.push_key(&[2], &[3])?;
+                    return Ok(VMResult::Ended);
+                },
+                3 => {
+                    //test sub-call error, will call 4
+                    codata.push_key(&[2], &[1])?;
+                    return Ok(VMResult::ElementCall(1, 2));
+
+                }
+                _ => {
+                    assert!(false);
+                }
             }
-            return Ok(VMResult::ElementCall(0, 0));
+            assert!(false);
+            //return Ok(VMResult::ElementCall(0, 0));
+            return Err(NeutronError::Unrecoverable(UnrecoverableError::ErrorInitializingVM));
         }
         fn set_result(&mut self, code: u32){
     
@@ -161,12 +195,26 @@ mod tests {
     }
     impl ElementAPI for TestElement{
         fn system_call(&mut self, callsystem: &dyn CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
+            codata.enter_element();
+            assert_eq!(feature, 1);
             match function{
                 0 => {
                     codata.push_stack(&[1])?;
                 },
-                _ => {}
+                2 => {
+                    let mut context = crate::interface::ExecutionContext::default();
+                    context.self_address.version = 1;
+                    codata.exit_element(); //TODO can this be cleaner?
+                    codata.push_context(context)?;
+                    codata.enter_element();
+                    codata.exit_element();
+                    return Ok(ElementResult::NewCall);
+                }
+                _ => {
+                    assert!(false);
+                }
             }
+            codata.exit_element();
             Ok(ElementResult::Result(0))
         }
     }
@@ -196,6 +244,58 @@ mod tests {
         assert!(codata.peek_result_key(&[0]).is_err());
         assert!(codata.peek_result_key(&[1]).unwrap()[0] == 1);
     }
+    
+    #[test]
+    fn test_single_call_behavior_correct(){
+        let mut codata = CoData::new();
+        codata.push_key(&[0], &[1]).unwrap();
+        let mut callsystem = RefCallSystem::default();
+        let element = TestElement::default();
+        callsystem.add_call(1, Box::from(element));
+
+        let testvm = || -> Box<dyn VMHypervisor>{
+            Box::from(TestVM::default())
+        };
+        let mut vmm = VMManager::default();
+        vmm.vm_builders.insert(1, testvm);
+
+        let mut manager = Manager::default();
+        let mut context = crate::interface::ExecutionContext::default();
+        context.self_address.version = 1;
+        codata.push_context(context).unwrap();
+
+        manager.execute(&mut codata, &callsystem, &vmm).unwrap();
+        assert!(codata.peek_key(&[3]).unwrap()[0] == 1);
+        assert!(codata.peek_result_key(&[3]).unwrap()[0] == 1);
+        //assert!(codata.peek_result_key(&[0]).is_err()); //TODO is this correct?
+    }
+    /*
+    #[test]
+    fn test_single_call_recoverable_error_behavior_correct(){
+        let mut codata = CoData::new();
+        codata.push_key(&[0], &[3]).unwrap();
+        let mut callsystem = RefCallSystem::default();
+        let element = TestElement::default();
+        callsystem.add_call(1, Box::from(element));
+
+        let testvm = || -> Box<dyn VMHypervisor>{
+            Box::from(TestVM::default())
+        };
+        let mut vmm = VMManager::default();
+        vmm.vm_builders.insert(1, testvm);
+
+        let mut manager = Manager::default();
+        let mut context = crate::interface::ExecutionContext::default();
+        context.self_address.version = 1;
+        codata.push_context(context).unwrap();
+
+        manager.execute(&mut codata, &callsystem, &vmm).unwrap();
+        assert!(codata.peek_key(&[0]).is_err());
+        assert!(codata.peek_key(&[1]).unwrap()[0] == 1);
+        assert!(codata.peek_result_key(&[0]).is_err());
+        assert!(codata.peek_result_key(&[1]).unwrap()[0] == 1);
+    }
+    */
 }
 
 

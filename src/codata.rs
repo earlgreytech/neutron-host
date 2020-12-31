@@ -279,6 +279,7 @@ mod tests {
         let key = [0];
         //ABI data
         manager.push_key(&key, &[1]).unwrap();
+        manager.push_key(&[2], &[2]).unwrap();
         //call from transaction
         {
             manager.push_context(c1).unwrap();
@@ -312,7 +313,7 @@ mod tests {
             assert_eq!(manager.peek_key(&key).unwrap()[0], 1);
             manager.pop_context().unwrap();
         }
-        
+        assert!(manager.peek_key(&[2]).is_err());
         assert_eq!(manager.peek_key(&key).unwrap()[0], 2);
         assert_eq!(manager.peek_result_key(&key).unwrap()[0], 2);
     }

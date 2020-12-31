@@ -31,7 +31,7 @@ impl RefCallSystem{
 }
 impl CallSystem for RefCallSystem{
     fn call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
-        let function = function & 0x8000_0000; //public calls can not set the top bit, which is reserved for private functions
+        let function = function & (!0x8000_0000); //public calls can not set the top bit, which is reserved for private functions
         let mut t = self.elements.get(&feature).unwrap().borrow_mut();
         t.system_call(self, manager, feature, function)
     }
