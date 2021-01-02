@@ -162,9 +162,14 @@ mod tests {
                 },
                 3 => {
                     //test sub-call error, will call 4
-                    codata.push_key(&[2], &[1])?;
+                    codata.push_key(&[0], &[4])?;
                     return Ok(VMResult::ElementCall(1, 2));
-
+                },
+                4 => {
+                    assert_eq!(self.self_calls, 1);
+                    //sub-contract call 2
+                    codata.push_key(&[2], &[4])?;
+                    return Err(NeutronError::Unrecoverable(UnrecoverableError::StateOutOfRent));
                 }
                 _ => {
                     assert!(false);
@@ -202,6 +207,15 @@ mod tests {
                     codata.push_stack(&[1])?;
                 },
                 2 => {
+                    let mut context = crate::interface::ExecutionContext::default();
+                    context.self_address.version = 1;
+                    codata.exit_element(); //TODO can this be cleaner?
+                    codata.push_context(context)?;
+                    codata.enter_element();
+                    codata.exit_element();
+                    return Ok(ElementResult::NewCall);
+                },
+                3 => {
                     let mut context = crate::interface::ExecutionContext::default();
                     context.self_address.version = 1;
                     codata.exit_element(); //TODO can this be cleaner?
@@ -269,7 +283,7 @@ mod tests {
         assert!(codata.peek_result_key(&[3]).unwrap()[0] == 1);
         //assert!(codata.peek_result_key(&[0]).is_err()); //TODO is this correct?
     }
-    /*
+    
     #[test]
     fn test_single_call_recoverable_error_behavior_correct(){
         let mut codata = CoData::new();
@@ -289,13 +303,9 @@ mod tests {
         context.self_address.version = 1;
         codata.push_context(context).unwrap();
 
-        manager.execute(&mut codata, &callsystem, &vmm).unwrap();
-        assert!(codata.peek_key(&[0]).is_err());
-        assert!(codata.peek_key(&[1]).unwrap()[0] == 1);
-        assert!(codata.peek_result_key(&[0]).is_err());
-        assert!(codata.peek_result_key(&[1]).unwrap()[0] == 1);
+        assert!(manager.execute(&mut codata, &callsystem, &vmm).is_err());
     }
-    */
+    
 }
 
 
