@@ -1,6 +1,7 @@
 use crate::codata::*;
 use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
+use crate::callsystem::*;
 /*
 ## Global Storage
 
@@ -27,17 +28,23 @@ pub enum GlobalStorageFunctions{
 
 }
 
+impl ElementAPI for GlobalStorage{
+    fn system_call(&mut self, callsystem: & CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
+        self.try_syscall(codata, feature, function)
+    }
+}
+
 pub trait GlobalStorage{
-    fn try_syscall(&mut self, codata: &mut CoData, feature: u32, function: u32) -> Result<bool, NeutronError>{
+    fn try_syscall(&mut self, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         if feature != GLOBAL_STORAGE_FEATURE{
-            return Ok(false);
+            return Ok(ElementResult::Result(0));
         }
         let f = num::FromPrimitive::from_u32(function);
         if f.is_none(){
             return Err(Recoverable(RecoverableError::InvalidSystemFunction));
         }
         let f=f.unwrap();
-        let result = match f{
+        match f{
             GlobalStorageFunctions::KeyExists => {
                 let key = codata.pop_stack()?;
                 let result = if self.key_exists(codata, &key)?{
@@ -46,29 +53,26 @@ pub trait GlobalStorage{
                     0
                 };
                 codata.push_stack(&[result])?;
-                Ok(())
+                Ok(ElementResult::Result(0))
             },
             GlobalStorageFunctions::LoadState => {
                 let key = codata.pop_stack()?;
                 let value = self.load_state(codata, &key)?;
                 codata.push_stack(&value)?;
-                Ok(())
+                Ok(ElementResult::Result(0))
             },
             GlobalStorageFunctions::StoreState => {
                 let key = codata.pop_stack()?;
                 let value = codata.pop_stack()?;
                 self.store_state(codata, &key, &value)?;
-                Ok(())
+                Ok(ElementResult::Result(0))
             }
             GlobalStorageFunctions::Available => {
-                Ok(())
+                Ok(ElementResult::Result(0))
             },
-            _ => { Ok(()) } //todo
-        };
-        if result.is_err(){
-            Err(result.unwrap_err())
-        }else{
-            Ok(true)
+            _ => {
+                Ok(ElementResult::Result(0))
+            } //todo
         }
     }
     fn store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>;

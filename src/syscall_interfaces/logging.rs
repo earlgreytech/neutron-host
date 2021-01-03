@@ -1,6 +1,7 @@
 use crate::codata::*;
 use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
+use crate::callsystem::*;
 /*
 ## Logging
 
@@ -22,7 +23,7 @@ but since logging is informative only and can easily be a no-op (other than need
 Note in neutron-star, log_info is used by default for println!
 */
 
-const LOGGING_FEATURE: u32 = 2;
+pub const LOGGING_FEATURE: u32 = 2;
 
 #[derive(FromPrimitive)]
 pub enum LoggingFunctions{
@@ -33,10 +34,16 @@ pub enum LoggingFunctions{
     LogError
 }
 
+impl ElementAPI for dyn LoggingInterface{
+    fn system_call(&mut self, callsystem: &CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
+        self.try_syscall(codata, feature, function)
+    }
+}
+
 pub trait LoggingInterface{
-    fn try_syscall(&mut self, stack: &mut CoData, feature: u32, function: u32) -> Result<bool, NeutronError>{
+    fn try_syscall(&mut self, stack: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         if feature != LOGGING_FEATURE {
-            return Ok(false);
+            return Ok(ElementResult::Result(0));
         }
         let f = num::FromPrimitive::from_u32(function);
         if f.is_none(){
@@ -66,7 +73,7 @@ pub trait LoggingInterface{
         if result.is_err(){
             Err(result.unwrap_err())
         }else{
-            Ok(true)
+            return Ok(ElementResult::Result(0));
         }
     }
     fn log_debug(&mut self, stack: &mut CoData) -> Result<(), NeutronError>;

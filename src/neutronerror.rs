@@ -12,7 +12,8 @@ pub enum UnrecoverableError{
     DatabaseWritingError,
     ErrorInitializingVM,
     OutOfGas,
-    TopLevelError(RecoverableError)
+    TopLevelError(RecoverableError),
+    InvalidElementOperation
 }
 
 //TODO: this later needs to be moved/copied to neutron-constants for sharing with neutron-star
