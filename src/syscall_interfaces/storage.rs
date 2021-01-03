@@ -2,6 +2,7 @@ use crate::codata::*;
 use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
 use crate::callsystem::*;
+use neutron_star_constants::*;
 /*
 ## Global Storage
 
@@ -81,5 +82,13 @@ pub trait GlobalStorage{
 
     fn private_store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>;
     fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>;
+
+    //do these belong here? They could be done by using a single struct, but impl on two traits. However, this could bring refcell problems
+    fn transfer_balance(&mut self, codata: &mut CoData, address: NeutronFullAddress, value: u64) -> Result<u64, NeutronError>;
+    fn get_balance(&mut self, codata: &mut CoData) -> Result<u64, NeutronError>;
+    
+    fn create_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>;
+    fn revert_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>;
+    fn commit_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>;
 }
 
