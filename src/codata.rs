@@ -4,7 +4,13 @@ use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
 use std::collections::HashMap;
 
-
+#[derive(Default)]
+pub struct GasSchedule{
+    //vm_operation -> gas cost
+    pub vm_costs: HashMap<u32, u64>,
+    //element -> function -> [gas_cost_parameters]
+    pub element_costs: HashMap<u32, HashMap<u32, Vec<u64>>>
+}
 
 #[derive(Default)]
 pub struct CoData{
@@ -20,7 +26,8 @@ pub struct CoData{
     //various fields that aren't really CoData, but are most convenient to track here
     pub gas_remaining: u64,
     pub vm_writeable_memory: u32,
-    pub vm_read_only_memory: u32
+    pub vm_read_only_memory: u32,
+    pub gas_schedule: GasSchedule
 }
 
 impl CoData{

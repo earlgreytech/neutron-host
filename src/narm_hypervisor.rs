@@ -151,9 +151,6 @@ impl VMHypervisor for NarmHypervisor{
     /// Creates the initial state, including potentially storing state to the database, decoding of bytecode, etc
     fn enter_state(&mut self, codata: &mut CoData, callsystem: & CallSystem) -> Result<(), NeutronError>{
         let execution_type = codata.peek_context(0)?.execution_type;
-        {
-            //let storage = callsystem.
-        }
         let mut storage = callsystem.global_storage.as_ref().unwrap().borrow_mut();
         let code = match execution_type{
             ExecutionType::Call => {
