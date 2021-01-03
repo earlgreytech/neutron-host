@@ -32,7 +32,7 @@ impl Manager{
     /// The main loop for handling a Neutron execution
     /// The VM is continually executed. Upon VM return, element calls will be handled, if a sub-contract is called, it'll cause a recursive execute() call. 
     /// The main loop will be exited either upon an unrecoverable error or upon the VM returning an "ended" result
-    fn neutron_main_loop(&mut self, hypervisor: &mut Box<dyn VMHypervisor>, codata: &mut CoData, callsystem: &dyn CallSystem, vmm: &VMManager) -> Result<VMResult, NeutronError>{
+    fn neutron_main_loop(&mut self, hypervisor: &mut Box<dyn VMHypervisor>, codata: &mut CoData, callsystem: & CallSystem, vmm: &VMManager) -> Result<VMResult, NeutronError>{
         loop{
             let result = match hypervisor.execute(codata){
                 Ok(v) => v,
@@ -86,7 +86,7 @@ impl Manager{
         }
     }
 
-    pub fn execute(&mut self, codata: &mut CoData, callsystem: &dyn CallSystem, vmm: &VMManager) -> Result<(), NeutronError>{
+    pub fn execute(&mut self, codata: &mut CoData, callsystem: & CallSystem, vmm: &VMManager) -> Result<(), NeutronError>{
         let mut hv = &mut self.start_execution(codata, vmm)?;
         hv.enter_state(codata, callsystem)?;
         let mut error = 0;
@@ -186,11 +186,11 @@ mod tests {
     
         }
         /// Creates the initial state, including potentially storing state to the database, decoding of bytecode, etc
-        fn enter_state(&mut self, codata: &mut CoData, callsystem: &dyn CallSystem) -> Result<(), NeutronError>{
+        fn enter_state(&mut self, codata: &mut CoData, callsystem: & CallSystem) -> Result<(), NeutronError>{
             Ok(())
         }
         /// Called when exiting the VM, should commit state etc
-        fn exit_state(&mut self, codata: &mut CoData, callsystem: &dyn CallSystem) -> Result<(), NeutronError>{
+        fn exit_state(&mut self, codata: &mut CoData, callsystem: & CallSystem) -> Result<(), NeutronError>{
             Ok(())
         }
     }
@@ -199,7 +199,7 @@ mod tests {
     struct TestElement{
     }
     impl ElementAPI for TestElement{
-        fn system_call(&mut self, callsystem: &dyn CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
+        fn system_call(&mut self, callsystem: & CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
             codata.enter_element();
             assert_eq!(feature, 1);
             match function{
@@ -237,7 +237,7 @@ mod tests {
     fn test_bare_behavior_correct(){
         let mut codata = CoData::new();
         codata.push_key(&[0], &[0]).unwrap();
-        let mut callsystem = RefCallSystem::default();
+        let mut callsystem = CallSystem::default();
         let element = TestElement::default();
         callsystem.add_call(1, Box::from(element));
 
@@ -263,7 +263,7 @@ mod tests {
     fn test_single_call_behavior_correct(){
         let mut codata = CoData::new();
         codata.push_key(&[0], &[1]).unwrap();
-        let mut callsystem = RefCallSystem::default();
+        let mut callsystem = CallSystem::default();
         let element = TestElement::default();
         callsystem.add_call(1, Box::from(element));
 
@@ -288,7 +288,7 @@ mod tests {
     fn test_single_call_recoverable_error_behavior_correct(){
         let mut codata = CoData::new();
         codata.push_key(&[0], &[3]).unwrap();
-        let mut callsystem = RefCallSystem::default();
+        let mut callsystem = CallSystem::default();
         let element = TestElement::default();
         callsystem.add_call(1, Box::from(element));
 

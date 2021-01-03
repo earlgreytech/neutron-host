@@ -2,40 +2,41 @@ use crate::neutronerror::*;
 use std::collections::hash_map::*;
 use crate::codata::*;
 use std::cell::*;
+use crate::syscall_interfaces::storage::*;
 
 pub enum ElementResult{
     Result(u32),
     NewCall
 }
 
-pub trait CallSystem{
-    fn call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>;
-    fn private_call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>;
-}
 
 pub trait ElementAPI{
-    fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>;
+    fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>;
 }
 
 /// Manages ElementAPIs. This structure is only provided for convenience and not necessarily a required structure
 /// Using it disallows any reentrancy within the call stack of elements (giving a runtime error)
 #[derive(Default)]
-pub struct RefCallSystem{
-    elements: HashMap<u32, RefCell<Box<dyn ElementAPI>>>
+pub struct CallSystem{
+    elements: HashMap<u32, RefCell<Box<dyn ElementAPI>>>,
+    storage: Option<RefCell<Box<dyn GlobalStorage>>>
 }
 
-impl RefCallSystem{
+impl CallSystem{
     pub fn add_call(&mut self, number: u32, element: Box<dyn ElementAPI>){
         self.elements.insert(number, RefCell::from(element));
     }
-}
-impl CallSystem for RefCallSystem{
-    fn call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
+    /*
+    fn get_storage_element<'a>(&self) -> Result<&'this mut Box<dyn GlobalStorage>, NeutronError>{
+        Ok(&mut *self.storage.unwrap().borrow_mut())
+    }
+    */
+    pub fn call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         let function = function & (!0x8000_0000); //public calls can not set the top bit, which is reserved for private functions
         let mut t = self.elements.get(&feature).unwrap().borrow_mut();
         t.system_call(self, manager, feature, function)
     }
-    fn private_call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
+    pub fn private_call(&self, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         let mut t = self.elements.get(&feature).unwrap().borrow_mut();
         t.system_call(self, manager, feature, function)
     }
@@ -48,7 +49,7 @@ mod tests {
     struct TestElementA{
     }
     impl ElementAPI for TestElementA{
-        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
+        fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             callsystem.call(manager, 2, 0);
             Ok(ElementResult::Result(0))
         }
@@ -57,7 +58,7 @@ mod tests {
     struct TestElementB{
     }
     impl ElementAPI for TestElementB{
-        fn system_call(&mut self, _callsystem: &dyn CallSystem, _manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
+        fn system_call(&mut self, _callsystem: & CallSystem, _manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             Ok(ElementResult::Result(0))
         }
     }
@@ -65,7 +66,7 @@ mod tests {
     struct TestElementFail{
     }
     impl ElementAPI for TestElementFail{
-        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
+        fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             callsystem.call(manager, 3, 0);
             Ok(ElementResult::Result(0))
         }
@@ -74,7 +75,7 @@ mod tests {
     struct TestElementFailA{
     }
     impl ElementAPI for TestElementFailA{
-        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
+        fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             callsystem.call(manager, 5, 0);
             Ok(ElementResult::Result(0))
         }
@@ -83,7 +84,7 @@ mod tests {
     struct TestElementFailB{
     }
     impl ElementAPI for TestElementFailB{
-        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
+        fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             callsystem.call(manager, 4, 0);
             Ok(ElementResult::Result(0))
         }
@@ -93,7 +94,7 @@ mod tests {
         test: u32
     }
     impl ElementAPI for TestElementC{
-        fn system_call(&mut self, callsystem: &dyn CallSystem, manager: &mut CoData, feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
+        fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             self.test = feature;
             callsystem.call(manager, 1, 0);
             callsystem.call(manager, 1, 0);
@@ -105,7 +106,7 @@ mod tests {
     fn test_borrowing(){
         let t1 = Box::new(TestElementA::default());
         let t2 = Box::new(TestElementB::default());
-        let mut cs = RefCallSystem::default();
+        let mut cs = CallSystem::default();
         cs.add_call(1, t1);
         cs.add_call(2, t2);
         let mut codata = CoData::default();
@@ -116,7 +117,7 @@ mod tests {
         let t1 = Box::new(TestElementA::default());
         let t2 = Box::new(TestElementB::default());
         let t3 = Box::new(TestElementC::default());
-        let mut cs = RefCallSystem::default();
+        let mut cs = CallSystem::default();
         cs.add_call(1, t1);
         cs.add_call(2, t2);
         cs.add_call(3, t3);
@@ -129,7 +130,7 @@ mod tests {
         let t1 = Box::new(TestElementA::default());
         let t2 = Box::new(TestElementB::default());
         let t3 = Box::new(TestElementFail::default());
-        let mut cs = RefCallSystem::default();
+        let mut cs = CallSystem::default();
         cs.add_call(1, t1);
         cs.add_call(2, t2);
         cs.add_call(3, t3);
@@ -144,7 +145,7 @@ mod tests {
         let t3 = Box::new(TestElementFail::default());
         let t4 = Box::new(TestElementFailA::default());
         let t5 = Box::new(TestElementFailB::default());
-        let mut cs = RefCallSystem::default();
+        let mut cs = CallSystem::default();
         cs.add_call(1, t1);
         cs.add_call(2, t2);
         cs.add_call(3, t3);

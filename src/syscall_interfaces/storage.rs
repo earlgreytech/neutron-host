@@ -4,7 +4,7 @@ use crate::neutronerror::NeutronError::*;
 /*
 ## Global Storage
 
-ID: 1
+ID: 2
 
 Functions:
 
@@ -13,18 +13,22 @@ Functions:
 * key_exists(key) -> (bool)
 */
 
-const GLOBAL_STORAGE_FEATURE: u32 = 1;
+pub const GLOBAL_STORAGE_FEATURE: u32 = 2;
 
 #[derive(FromPrimitive)]
 pub enum GlobalStorageFunctions{
     Available = 0, //reserved??
     StoreState = 1,
     LoadState,
-    KeyExists
+    KeyExists,
+    //private functions
+    LoadPrivateState = 0x8000_0001,
+    StorePrivateState = 0x8000_0002,
+
 }
 
 pub trait GlobalStorage{
-    fn try_syscall(&mut self, stack: &mut CoData, feature: u32, function: u32) -> Result<bool, NeutronError>{
+    fn try_syscall(&mut self, codata: &mut CoData, feature: u32, function: u32) -> Result<bool, NeutronError>{
         if feature != GLOBAL_STORAGE_FEATURE{
             return Ok(false);
         }
@@ -35,17 +39,31 @@ pub trait GlobalStorage{
         let f=f.unwrap();
         let result = match f{
             GlobalStorageFunctions::KeyExists => {
-                self.key_exists(stack)
+                let key = codata.pop_stack()?;
+                let result = if self.key_exists(codata, &key)?{
+                    1
+                } else{
+                    0
+                };
+                codata.push_stack(&[result])?;
+                Ok(())
             },
             GlobalStorageFunctions::LoadState => {
-                self.load_state(stack)
+                let key = codata.pop_stack()?;
+                let value = self.load_state(codata, &key)?;
+                codata.push_stack(&value)?;
+                Ok(())
             },
             GlobalStorageFunctions::StoreState => {
-                self.store_state(stack)
+                let key = codata.pop_stack()?;
+                let value = codata.pop_stack()?;
+                self.store_state(codata, &key, &value)?;
+                Ok(())
             }
             GlobalStorageFunctions::Available => {
                 Ok(())
-            }
+            },
+            _ => { Ok(()) } //todo
         };
         if result.is_err(){
             Err(result.unwrap_err())
@@ -53,8 +71,11 @@ pub trait GlobalStorage{
             Ok(true)
         }
     }
-    fn store_state(&mut self, stack: &mut CoData) -> Result<(), NeutronError>;
-    fn load_state(&mut self, stack: &mut CoData) -> Result<(), NeutronError>;
-    fn key_exists(&mut self, stack: &mut CoData) -> Result<(), NeutronError>;
+    fn store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>;
+    fn load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>;
+    fn key_exists(&mut self, codata: &mut CoData, key: &[u8]) -> Result<bool, NeutronError>;
+
+    fn private_store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>;
+    fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>;
 }
 

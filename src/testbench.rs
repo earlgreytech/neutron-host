@@ -10,6 +10,7 @@ use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
 use crate::syscall_interfaces::logging;
 
+/*
 /// The Testbench is a virtual environment which can be used for testing smart contracts 
 #[derive(Default)]
 pub struct Testbench{
@@ -181,3 +182,5 @@ mod tests {
         assert_eq!(2 + 2, 4);
     }
 }
+
+*/

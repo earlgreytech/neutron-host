@@ -127,42 +127,6 @@ pub struct NeutronVersion{
 
 
 
-
-pub trait VMInterface{
-    fn execute(&mut self) -> Result<NeutronVMResult, NeutronError>;
-}
-
-pub trait CallSystem{
-    /// General system call interface
-    fn system_call(&mut self, stack: &mut CoData, feature: u32, function: u32) -> Result<u32, NeutronError>;
-    /// Get the current block height at execution
-    /// Used to switch VM behavior in blockchain forks
-    fn block_height(&self) -> Result<u32, NeutronError>;
-    /// Read a state key from the database using the permanent storage feature set
-    /// Used for reading core contract bytecode by VMs
-    fn read_state_key(&mut self, stack: &mut CoData, space: u8, key: &[u8]) -> Result<Vec<u8>, NeutronError>;
-    /// Write a state key to the database using the permanent storage feature set
-    /// Used for writing bytecode etc by VMs
-    fn write_state_key(&mut self, stack: &mut CoData, space: u8, key: &[u8], value: &[u8]) -> Result<(), NeutronError>;
-
-    fn log_error(&self, msg: &str){
-        println!("Error: {}", msg);
-    }
-    fn log_warning(&self, msg: &str){
-        println!("Warning: {}", msg);
-    }
-    fn log_info(&self, msg: &str){
-        println!("Info: {}", msg);
-    }
-    fn log_debug(&self, msg: &str){
-        println!("Debug: {}", msg);
-    }
-}
-
-
-
-
- 
     /*
     leftovers from NeutronAPI that need to be implemented in system contracts
 	/// Loads user accessible state from the smart contract database
