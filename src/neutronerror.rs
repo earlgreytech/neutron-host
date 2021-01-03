@@ -29,6 +29,7 @@ pub enum RecoverableError{
     InvalidHypervisorInterrupt,
     StackItemTooSmall,
     InvalidVM,
+    ContractRevertedExecution
 
 }
 

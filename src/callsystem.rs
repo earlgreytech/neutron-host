@@ -6,7 +6,7 @@ use crate::syscall_interfaces::storage::*;
 use crate::syscall_interfaces::logging::*;
 
 pub enum ElementResult{
-    Result(u32),
+    Result(u64),
     NewCall
 }
 

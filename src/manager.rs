@@ -56,7 +56,7 @@ impl Manager{
                                     match self.execute(codata, callsystem, vmm){
                                         Err(NeutronError::Recoverable(e)) => {
                                             dbg!(&e);
-                                            hypervisor.set_error(e as u32);
+                                            hypervisor.set_error(e as u64);
                                         },
                                         Err(NeutronError::Unrecoverable(e)) => {
                                             dbg!(&e);
@@ -72,7 +72,7 @@ impl Manager{
                             match e{
                                 NeutronError::Recoverable(v) => {
                                     dbg!(&v);
-                                    hypervisor.set_error(v as u32);
+                                    hypervisor.set_error(v as u64);
                                 },
                                 NeutronError::Unrecoverable(e) => {
                                     dbg!(&e);
@@ -179,10 +179,10 @@ mod tests {
             //return Ok(VMResult::ElementCall(0, 0));
             return Err(NeutronError::Unrecoverable(UnrecoverableError::ErrorInitializingVM));
         }
-        fn set_result(&mut self, code: u32){
+        fn set_result(&mut self, code: u64){
     
         }
-        fn set_error(&mut self, code: u32){
+        fn set_error(&mut self, code: u64){
     
         }
         /// Creates the initial state, including potentially storing state to the database, decoding of bytecode, etc
