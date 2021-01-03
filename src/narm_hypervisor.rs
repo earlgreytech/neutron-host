@@ -36,17 +36,16 @@ impl VMHypervisor for NarmHypervisor{
         {
             //let storage = callsystem.
         }
+        let mut storage = callsystem.global_storage.as_ref().unwrap().borrow_mut();
         let code = match execution_type{
             ExecutionType::Call => {
-                codata.push_stack(&[0x02, 0]);
-                callsystem.private_call(codata, GLOBAL_STORAGE_FEATURE, GlobalStorageFunctions::LoadPrivateState as u32)?;
-                codata.pop_stack()?
+                storage.private_load_state(codata, &[0x02, 0])?
             },
             _ => {
                 codata.peek_key("!.c".as_bytes())?
             }
         };
-        self.vm.memory.add_memory(0x10000, code.len() as u32);
+        self.vm.memory.add_memory(0x10000, code.len() as u32).unwrap();
         match self.vm.copy_into_memory(0x10000, &code){
             Err(_) => {
                 return Err(NeutronError::Unrecoverable(UnrecoverableError::ErrorInitializingVM));
@@ -55,15 +54,13 @@ impl VMHypervisor for NarmHypervisor{
         }
         let data = match execution_type{
             ExecutionType::Call => {
-                codata.push_stack(&[0x02, 0x10]);
-                callsystem.private_call(codata, GLOBAL_STORAGE_FEATURE, GlobalStorageFunctions::LoadPrivateState as u32)?;
-                codata.pop_stack()?
+                storage.private_load_state(codata, &[0x02, 0x10])?
             },
             _ => {
                 codata.peek_key("!.d".as_bytes())?
             }
         };
-        self.vm.memory.add_memory(0x80010000, data.len() as u32);
+        self.vm.memory.add_memory(0x80010000, data.len() as u32).unwrap();
         match self.vm.copy_into_memory(0x10000, &data){
             Err(_) => {
                 return Err(NeutronError::Unrecoverable(UnrecoverableError::ErrorInitializingVM));
@@ -73,12 +70,8 @@ impl VMHypervisor for NarmHypervisor{
 
         match execution_type{
             ExecutionType::Deploy => {
-                codata.push_stack(&[0x02, 0x00])?; //key
-                codata.push_stack(&code)?; //value
-                callsystem.private_call(codata, GLOBAL_STORAGE_FEATURE, GlobalStorageFunctions::StorePrivateState as u32)?;
-                codata.push_stack(&[0x02, 0x10])?; //key
-                codata.push_stack(&data)?; //value
-                callsystem.private_call(codata, GLOBAL_STORAGE_FEATURE, GlobalStorageFunctions::StorePrivateState as u32)?;
+                storage.private_store_state(codata, &[0x02, 0x00], &code)?;
+                storage.private_store_state(codata, &[0x02, 0x10], &data)?;
             },
             _ => {}
         };
