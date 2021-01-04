@@ -33,6 +33,7 @@ impl Manager{
     /// The VM is continually executed. Upon VM return, element calls will be handled, if a sub-contract is called, it'll cause a recursive execute() call. 
     /// The main loop will be exited either upon an unrecoverable error or upon the VM returning an "ended" result
     fn neutron_main_loop(&mut self, hypervisor: &mut Box<dyn VMHypervisor>, codata: &mut CoData, callsystem: & CallSystem, vmm: &VMManager) -> Result<VMResult, NeutronError>{
+        callsystem.global_storage.as_ref().unwrap().borrow_mut().create_checkpoint(codata);
         loop{
             let result = match hypervisor.execute(codata){
                 Ok(v) => v,
@@ -55,6 +56,7 @@ impl Manager{
                                 ElementResult::NewCall => {
                                     match self.execute(codata, callsystem, vmm){
                                         Err(NeutronError::Recoverable(e)) => {
+                                            callsystem.global_storage.as_ref().unwrap().borrow_mut().revert_checkpoint(codata);
                                             dbg!(&e);
                                             hypervisor.set_error(e as u64);
                                         },
@@ -63,6 +65,7 @@ impl Manager{
                                             return Err(NeutronError::Unrecoverable(e));
                                         },
                                         Ok(_) =>{
+                                            callsystem.global_storage.as_ref().unwrap().borrow_mut().commit_checkpoint(codata);
                                         }
                                     }
                                 }
@@ -119,6 +122,8 @@ impl Manager{
 #[cfg(test)]
 mod tests {
     use super::*;
+    use neutron_star_constants::NeutronFullAddress;
+    use std::cell::RefCell;
 
     #[derive(Default)]
     struct TestVM{
@@ -194,6 +199,27 @@ mod tests {
             Ok(())
         }
     }
+    #[derive(Default)]
+    struct TestStorageElement{}
+    impl crate::syscall_interfaces::storage::GlobalStorage for TestStorageElement{
+        fn store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{Ok(())}
+        fn load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok((vec![0]))}
+        fn key_exists(&mut self, codata: &mut CoData, key: &[u8]) -> Result<bool, NeutronError>{Ok((false))}
+    
+        fn private_store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{Ok(())}
+        fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok((vec![0]))}
+    
+        //do these belong here? They could be done by using a single struct, but impl on two traits. However, this could bring refcell problems
+        fn transfer_balance(&mut self, codata: &mut CoData, address: NeutronFullAddress, value: u64) -> Result<u64, NeutronError>{Ok(0)}
+        fn get_balance(&mut self, codata: &mut CoData) -> Result<u64, NeutronError>{Ok(0)}
+        
+        fn create_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
+        fn revert_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
+        fn commit_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
+    }
+    impl ElementAPI for TestStorageElement{
+        fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{Ok(ElementResult::Result(0))}
+    }
 
     #[derive(Default)]
     struct TestElement{
@@ -240,6 +266,8 @@ mod tests {
         let mut callsystem = CallSystem::default();
         let element = TestElement::default();
         callsystem.add_call(1, Box::from(element));
+        let storage = TestStorageElement::default();
+        callsystem.global_storage = Some(RefCell::from(Box::from(storage)));
 
         let testvm = || -> Box<dyn VMHypervisor>{
             Box::from(TestVM::default())
@@ -266,6 +294,8 @@ mod tests {
         let mut callsystem = CallSystem::default();
         let element = TestElement::default();
         callsystem.add_call(1, Box::from(element));
+        let storage = TestStorageElement::default();
+        callsystem.global_storage = Some(RefCell::from(Box::from(storage)));
 
         let testvm = || -> Box<dyn VMHypervisor>{
             Box::from(TestVM::default())
@@ -291,6 +321,8 @@ mod tests {
         let mut callsystem = CallSystem::default();
         let element = TestElement::default();
         callsystem.add_call(1, Box::from(element));
+        let storage = TestStorageElement::default();
+        callsystem.global_storage = Some(RefCell::from(Box::from(storage)));
 
         let testvm = || -> Box<dyn VMHypervisor>{
             Box::from(TestVM::default())

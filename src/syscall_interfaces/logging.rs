@@ -23,7 +23,7 @@ but since logging is informative only and can easily be a no-op (other than need
 Note in neutron-star, log_info is used by default for println!
 */
 
-pub const LOGGING_FEATURE: u32 = 2;
+pub const LOGGING_FEATURE: u32 = 4;
 
 #[derive(FromPrimitive)]
 pub enum LoggingFunctions{
