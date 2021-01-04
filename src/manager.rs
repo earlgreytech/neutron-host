@@ -201,7 +201,7 @@ mod tests {
     }
     #[derive(Default)]
     struct TestStorageElement{}
-    impl crate::syscall_interfaces::storage::GlobalStorage for TestStorageElement{
+    impl crate::element_interfaces::storage::GlobalStorage for TestStorageElement{
         fn store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{Ok(())}
         fn load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok((vec![0]))}
         fn key_exists(&mut self, codata: &mut CoData, key: &[u8]) -> Result<bool, NeutronError>{Ok((false))}

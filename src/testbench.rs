@@ -3,12 +3,12 @@ extern crate ring;
 extern crate elf;
 use crate::db::*;
 use std::path::PathBuf;
-use crate::syscall_interfaces::storage;
+use crate::element_interfaces::storage;
 use crate::interface::*;
 use crate::codata::*;
 use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
-use crate::syscall_interfaces::logging;
+use crate::element_interfaces::logging;
 
 /*
 /// The Testbench is a virtual environment which can be used for testing smart contracts 

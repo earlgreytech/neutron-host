@@ -2,8 +2,8 @@ use crate::neutronerror::*;
 use std::collections::hash_map::*;
 use crate::codata::*;
 use std::cell::*;
-use crate::syscall_interfaces::storage::*;
-use crate::syscall_interfaces::logging::*;
+use crate::element_interfaces::storage::*;
+use crate::element_interfaces::logging::*;
 
 pub enum ElementResult{
     Result(u64),

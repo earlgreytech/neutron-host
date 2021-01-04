@@ -1,7 +1,7 @@
 pub mod interface;
 pub mod db;
 pub mod addressing;
-pub mod syscall_interfaces;
+pub mod element_interfaces;
 pub mod testbench;
 pub mod codata;
 pub mod neutronerror;
