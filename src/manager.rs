@@ -266,8 +266,8 @@ mod tests {
         let mut callsystem = CallSystem::default();
         let element = TestElement::default();
         callsystem.add_call(1, Box::from(element));
-        let storage = TestStorageElement::default();
-        callsystem.global_storage = Some(RefCell::from(Box::from(storage)));
+        let mut storage = TestStorageElement::default();
+        callsystem.global_storage = Some(RefCell::from(&mut storage));
 
         let testvm = || -> Box<dyn VMHypervisor>{
             Box::from(TestVM::default())
@@ -294,8 +294,8 @@ mod tests {
         let mut callsystem = CallSystem::default();
         let element = TestElement::default();
         callsystem.add_call(1, Box::from(element));
-        let storage = TestStorageElement::default();
-        callsystem.global_storage = Some(RefCell::from(Box::from(storage)));
+        let mut storage = TestStorageElement::default();
+        callsystem.global_storage = Some(RefCell::from(&mut storage));
 
         let testvm = || -> Box<dyn VMHypervisor>{
             Box::from(TestVM::default())
@@ -321,8 +321,8 @@ mod tests {
         let mut callsystem = CallSystem::default();
         let element = TestElement::default();
         callsystem.add_call(1, Box::from(element));
-        let storage = TestStorageElement::default();
-        callsystem.global_storage = Some(RefCell::from(Box::from(storage)));
+        let mut storage = TestStorageElement::default();
+        callsystem.global_storage = Some(RefCell::from(&mut storage));
 
         let testvm = || -> Box<dyn VMHypervisor>{
             Box::from(TestVM::default())

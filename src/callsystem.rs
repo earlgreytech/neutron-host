@@ -18,13 +18,13 @@ pub trait ElementAPI{
 /// Manages ElementAPIs. This structure is only provided for convenience and not necessarily a required structure
 /// Using it disallows any reentrancy within the call stack of elements (giving a runtime error)
 #[derive(Default)]
-pub struct CallSystem{
+pub struct CallSystem<'a>{
     elements: HashMap<u32, RefCell<Box<dyn ElementAPI>>>,
-    pub global_storage: Option<RefCell<Box<dyn GlobalStorage>>>,
+    pub global_storage: Option<RefCell<&'a mut dyn GlobalStorage>>,
     pub logging: Option<RefCell<Box<dyn LoggingInterface>>>
 }
 
-impl CallSystem{
+impl <'a>CallSystem<'a>{
     pub fn add_call(&mut self, number: u32, element: Box<dyn ElementAPI>) -> Result<(), NeutronError>{
         match number{
             GLOBAL_STORAGE_FEATURE => {

@@ -29,7 +29,7 @@ pub enum GlobalStorageFunctions{
 
 }
 
-impl ElementAPI for GlobalStorage{
+impl <'a>ElementAPI for (dyn GlobalStorage +'a){
     fn system_call(&mut self, callsystem: & CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         self.try_syscall(codata, feature, function)
     }
