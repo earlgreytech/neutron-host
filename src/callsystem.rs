@@ -19,13 +19,13 @@ pub trait ElementAPI{
 /// Using it disallows any reentrancy within the call stack of elements (giving a runtime error)
 #[derive(Default)]
 pub struct CallSystem<'a>{
-    elements: HashMap<u32, RefCell<Box<dyn ElementAPI>>>,
+    elements: HashMap<u32, RefCell<&'a mut (dyn ElementAPI + 'a)>>,
     pub global_storage: Option<RefCell<&'a mut dyn GlobalStorage>>,
-    pub logging: Option<RefCell<Box<dyn LoggingInterface>>>
+    pub logging: Option<RefCell<&'a mut dyn LoggingInterface>>
 }
 
 impl <'a>CallSystem<'a>{
-    pub fn add_call(&mut self, number: u32, element: Box<dyn ElementAPI>) -> Result<(), NeutronError>{
+    pub fn add_call(&mut self, number: u32, element: &'a mut dyn ElementAPI) -> Result<(), NeutronError>{
         match number{
             GLOBAL_STORAGE_FEATURE => {
                 return Err(NeutronError::Unrecoverable(UnrecoverableError::InvalidElementOperation));
@@ -122,53 +122,53 @@ mod tests {
     use super::*;
     #[test]
     fn test_borrowing(){
-        let t1 = Box::new(TestElementA::default());
-        let t2 = Box::new(TestElementB::default());
+        let mut t1 = TestElementA::default();
+        let mut t2 = TestElementB::default();
         let mut cs = CallSystem::default();
-        cs.add_call(11, t1);
-        cs.add_call(12, t2);
+        cs.add_call(11, &mut t1);
+        cs.add_call(12, &mut t2);
         let mut codata = CoData::default();
         cs.call(&mut codata, 11, 0);
     }
     #[test]
     fn test_borrowing_back_and_forth(){
-        let t1 = Box::new(TestElementA::default());
-        let t2 = Box::new(TestElementB::default());
-        let t3 = Box::new(TestElementC::default());
+        let mut t1 = TestElementA::default();
+        let mut t2 = TestElementB::default();
+        let mut t3 = TestElementC::default();
         let mut cs = CallSystem::default();
-        cs.add_call(11, t1);
-        cs.add_call(12, t2);
-        cs.add_call(13, t3);
+        cs.add_call(11, &mut t1);
+        cs.add_call(12, &mut t2);
+        cs.add_call(13, &mut t3);
         let mut codata = CoData::default();
         cs.call(&mut codata, 13, 0);
     }
     #[test]
     #[should_panic]
     fn test_borrowing_should_fail(){
-        let t1 = Box::new(TestElementA::default());
-        let t2 = Box::new(TestElementB::default());
-        let t3 = Box::new(TestElementFail::default());
+        let mut t1 = TestElementA::default();
+        let mut t2 = TestElementB::default();
+        let mut t3 = TestElementFail::default();
         let mut cs = CallSystem::default();
-        cs.add_call(11, t1);
-        cs.add_call(12, t2);
-        cs.add_call(13, t3);
+        cs.add_call(11, &mut t1);
+        cs.add_call(12, &mut t2);
+        cs.add_call(13, &mut t3);
         let mut codata = CoData::default();
         cs.call(&mut codata, 13, 0);
     }
     #[test]
     #[should_panic]
     fn test_borrowing_should_fail_extended(){
-        let t1 = Box::new(TestElementA::default());
-        let t2 = Box::new(TestElementB::default());
-        let t3 = Box::new(TestElementFail::default());
-        let t4 = Box::new(TestElementFailA::default());
-        let t5 = Box::new(TestElementFailB::default());
+        let mut t1 = TestElementA::default();
+        let mut t2 = TestElementB::default();
+        let mut t3 = TestElementFail::default();
+        let mut t4 = TestElementFailA::default();
+        let mut t5 = TestElementFailB::default();
         let mut cs = CallSystem::default();
-        cs.add_call(11, t1);
-        cs.add_call(12, t2);
-        cs.add_call(13, t3);
-        cs.add_call(14, t4);
-        cs.add_call(15, t5);
+        cs.add_call(11, &mut t1);
+        cs.add_call(12, &mut t2);
+        cs.add_call(13, &mut t3);
+        cs.add_call(14, &mut t4);
+        cs.add_call(15, &mut t5);
         let mut codata = CoData::default();
         cs.call(&mut codata, 15, 0);
     }

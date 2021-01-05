@@ -264,8 +264,8 @@ mod tests {
         let mut codata = CoData::new();
         codata.push_key(&[0], &[0]).unwrap();
         let mut callsystem = CallSystem::default();
-        let element = TestElement::default();
-        callsystem.add_call(1, Box::from(element));
+        let mut element = TestElement::default();
+        callsystem.add_call(1, &mut element);
         let mut storage = TestStorageElement::default();
         callsystem.global_storage = Some(RefCell::from(&mut storage));
 
@@ -292,8 +292,8 @@ mod tests {
         let mut codata = CoData::new();
         codata.push_key(&[0], &[1]).unwrap();
         let mut callsystem = CallSystem::default();
-        let element = TestElement::default();
-        callsystem.add_call(1, Box::from(element));
+        let mut element = TestElement::default();
+        callsystem.add_call(1, &mut element);
         let mut storage = TestStorageElement::default();
         callsystem.global_storage = Some(RefCell::from(&mut storage));
 
@@ -319,8 +319,8 @@ mod tests {
         let mut codata = CoData::new();
         codata.push_key(&[0], &[3]).unwrap();
         let mut callsystem = CallSystem::default();
-        let element = TestElement::default();
-        callsystem.add_call(1, Box::from(element));
+        let mut element = TestElement::default();
+        callsystem.add_call(1, &mut element);
         let mut storage = TestStorageElement::default();
         callsystem.global_storage = Some(RefCell::from(&mut storage));
 

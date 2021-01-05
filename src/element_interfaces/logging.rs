@@ -34,7 +34,7 @@ pub enum LoggingFunctions{
     LogError
 }
 
-impl ElementAPI for dyn LoggingInterface{
+impl <'a>ElementAPI for (dyn LoggingInterface + 'a){
     fn system_call(&mut self, callsystem: &CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         self.try_syscall(codata, feature, function)
     }
