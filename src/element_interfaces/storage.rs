@@ -18,24 +18,20 @@ Functions:
 pub const GLOBAL_STORAGE_FEATURE: u32 = 2;
 
 #[derive(FromPrimitive)]
-pub enum GlobalStorageFunctions{
+pub enum GlobalStateFunctions{
     Available = 0, //reserved??
     StoreState = 1,
     LoadState,
     KeyExists,
-    //private functions
-    LoadPrivateState = 0x8000_0001,
-    StorePrivateState = 0x8000_0002,
-
 }
 
-impl <'a>ElementAPI for (dyn GlobalStorage +'a){
+impl <'a>ElementAPI for (dyn GlobalState +'a){
     fn system_call(&mut self, callsystem: & CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         self.try_syscall(codata, feature, function)
     }
 }
 
-pub trait GlobalStorage{
+pub trait GlobalState{
     fn try_syscall(&mut self, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         if feature != GLOBAL_STORAGE_FEATURE{
             return Ok(ElementResult::Result(0));
@@ -46,7 +42,7 @@ pub trait GlobalStorage{
         }
         let f=f.unwrap();
         match f{
-            GlobalStorageFunctions::KeyExists => {
+            GlobalStateFunctions::KeyExists => {
                 let key = codata.pop_stack()?;
                 let result = if self.key_exists(codata, &key)?{
                     1
@@ -56,19 +52,19 @@ pub trait GlobalStorage{
                 codata.push_stack(&[result])?;
                 Ok(ElementResult::Result(0))
             },
-            GlobalStorageFunctions::LoadState => {
+            GlobalStateFunctions::LoadState => {
                 let key = codata.pop_stack()?;
                 let value = self.load_state(codata, &key)?;
                 codata.push_stack(&value)?;
                 Ok(ElementResult::Result(0))
             },
-            GlobalStorageFunctions::StoreState => {
+            GlobalStateFunctions::StoreState => {
                 let key = codata.pop_stack()?;
                 let value = codata.pop_stack()?;
                 self.store_state(codata, &key, &value)?;
                 Ok(ElementResult::Result(0))
             }
-            GlobalStorageFunctions::Available => {
+            GlobalStateFunctions::Available => {
                 Ok(ElementResult::Result(0))
             },
             _ => {

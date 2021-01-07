@@ -20,7 +20,7 @@ pub trait ElementAPI{
 #[derive(Default)]
 pub struct CallSystem<'a>{
     elements: HashMap<u32, RefCell<&'a mut (dyn ElementAPI + 'a)>>,
-    pub global_storage: Option<RefCell<&'a mut dyn GlobalStorage>>,
+    pub global_storage: Option<RefCell<&'a mut dyn GlobalState>>,
     pub logging: Option<RefCell<&'a mut dyn LoggingInterface>>
 }
 

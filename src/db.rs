@@ -2,43 +2,81 @@ extern crate neutron_star_constants;
 use std::collections::HashMap;
 //use std::collections::HashSet;
 use neutron_star_constants::*;
+use crate::neutronerror::*;
+use crate::element_interfaces::storage::*;
+use crate::codata::*;
 
-pub const NEUTRONDB_USER_SPACE: u8 = '_' as u8;
+const USER_SPACE: u8 = '_' as u8;
 
-#[derive(Debug)]
-pub enum NeutronDBError{
-    Recoverable, // ever used?
-    Unrecoverable
-}
+/*
 pub trait NeutronDB{
-    fn read_key(&mut self, address: &NeutronShortAddress, key: &[u8]) -> Result<Vec<u8>, NeutronDBError>;
-    fn write_key(&mut self, address: &NeutronShortAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronDBError>;
+    fn read_key(&mut self, address: &NeutronShortAddress, key: &[u8]) -> Result<Vec<u8>, NeutronError>;
+    fn write_key(&mut self, address: &NeutronShortAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronError>;
     /// Creates a new checkpoint which enables the ability to revert back to the current state
     /// Returns the number of current checkpoints within the database context
-    fn checkpoint(&mut self) -> Result<u32, NeutronDBError>;
+    fn checkpoint(&mut self) -> Result<u32, NeutronError>;
     /// Collapses all outstanding checkpoints into a single top level checkpoint
-    fn collapse_checkpoints(&mut self) -> Result<(), NeutronDBError>;
+    fn collapse_checkpoints(&mut self) -> Result<(), NeutronError>;
     /// Reverts the current state to the previous checkpoint, discarding the modifications made since that checkpoint
-    fn revert_checkpoint(&mut self) -> Result<u32, NeutronDBError>;
+    fn revert_checkpoint(&mut self) -> Result<u32, NeutronError>;
     fn clear_checkpoints(&mut self);
     /// Commits all state to the database 
     /// TBD: should this be left as a non-trait function??
-    fn commit(&mut self) -> Result<(), NeutronDBError>;
+    fn commit(&mut self) -> Result<(), NeutronError>;
     //fn compute_new_proofs(&mut self, )
     // Automatically will execute `collapse_checkpoints`. Returns the keys and values which were read in this context as well as the keys which were written to
     //fn compute_state_differences(&mut self, reads: HashMap<NeutronShortAddress, HashMap<Vec<u8>, Vec<u8>>>, writes: HashMap<NeutronShortAddress, HashMap<Vec<u8>, Vec<u8>>>)
     //    -> Result<(), NeutronDBError>;
 }
+*/
 #[derive(Default,  Debug, Clone)]
-pub struct ProtoDB{
+pub struct MemoryGlobalState{
     storage: HashMap<NeutronShortAddress, HashMap<Vec<u8>, Vec<u8>>>,
     /// This only tracks keys which are read from storage, and ignores checkpoint-only data and reverts
     //touched: HashMap<NeutronShortAddress, Vec<u8>>,
     //rents: HashMap<Vec<u8>, u32>,
     checkpoints: Vec<HashMap<NeutronShortAddress, HashMap<Vec<u8>, Vec<u8>>>>
 }
-impl NeutronDB for ProtoDB{
-    fn read_key(&mut self, address: &NeutronShortAddress, key: &[u8]) -> Result<Vec<u8>, NeutronDBError>{
+
+impl GlobalState for MemoryGlobalState{
+    fn store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
+        Ok(())
+    }
+    fn load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
+        Ok(vec![0])
+    }
+    fn key_exists(&mut self, codata: &mut CoData, key: &[u8]) -> Result<bool, NeutronError>{
+        Ok(false)
+    }
+
+    fn private_store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
+        Ok(())
+    }
+    fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
+        Ok(vec![0])
+    }
+
+    //do these belong here? They could be done by using a single struct, but impl on two traits. However, this could bring refcell problems
+    fn transfer_balance(&mut self, codata: &mut CoData, address: NeutronFullAddress, value: u64) -> Result<u64, NeutronError>{
+        Ok(0)
+    }
+    fn get_balance(&mut self, codata: &mut CoData) -> Result<u64, NeutronError>{
+        Ok(0)
+    }
+    
+    fn create_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{
+        Ok(())
+    }
+    fn revert_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{
+        Ok(())
+    }
+    fn commit_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{
+        Ok(())
+    }
+}
+
+impl MemoryGlobalState{
+    fn read_key(&mut self, address: &NeutronShortAddress, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
         for checkpoint in self.checkpoints.iter().rev(){
             match checkpoint.get(address){
                 Some(kv) => {
@@ -66,11 +104,12 @@ impl NeutronDB for ProtoDB{
             None => {
             }
         }
-        Err(NeutronDBError::Unrecoverable)
+        Err(NeutronError::Unrecoverable(UnrecoverableError::StateOutOfRent))
     }
-    fn write_key(&mut self, address: &NeutronShortAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronDBError>{
+    fn write_key(&mut self, address: &NeutronShortAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
+
         if self.checkpoints.len() == 0{
-            return Err(NeutronDBError::Recoverable);
+            return Err(NeutronError::Unrecoverable(UnrecoverableError::DeveloperError));
         }
         let c = self.checkpoints.last_mut().unwrap();
         match c.get_mut(address){
@@ -85,18 +124,32 @@ impl NeutronDB for ProtoDB{
         }
         Ok(())
     }
-    fn checkpoint(&mut self) -> Result<u32, NeutronDBError>{
+    fn checkpoint(&mut self) -> Result<u32, NeutronError>{
         self.checkpoints.push(HashMap::new());
         Ok(self.checkpoints.len() as u32)
     }
-    fn revert_checkpoint(&mut self) -> Result<u32, NeutronDBError>{
+    fn revert_checkpoint(&mut self) -> Result<u32, NeutronError>{
         if self.checkpoints.pop().is_none(){
-            Err(NeutronDBError::Unrecoverable)
+            Err(NeutronError::Unrecoverable(UnrecoverableError::StateOutOfRent))
         }else{
             Ok(self.checkpoints.len() as u32)
         }
     }
-    fn collapse_checkpoints(&mut self) -> Result<(), NeutronDBError>{
+    fn commit_single_checkpoint(&mut self) -> Result<(), NeutronError>{
+        let mut collapsed = HashMap::new();
+        let mut kv_top = self.checkpoints.pop().unwrap();
+        let mut kv_bottom = self.checkpoints.pop().unwrap();
+        for (key, value) in kv_bottom.drain(){
+            collapsed.insert(key, value);
+        }
+        for (key, value) in kv_top.drain(){
+            collapsed.insert(key, value);
+        }
+        self.checkpoints.push(collapsed);
+        
+        Ok(())
+    }
+    fn collapse_checkpoints(&mut self) -> Result<(), NeutronError>{
         let mut collapsed = HashMap::new();
         for kv in self.checkpoints.iter_mut(){
             for (key, value) in kv.drain(){
@@ -108,7 +161,7 @@ impl NeutronDB for ProtoDB{
         
         Ok(())
     }
-    fn commit(&mut self) -> Result<(), NeutronDBError>{
+    fn commit(&mut self) -> Result<(), NeutronError>{
         self.collapse_checkpoints()?;
         for (key, value) in self.checkpoints.last_mut().unwrap().drain(){
             match self.storage.get_mut(&key){
@@ -137,7 +190,7 @@ mod tests {
         let mut a = NeutronShortAddress::default();
         a.version=100;
         a.data[5] = 20;
-        let mut db = ProtoDB::default();
+        let mut db = MemoryGlobalState::default();
         assert!(db.checkpoint().is_ok());
         assert!(db.write_key(&a, &[1], &[8, 8, 8, 8]).is_ok());
         assert!(db.write_key(&a, &[1], &[9, 9, 9, 9]).is_ok());
@@ -150,7 +203,7 @@ mod tests {
         let mut a = NeutronShortAddress::default();
         a.version=100;
         a.data[5] = 20;
-        let mut db = ProtoDB::default();
+        let mut db = MemoryGlobalState::default();
         assert!(db.checkpoint().is_ok());
         assert!(db.write_key(&a, &[1], &[8, 8, 8, 8]).is_ok());
         assert!(db.checkpoint().is_ok());
@@ -165,7 +218,7 @@ mod tests {
         let mut a = NeutronShortAddress::default();
         a.version=100;
         a.data[5] = 20;
-        let mut db = ProtoDB::default();
+        let mut db = MemoryGlobalState::default();
         assert!(db.checkpoint().is_ok());
         assert!(db.write_key(&a, &[1], &[8, 8, 8, 8]).is_ok());
         assert!(db.commit().is_ok());
@@ -187,7 +240,7 @@ mod tests {
         let mut a = NeutronShortAddress::default();
         a.version=100;
         a.data[5] = 20;
-        let mut db = ProtoDB::default(); 
+        let mut db = MemoryGlobalState::default(); 
         //deploy
         assert!(db.checkpoint().is_ok());
         assert!(db.write_key(&a, &[2, 1, 0], &[10]).is_ok());

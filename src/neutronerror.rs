@@ -13,7 +13,8 @@ pub enum UnrecoverableError{
     ErrorInitializingVM,
     OutOfGas,
     TopLevelError(RecoverableError),
-    InvalidElementOperation
+    InvalidElementOperation,
+    DeveloperError //used for things that should only happen by Neutron developer error
 }
 
 //TODO: this later needs to be moved/copied to neutron-constants for sharing with neutron-star
@@ -29,7 +30,7 @@ pub enum RecoverableError{
     InvalidHypervisorInterrupt,
     StackItemTooSmall,
     InvalidVM,
-    ContractRevertedExecution
+    ContractRevertedExecution,
 
 }
 
