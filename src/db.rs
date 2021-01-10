@@ -38,22 +38,54 @@ pub struct MemoryGlobalState{
     checkpoints: Vec<HashMap<NeutronShortAddress, HashMap<Vec<u8>, Vec<u8>>>>
 }
 
+impl MemoryGlobalState{
+    /*
+    pub fn create_user_key(&self, address: NeutronShortAddress, space: u8, key: &[u8]) -> Vec<u8>{
+        let bigkey = Vec::<u8>::default();
+        for i in 0..4{
+            bigkey.push(((address.version & (0xFF << i)) >> (i * 8)) as u8);
+        }
+        
+        bigkey.append(&mut address.data.to_vec());
+        bigkey.push(space);
+        bigkey.append(&mut key.to_vec());
+        bigkey
+    }
+    pub fn create_raw_key(&self, address: NeutronShortAddress, key: &[u8]) -> Vec<u8>{
+        let bigkey = Vec::<u8>::default();
+        for i in 0..4{
+            bigkey.push(((address.version & (0xFF << i)) >> (i * 8)) as u8);
+        }
+        
+        bigkey.append(&mut address.data.to_vec());
+        bigkey.append(&mut key.to_vec());
+        bigkey
+    }
+    */
+    pub fn create_user_key(&self, key: &[u8]) -> Vec<u8>{
+        let mut bigkey = Vec::<u8>::default();
+        bigkey.push(USER_SPACE);
+        bigkey.append(&mut key.to_vec());
+        bigkey
+    }
+}
+
 impl GlobalState for MemoryGlobalState{
     fn store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
-        Ok(())
+        self.write_key(&codata.peek_context(0).unwrap().self_address.to_short_address(), &self.create_user_key(key), value)
     }
     fn load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
-        Ok(vec![0])
+        self.read_key(&codata.peek_context(0).unwrap().self_address.to_short_address(), &self.create_user_key(key))
     }
     fn key_exists(&mut self, codata: &mut CoData, key: &[u8]) -> Result<bool, NeutronError>{
-        Ok(false)
+        Err(NeutronError::Unrecoverable(UnrecoverableError::NotImplemented))
     }
 
     fn private_store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
-        Ok(())
+        self.write_key(&codata.peek_context(0).unwrap().self_address.to_short_address(), key, value)
     }
     fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
-        Ok(vec![0])
+        self.read_key(&codata.peek_context(0).unwrap().self_address.to_short_address(), key)
     }
 
     //do these belong here? They could be done by using a single struct, but impl on two traits. However, this could bring refcell problems
@@ -65,13 +97,15 @@ impl GlobalState for MemoryGlobalState{
     }
     
     fn create_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{
+        self.checkpoint()?;
         Ok(())
     }
     fn revert_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{
+        self.revert_single_checkpoint()?;
         Ok(())
     }
     fn commit_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{
-        Ok(())
+        self.commit_single_checkpoint()
     }
 }
 
@@ -128,7 +162,7 @@ impl MemoryGlobalState{
         self.checkpoints.push(HashMap::new());
         Ok(self.checkpoints.len() as u32)
     }
-    fn revert_checkpoint(&mut self) -> Result<u32, NeutronError>{
+    fn revert_single_checkpoint(&mut self) -> Result<u32, NeutronError>{
         if self.checkpoints.pop().is_none(){
             Err(NeutronError::Unrecoverable(UnrecoverableError::StateOutOfRent))
         }else{
@@ -208,7 +242,7 @@ mod tests {
         assert!(db.write_key(&a, &[1], &[8, 8, 8, 8]).is_ok());
         assert!(db.checkpoint().is_ok());
         assert!(db.write_key(&a, &[1], &[9, 9, 9, 9]).is_ok());
-        assert!(db.revert_checkpoint().is_ok());
+        assert!(db.revert_single_checkpoint().is_ok());
         let v = db.read_key(&a, &[1]).unwrap();
         assert!(v == vec![8, 8, 8, 8]);
     }
@@ -222,7 +256,7 @@ mod tests {
         assert!(db.checkpoint().is_ok());
         assert!(db.write_key(&a, &[1], &[8, 8, 8, 8]).is_ok());
         assert!(db.commit().is_ok());
-        assert!(db.revert_checkpoint().is_err());
+        assert!(db.revert_single_checkpoint().is_err());
         db.clear_checkpoints();
         let v = db.read_key(&a, &[1]).unwrap();
         assert!(v == vec![8, 8, 8, 8]);
@@ -230,7 +264,7 @@ mod tests {
         assert!(db.checkpoint().is_ok());
         assert!(db.write_key(&a, &[1, 2, 3], &[9, 9, 9, 9]).is_ok());
         assert!(db.commit().is_ok());
-        assert!(db.revert_checkpoint().is_err());
+        assert!(db.revert_single_checkpoint().is_err());
         assert!(db.checkpoint().is_ok());
         let v = db.read_key(&a, &[1, 2, 3]).unwrap();
         assert!(v == vec![9, 9, 9, 9]);
