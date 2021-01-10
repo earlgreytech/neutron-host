@@ -80,7 +80,7 @@ pub trait GlobalState{
     fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>;
 
     //do these belong here? They could be done by using a single struct, but impl on two traits. However, this could bring refcell problems
-    fn transfer_balance(&mut self, codata: &mut CoData, address: NeutronFullAddress, value: u64) -> Result<u64, NeutronError>;
+    fn transfer_balance(&mut self, codata: &mut CoData, address: NeutronAddress, value: u64) -> Result<u64, NeutronError>;
     fn get_balance(&mut self, codata: &mut CoData) -> Result<u64, NeutronError>;
     
     fn create_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>;

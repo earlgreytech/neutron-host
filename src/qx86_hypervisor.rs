@@ -35,10 +35,10 @@ Interrupt 0x80: alloc_memory TBD
 
 -- Context functions
 Interrupt 0x90: gas_limit() -> u64
-Interrupt 0x91: self_address() -- result on stack as NeutronShortAddress
-Interrupt 0x92: origin() -- result on stack as NeutronShortAddress
+Interrupt 0x91: self_address() -- result on stack as NeutronAddress
+Interrupt 0x92: origin() -- result on stack as NeutronAddress
 Interrupt 0x93: origin_long() -- result on stack as NeutronLongAddress
-Interrupt 0x94: sender() -- result on stack as NeutronShortAddress
+Interrupt 0x94: sender() -- result on stack as NeutronAddress
 Interrupt 0x95: sender_long() -- result on stack as NeutronLongAddress
 Interrupt 0x96: value_sent() -> u64
 Interrupt 0x97: nest_level() -> u32

@@ -31,6 +31,7 @@ pub enum RecoverableError{
     StackItemTooSmall,
     InvalidVM,
     ContractRevertedExecution,
+    InvalidCoMapAccess
 
 }
 

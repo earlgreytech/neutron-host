@@ -2,6 +2,7 @@ use crate::codata::*;
 use crate::neutronerror::*;
 use crate::vmmanager::*;
 use crate::callsystem::*;
+use crate::addressing::*;
 
 #[derive(Default)]
 pub struct Manager{
@@ -122,7 +123,6 @@ impl Manager{
 #[cfg(test)]
 mod tests {
     use super::*;
-    use neutron_star_constants::NeutronFullAddress;
     use std::cell::RefCell;
 
     #[derive(Default)]
@@ -139,7 +139,7 @@ mod tests {
                 },
                 _ => {}
             }
-            match codata.peek_key(&[0])?[0]{
+            match codata.peek_key(&[10])?[0]{
                 0 => {
                     assert_eq!(self.self_calls, 1);
                     return Ok(VMResult::ElementCall(1, 0));
@@ -153,7 +153,7 @@ mod tests {
                     }else{
                         //will call 2
                         assert!(self.self_calls <= 10);
-                        codata.push_key(&[0], &[2])?;
+                        codata.push_key(&[10], &[2])?;
                         codata.push_key(&[1], &[2])?;
                         return Ok(VMResult::ElementCall(1, 2));
                     }
@@ -167,7 +167,7 @@ mod tests {
                 },
                 3 => {
                     //test sub-call error, will call 4
-                    codata.push_key(&[0], &[4])?;
+                    codata.push_key(&[10], &[4])?;
                     return Ok(VMResult::ElementCall(1, 2));
                 },
                 4 => {
@@ -210,7 +210,7 @@ mod tests {
         fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok((vec![0]))}
     
         //do these belong here? They could be done by using a single struct, but impl on two traits. However, this could bring refcell problems
-        fn transfer_balance(&mut self, codata: &mut CoData, address: NeutronFullAddress, value: u64) -> Result<u64, NeutronError>{Ok(0)}
+        fn transfer_balance(&mut self, codata: &mut CoData, address: NeutronAddress, value: u64) -> Result<u64, NeutronError>{Ok(0)}
         fn get_balance(&mut self, codata: &mut CoData) -> Result<u64, NeutronError>{Ok(0)}
         
         fn create_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
@@ -262,7 +262,7 @@ mod tests {
     #[test]
     fn test_bare_behavior_correct(){
         let mut codata = CoData::new();
-        codata.push_key(&[0], &[0]).unwrap();
+        codata.push_key(&[10], &[0]).unwrap();
         let mut callsystem = CallSystem::default();
         let mut element = TestElement::default();
         callsystem.add_call(1, &mut element);
@@ -281,7 +281,7 @@ mod tests {
         codata.push_context(context).unwrap();
 
         manager.execute(&mut codata, &callsystem, &vmm).unwrap();
-        assert!(codata.peek_key(&[0]).is_err());
+        assert!(codata.peek_key(&[10]).is_err());
         assert!(codata.peek_key(&[1]).unwrap()[0] == 1);
         assert!(codata.peek_result_key(&[0]).is_err());
         assert!(codata.peek_result_key(&[1]).unwrap()[0] == 1);
@@ -290,7 +290,7 @@ mod tests {
     #[test]
     fn test_single_call_behavior_correct(){
         let mut codata = CoData::new();
-        codata.push_key(&[0], &[1]).unwrap();
+        codata.push_key(&[10], &[1]).unwrap();
         let mut callsystem = CallSystem::default();
         let mut element = TestElement::default();
         callsystem.add_call(1, &mut element);
@@ -317,7 +317,7 @@ mod tests {
     #[test]
     fn test_single_call_recoverable_error_behavior_correct(){
         let mut codata = CoData::new();
-        codata.push_key(&[0], &[3]).unwrap();
+        codata.push_key(&[10], &[3]).unwrap();
         let mut callsystem = CallSystem::default();
         let mut element = TestElement::default();
         callsystem.add_call(1, &mut element);

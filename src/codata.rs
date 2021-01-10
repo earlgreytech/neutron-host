@@ -84,6 +84,9 @@ impl CoData{
     }
 
     pub fn push_key(&mut self, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
+        if key[0] == 0{
+            return Err(NeutronError::Recoverable(RecoverableError::InvalidCoMapAccess));
+        }
         self.maps.get_mut(self.top_output_map).unwrap().insert(key.to_vec(), value.to_vec());
         Ok(())
     }
@@ -100,6 +103,9 @@ impl CoData{
     }
     */
     pub fn peek_key(&self, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
+        if key[0] == 0{
+            return Err(NeutronError::Recoverable(RecoverableError::InvalidCoMapAccess));
+        }
         match self.maps[self.top_input_map].get(key){
             Some(v) => {
                 Ok(v.to_vec())
@@ -110,6 +116,9 @@ impl CoData{
         }
     }
     pub fn peek_result_key(&self, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
+        if key[0] == 0{
+            return Err(NeutronError::Recoverable(RecoverableError::InvalidCoMapAccess));
+        }
         match self.maps[self.top_result_map].get(key){
             Some(v) => {
                 Ok(v.to_vec())
@@ -119,6 +128,7 @@ impl CoData{
             }
         }
     }
+
 
     /// Should only be used by Element APIs. Flip stacks once when entering an Element API and once more when leaving and returning to a contract.
     /// Used so that contract outputs become Element inputs at first, then so that Element outputs becomes contract inputs
@@ -285,7 +295,7 @@ mod tests {
         let c1 = ExecutionContext::default();
         let c2 = ExecutionContext::default();
         let c3 = ExecutionContext::default();
-        let key = [0];
+        let key = [1];
         //ABI data
         manager.push_key(&key, &[1]).unwrap();
         manager.push_key(&[2], &[2]).unwrap();
@@ -330,7 +340,7 @@ mod tests {
     fn test_element_stack_flow(){
         let mut manager = CoData::new();
         let c1 = ExecutionContext::default();        
-        let key = [0];
+        let key = [1];
         //ABI data
         manager.push_key(&key, &[1]).unwrap();
         //element data

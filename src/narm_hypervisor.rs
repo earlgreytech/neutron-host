@@ -43,10 +43,10 @@ Hypervisor Functions:
 Context Functions:
 
 * SVC 0x90: gas_remaining() -> limit:u64 -- Will get the total amount of gas available for the current execution
-* SVC 0x91: self_address() -- result on stack as NeutronShortAddress -- Will return the current address for the execution. For a "one-time" execution, this will return a null address
-* SVC 0x92: origin() -- result on stack as NeutronShortAddress -- Will return the original address which caused the current chain of executions
+* SVC 0x91: self_address() -- result on stack as NeutronAddress -- Will return the current address for the execution. For a "one-time" execution, this will return a null address
+* SVC 0x92: origin() -- result on stack as NeutronAddress -- Will return the original address which caused the current chain of executions
 * SVC 0x93: origin_long() -- result on stack as NeutronLongAddress
-* SVC 0x94: sender() -- result on stack as NeutronShortAddress -- Will return the address which caused the current execution (and not the entire chain)
+* SVC 0x94: sender() -- result on stack as NeutronAddress -- Will return the address which caused the current execution (and not the entire chain)
 * SVC 0x95: sender_long() -- result on stack as NeutronLongAddress
 * SVC 0x96: execution_type() -> type:u32 -- The type of the current execution (see built-in types)
 * SVC 0x97: execution_permissions() -> permissions:u32 -- The current permissions of the execution (see built-in types)

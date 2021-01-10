@@ -140,20 +140,20 @@ pub struct NeutronVersion{
     /// Protected state should not be freely exposed to smart contracts 
     fn store_protected_state(&mut self, address: NeutronAddress, key: &[u8], data: &[u8]) -> Result<(), NeutronError>;
     /// Loads user accessible state from another smart contract's "namespace" in the smart contract database.  
-    fn load_external_state(&mut self, address: &NeutronShortAddress, key: &[u8], data: &mut Vec<u8>) -> Result<usize, NeutronError>;
+    fn load_external_state(&mut self, address: &NeutronAddress, key: &[u8], data: &mut Vec<u8>) -> Result<usize, NeutronError>;
     /// Loads "protected" state from the smart contract database which is from another smart contract's namespace. 
     /// Protected state can include bytecode, VM configuration options, etc. Protected state should not be freely exposed to smart contracts 
-    fn load_external_protected_state(&mut self, address: &NeutronShortAddress, key: &[u8], data: &mut Vec<u8>) -> Result<usize, NeutronError>;
+    fn load_external_protected_state(&mut self, address: &NeutronAddress, key: &[u8], data: &mut Vec<u8>) -> Result<usize, NeutronError>;
 
     /// Transfers coins from the currently executing smart contract to the specified address
     fn transfer(&mut self, address: &NeutronAddress, value: u64) -> Result<(), NeutronError>;
     /// Transfers coins from the currently executing smart contract to the specified address
     /// This can only be used for valid short addresses where the amount of data in a full address exactly matches the size of a short address
-    fn transfer_short(&mut self, address: &NeutronShortAddress, value: u64) -> Result<(), NeutronError>;
+    fn transfer_short(&mut self, address: &NeutronAddress, value: u64) -> Result<(), NeutronError>;
     /// Returns the balance of the currently executing smart contract
     fn balance(&mut self) -> Result<u64, NeutronError>;
     /// Checks the balance of an external smart contract. This can not be used for checking the balance of non-contract addresses.
-    fn balance_of_external(&mut self, address: &NeutronShortAddress) -> Result<u64, NeutronError>;
+    fn balance_of_external(&mut self, address: &NeutronAddress) -> Result<u64, NeutronError>;
 
     /// Gets the block hash of the specified block
     fn get_block_hash(&mut self, number: u64, hash: &mut[u8]) -> Result<(), NeutronError>;
