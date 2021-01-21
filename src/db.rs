@@ -87,15 +87,13 @@ impl GlobalState for MemoryGlobalState{
     fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
         self.read_key(&codata.peek_context(0).unwrap().self_address, key)
     }
+    fn private_store_state_external(&mut self, codata: &mut CoData, address: NeutronAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronError> {
+        self.write_key(&codata.peek_context(0).unwrap().self_address, &key, value)
+    }
+    fn private_load_state_external(&mut self, codata: &mut CoData, address: NeutronAddress, key: &[u8]) -> Result<Vec<u8>, NeutronError> {
+        self.read_key(&codata.peek_context(0).unwrap().self_address, &key)
+    }
 
-    //do these belong here? They could be done by using a single struct, but impl on two traits. However, this could bring refcell problems
-    fn transfer_balance(&mut self, codata: &mut CoData, address: NeutronAddress, value: u64) -> Result<u64, NeutronError>{
-        Ok(0)
-    }
-    fn get_balance(&mut self, codata: &mut CoData) -> Result<u64, NeutronError>{
-        Ok(0)
-    }
-    
     fn create_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{
         self.checkpoint()?;
         Ok(())

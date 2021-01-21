@@ -26,3 +26,16 @@ pub fn new_random_address() -> crate::addressing::NeutronAddress{
     reset_to_random_address(&mut a);
     a
 }
+
+trait AddressDecoding{
+    fn decode(&self) -> Vec<u8>;
+}
+
+impl AddressDecoding for crate::addressing::NeutronAddress{
+    fn decode(&self) -> Vec<u8>{
+        let mut v = Vec::with_capacity(4 + 20);
+        v.extend(&self.version.to_le_bytes());
+        v.extend(&self.data);
+        v
+    }
+}

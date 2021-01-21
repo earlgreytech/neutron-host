@@ -203,16 +203,15 @@ mod tests {
     struct TestStorageElement{}
     impl crate::element_interfaces::storage::GlobalState for TestStorageElement{
         fn store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{Ok(())}
-        fn load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok((vec![0]))}
-        fn key_exists(&mut self, codata: &mut CoData, key: &[u8]) -> Result<bool, NeutronError>{Ok((false))}
+        fn load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok(vec![0])}
+        fn key_exists(&mut self, codata: &mut CoData, key: &[u8]) -> Result<bool, NeutronError>{Ok(false)}
     
         fn private_store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{Ok(())}
-        fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok((vec![0]))}
+        fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok(vec![0])}
     
-        //do these belong here? They could be done by using a single struct, but impl on two traits. However, this could bring refcell problems
-        fn transfer_balance(&mut self, codata: &mut CoData, address: NeutronAddress, value: u64) -> Result<u64, NeutronError>{Ok(0)}
-        fn get_balance(&mut self, codata: &mut CoData) -> Result<u64, NeutronError>{Ok(0)}
-        
+        fn private_store_state_external(&mut self, codata: &mut CoData, address: NeutronAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronError> {Ok(())}
+        fn private_load_state_external(&mut self, codata: &mut CoData, address: NeutronAddress, key: &[u8]) -> Result<Vec<u8>, NeutronError> {Ok(vec![0])}
+
         fn create_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
         fn revert_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
         fn commit_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
