@@ -77,7 +77,7 @@ impl GlobalState for MemoryGlobalState{
     fn load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
         self.read_key(&codata.peek_context(0).unwrap().self_address, &self.create_user_key(key))
     }
-    fn key_exists(&mut self, codata: &mut CoData, key: &[u8]) -> Result<bool, NeutronError>{
+    fn key_exists(&mut self, _codata: &mut CoData, _key: &[u8]) -> Result<bool, NeutronError>{
         Err(NeutronError::Unrecoverable(UnrecoverableError::NotImplemented))
     }
 
@@ -87,28 +87,28 @@ impl GlobalState for MemoryGlobalState{
     fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
         self.read_key(&codata.peek_context(0).unwrap().self_address, key)
     }
-    fn private_store_state_external(&mut self, codata: &mut CoData, address: NeutronAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronError> {
+    fn private_store_state_external(&mut self, codata: &mut CoData, _address: NeutronAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronError> {
         self.write_key(&codata.peek_context(0).unwrap().self_address, &key, value)
     }
-    fn private_load_state_external(&mut self, codata: &mut CoData, address: NeutronAddress, key: &[u8]) -> Result<Vec<u8>, NeutronError> {
+    fn private_load_state_external(&mut self, codata: &mut CoData, _address: NeutronAddress, key: &[u8]) -> Result<Vec<u8>, NeutronError> {
         self.read_key(&codata.peek_context(0).unwrap().self_address, &key)
     }
 
-    fn create_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{
+    fn create_checkpoint(&mut self, _codata: &mut CoData) -> Result<(), NeutronError>{
         self.checkpoint()?;
         Ok(())
     }
-    fn revert_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{
+    fn revert_checkpoint(&mut self, _codata: &mut CoData) -> Result<(), NeutronError>{
         self.revert_single_checkpoint()?;
         Ok(())
     }
-    fn commit_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{
+    fn commit_checkpoint(&mut self, _codata: &mut CoData) -> Result<(), NeutronError>{
         self.commit_single_checkpoint()
     }
 }
 
 impl MemoryGlobalState{
-    fn read_key(&mut self, address: &NeutronAddress, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
+    pub fn read_key(&mut self, address: &NeutronAddress, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
         for checkpoint in self.checkpoints.iter().rev(){
             match checkpoint.get(address){
                 Some(kv) => {
@@ -138,7 +138,7 @@ impl MemoryGlobalState{
         }
         Err(NeutronError::Unrecoverable(UnrecoverableError::StateOutOfRent))
     }
-    fn write_key(&mut self, address: &NeutronAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
+    pub fn write_key(&mut self, address: &NeutronAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
 
         if self.checkpoints.len() == 0{
             return Err(NeutronError::Unrecoverable(UnrecoverableError::DeveloperError));
@@ -156,18 +156,18 @@ impl MemoryGlobalState{
         }
         Ok(())
     }
-    fn checkpoint(&mut self) -> Result<u32, NeutronError>{
+    pub fn checkpoint(&mut self) -> Result<u32, NeutronError>{
         self.checkpoints.push(HashMap::new());
         Ok(self.checkpoints.len() as u32)
     }
-    fn revert_single_checkpoint(&mut self) -> Result<u32, NeutronError>{
+    pub fn revert_single_checkpoint(&mut self) -> Result<u32, NeutronError>{
         if self.checkpoints.pop().is_none(){
             Err(NeutronError::Unrecoverable(UnrecoverableError::StateOutOfRent))
         }else{
             Ok(self.checkpoints.len() as u32)
         }
     }
-    fn commit_single_checkpoint(&mut self) -> Result<(), NeutronError>{
+    pub fn commit_single_checkpoint(&mut self) -> Result<(), NeutronError>{
         let mut collapsed = HashMap::new();
         let mut kv_top = self.checkpoints.pop().unwrap();
         let mut kv_bottom = self.checkpoints.pop().unwrap();
@@ -181,7 +181,7 @@ impl MemoryGlobalState{
         
         Ok(())
     }
-    fn collapse_checkpoints(&mut self) -> Result<(), NeutronError>{
+    pub fn collapse_checkpoints(&mut self) -> Result<(), NeutronError>{
         let mut collapsed = HashMap::new();
         for kv in self.checkpoints.iter_mut(){
             for (key, value) in kv.drain(){
@@ -193,7 +193,7 @@ impl MemoryGlobalState{
         
         Ok(())
     }
-    fn commit(&mut self) -> Result<(), NeutronError>{
+    pub fn commit(&mut self) -> Result<(), NeutronError>{
         self.collapse_checkpoints()?;
         for (key, value) in self.checkpoints.last_mut().unwrap().drain(){
             match self.storage.get_mut(&key){
@@ -210,7 +210,7 @@ impl MemoryGlobalState{
         self.clear_checkpoints();
         Ok(())
     }
-    fn clear_checkpoints(&mut self){
+    pub fn clear_checkpoints(&mut self){
         self.checkpoints.clear();
     }
 }
@@ -281,7 +281,7 @@ mod tests {
         assert!(db.checkpoint().is_ok());
         let v = db.read_key(&a, &[2, 1, 0]).unwrap();
         assert!(v == vec![10]);
-        db.write_key(&a, &[95, 0, 1, 2, 3], &[10, 20, 30, 40]);
+        db.write_key(&a, &[95, 0, 1, 2, 3], &[10, 20, 30, 40]).unwrap();
         db.commit().unwrap();
         //second call
         db.checkpoint().unwrap();

@@ -63,7 +63,7 @@ impl CoData{
             None => {
                 return Err(Recoverable(RecoverableError::ItemDoesntExist));
             },
-            Some(v) => {
+            Some(_) => {
                 return Ok(());
             }
         }
@@ -201,7 +201,7 @@ impl CoData{
             }
         }
     }
-    pub fn compute_outgoing_transfer_value(&self, token_owner: NeutronAddress, id: u64, address: NeutronAddress) -> Result<u64, NeutronError>{
+    pub fn compute_outgoing_transfer_value(&self, token_owner: NeutronAddress, id: u64, _address: NeutronAddress) -> Result<u64, NeutronError>{
         let address = self.context_stack.last().unwrap().self_address;
         let key = self.build_transfer_key(token_owner, id);
         let mut value = 0;
@@ -275,7 +275,7 @@ impl CoData{
             None => {
                 return Err(Unrecoverable(UnrecoverableError::ContextIndexEmpty));
             },
-            Some(v) => {}
+            Some(_) => {}
         }
         let c = match self.context_stack.last(){
             None => {

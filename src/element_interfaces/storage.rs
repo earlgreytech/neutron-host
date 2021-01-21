@@ -27,7 +27,7 @@ pub enum GlobalStateFunctions{
 }
 
 impl <'a>ElementAPI for (dyn GlobalState +'a){
-    fn system_call(&mut self, callsystem: & CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
+    fn system_call(&mut self, _callsystem: & CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         self.try_syscall(codata, feature, function)
     }
 }
@@ -68,9 +68,9 @@ pub trait GlobalState{
             GlobalStateFunctions::Available => {
                 Ok(ElementResult::Result(0))
             },
-            _ => {
-                Ok(ElementResult::Result(0))
-            } //todo
+            // _ => {
+            //     Ok(ElementResult::Result(0))
+            // } //todo
         }
     }
     fn store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>;
@@ -83,8 +83,8 @@ pub trait GlobalState{
     fn private_store_state_external(&mut self, codata: &mut CoData, address: NeutronAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronError>;
 
     fn create_token_transfer(&mut self, codata: &mut CoData, owner: NeutronAddress, id: u64, value: u64) -> Result<u64, NeutronError>{
-        let c = codata.peek_context(0)?;
-        let mut balance = self.get_token_balance(codata, owner, id, c.self_address).unwrap_or(0);
+        let c = codata.peek_context(0)?.clone();
+        let balance = self.get_token_balance(codata, owner, id, c.self_address).unwrap_or(0);
         if balance < value{
             return Err(NeutronError::Recoverable(RecoverableError::LowTokenBalance));
         }
@@ -95,9 +95,9 @@ pub trait GlobalState{
         let c = codata.peek_context(0)?.clone();
         let self_key = build_token_key(c.self_address, id);
         let sender_key = build_token_key(c.sender, id);
-        let mut self_balance = self.get_token_balance(codata, owner, id, c.self_address).unwrap_or(0);
+        let self_balance = self.get_token_balance(codata, owner, id, c.self_address).unwrap_or(0);
         let value = codata.element_pop_transfer(owner, id).unwrap_or(0);
-        let mut sender_balance = self.get_token_balance(codata, owner, id, c.sender)?;
+        let sender_balance = self.get_token_balance(codata, owner, id, c.sender)?;
         if sender_balance < value{
             return Err(Unrecoverable(UnrecoverableError::DeveloperError));
         }

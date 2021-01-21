@@ -1,6 +1,7 @@
 extern crate neutron_star_constants;
 extern crate ring;
 extern crate elf;
+/*
 use crate::db::*;
 use std::path::PathBuf;
 use crate::element_interfaces::storage;
@@ -10,7 +11,6 @@ use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
 use crate::element_interfaces::logging;
 
-/*
 /// The Testbench is a virtual environment which can be used for testing smart contracts 
 #[derive(Default)]
 pub struct Testbench{
