@@ -91,6 +91,13 @@ impl CoData{
         self.maps.get_mut(self.top_output_map).unwrap().insert(key.to_vec(), value.to_vec());
         Ok(())
     }
+    pub fn element_push_key(&mut self, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
+        if key[0] == 0{
+            return Err(NeutronError::Recoverable(RecoverableError::InvalidCoMapAccess));
+        }
+        self.maps.get_mut(self.top_input_map).unwrap().insert(key.to_vec(), value.to_vec());
+        Ok(())
+    }
     /* should this be allowed?
     pub fn pop_key(&mut self, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
         match self.maps[self.top_input_map].remove(key){

@@ -101,6 +101,7 @@ impl NarmHypervisor{
         }
         loop{
             let syscall = self.vm.execute()?;
+            println!("svc: {}", syscall);
             match syscall{
                 0xFF => {
                     return Ok(HypervisorState::Ended);
@@ -136,7 +137,8 @@ impl VMHypervisor for NarmHypervisor{
                     }
                 };
             },
-            Err(_) => {
+            Err(e) => {
+                dbg!(&e);
                 return Err(NeutronError::Recoverable(RecoverableError::ContractExecutionError)); //TODO, decode into useful info
             }
         }
@@ -150,6 +152,7 @@ impl VMHypervisor for NarmHypervisor{
     }
     /// Creates the initial state, including potentially storing state to the database, decoding of bytecode, etc
     fn enter_state(&mut self, codata: &mut CoData, callsystem: & CallSystem) -> Result<(), NeutronError>{
+        println!("enter_state narm");
         let execution_type = codata.peek_context(0)?.execution_type;
         let mut storage = callsystem.global_storage.as_ref().unwrap().borrow_mut();
         let code = match execution_type{
@@ -157,9 +160,11 @@ impl VMHypervisor for NarmHypervisor{
                 storage.private_load_state(codata, &[0x02, 0])?
             },
             _ => {
+                println!("1");
                 codata.peek_key("!.c".as_bytes())?
             }
         };
+        println!("2");
         self.vm.memory.add_memory(0x10000, code.len() as u32).unwrap();
         match self.vm.copy_into_memory(0x10000, &code){
             Err(_) => {
@@ -193,6 +198,7 @@ impl VMHypervisor for NarmHypervisor{
 
         //do init stuff
         self.vm.set_pc(0x1_0000);
+        self.vm.gas_remaining = codata.peek_context(0)?.gas_limit;
 
         Ok(())
     }

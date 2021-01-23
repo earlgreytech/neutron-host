@@ -1,4 +1,5 @@
 extern crate neutron_star_constants;
+/*
 use neutron_host::addressing::*;
 use neutron_host::interface::*;
 use neutron_host::db::*;
@@ -34,3 +35,4 @@ mod tests {
     }
     
 }
+*/
