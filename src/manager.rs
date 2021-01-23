@@ -2,7 +2,6 @@ use crate::codata::*;
 use crate::neutronerror::*;
 use crate::vmmanager::*;
 use crate::callsystem::*;
-use crate::addressing::*;
 
 #[derive(Default)]
 pub struct Manager{
@@ -34,7 +33,7 @@ impl Manager{
     /// The VM is continually executed. Upon VM return, element calls will be handled, if a sub-contract is called, it'll cause a recursive execute() call. 
     /// The main loop will be exited either upon an unrecoverable error or upon the VM returning an "ended" result
     fn neutron_main_loop(&mut self, hypervisor: &mut Box<dyn VMHypervisor>, codata: &mut CoData, callsystem: & CallSystem, vmm: &VMManager) -> Result<VMResult, NeutronError>{
-        callsystem.global_storage.as_ref().unwrap().borrow_mut().create_checkpoint(codata);
+        callsystem.global_storage.as_ref().unwrap().borrow_mut().create_checkpoint(codata)?;
         loop{
             let result = match hypervisor.execute(codata){
                 Ok(v) => v,
@@ -57,7 +56,7 @@ impl Manager{
                                 ElementResult::NewCall => {
                                     match self.execute(codata, callsystem, vmm){
                                         Err(NeutronError::Recoverable(e)) => {
-                                            callsystem.global_storage.as_ref().unwrap().borrow_mut().revert_checkpoint(codata);
+                                            callsystem.global_storage.as_ref().unwrap().borrow_mut().revert_checkpoint(codata)?;
                                             dbg!(&e);
                                             hypervisor.set_error(e as u64);
                                         },
@@ -66,7 +65,7 @@ impl Manager{
                                             return Err(NeutronError::Unrecoverable(e));
                                         },
                                         Ok(_) =>{
-                                            callsystem.global_storage.as_ref().unwrap().borrow_mut().commit_checkpoint(codata);
+                                            callsystem.global_storage.as_ref().unwrap().borrow_mut().commit_checkpoint(codata)?;
                                         }
                                     }
                                 }
@@ -91,7 +90,7 @@ impl Manager{
     }
 
     pub fn execute(&mut self, codata: &mut CoData, callsystem: & CallSystem, vmm: &VMManager) -> Result<(), NeutronError>{
-        let mut hv = &mut self.start_execution(codata, vmm)?;
+        let hv = &mut self.start_execution(codata, vmm)?;
         hv.enter_state(codata, callsystem)?;
         let mut error = 0;
         match self.neutron_main_loop(hv, codata, callsystem, vmm){
@@ -124,6 +123,7 @@ impl Manager{
 mod tests {
     use super::*;
     use std::cell::RefCell;
+    use crate::addressing::*;
 
     #[derive(Default)]
     struct TestVM{
@@ -184,48 +184,47 @@ mod tests {
             //return Ok(VMResult::ElementCall(0, 0));
             return Err(NeutronError::Unrecoverable(UnrecoverableError::ErrorInitializingVM));
         }
-        fn set_result(&mut self, code: u64){
+        fn set_result(&mut self, _code: u64){
     
         }
-        fn set_error(&mut self, code: u64){
+        fn set_error(&mut self, _code: u64){
     
         }
         /// Creates the initial state, including potentially storing state to the database, decoding of bytecode, etc
-        fn enter_state(&mut self, codata: &mut CoData, callsystem: & CallSystem) -> Result<(), NeutronError>{
+        fn enter_state(&mut self, _codata: &mut CoData, _callsystem: & CallSystem) -> Result<(), NeutronError>{
             Ok(())
         }
         /// Called when exiting the VM, should commit state etc
-        fn exit_state(&mut self, codata: &mut CoData, callsystem: & CallSystem) -> Result<(), NeutronError>{
+        fn exit_state(&mut self, _codata: &mut CoData, _callsystem: & CallSystem) -> Result<(), NeutronError>{
             Ok(())
         }
     }
     #[derive(Default)]
     struct TestStorageElement{}
     impl crate::element_interfaces::storage::GlobalState for TestStorageElement{
-        fn store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{Ok(())}
-        fn load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok((vec![0]))}
-        fn key_exists(&mut self, codata: &mut CoData, key: &[u8]) -> Result<bool, NeutronError>{Ok((false))}
+        fn store_state(&mut self, _codata: &mut CoData, _key: &[u8], _value: &[u8]) -> Result<(), NeutronError>{Ok(())}
+        fn load_state(&mut self, _codata: &mut CoData, _key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok(vec![0])}
+        fn key_exists(&mut self, _codata: &mut CoData, _key: &[u8]) -> Result<bool, NeutronError>{Ok(false)}
     
-        fn private_store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{Ok(())}
-        fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok((vec![0]))}
+        fn private_store_state(&mut self, _codata: &mut CoData, _key: &[u8], _value: &[u8]) -> Result<(), NeutronError>{Ok(())}
+        fn private_load_state(&mut self, _codata: &mut CoData, _key: &[u8]) -> Result<Vec<u8>, NeutronError>{Ok(vec![0])}
     
-        //do these belong here? They could be done by using a single struct, but impl on two traits. However, this could bring refcell problems
-        fn transfer_balance(&mut self, codata: &mut CoData, address: NeutronAddress, value: u64) -> Result<u64, NeutronError>{Ok(0)}
-        fn get_balance(&mut self, codata: &mut CoData) -> Result<u64, NeutronError>{Ok(0)}
-        
-        fn create_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
-        fn revert_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
-        fn commit_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
+        fn private_store_state_external(&mut self, _codata: &mut CoData, _address: NeutronAddress, _key: &[u8], _value: &[u8]) -> Result<(), NeutronError> {Ok(())}
+        fn private_load_state_external(&mut self, _codata: &mut CoData, _address: NeutronAddress, _key: &[u8]) -> Result<Vec<u8>, NeutronError> {Ok(vec![0])}
+
+        fn create_checkpoint(&mut self, _codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
+        fn revert_checkpoint(&mut self, _codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
+        fn commit_checkpoint(&mut self, _codata: &mut CoData) -> Result<(), NeutronError>{Ok(())}
     }
     impl ElementAPI for TestStorageElement{
-        fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{Ok(ElementResult::Result(0))}
+        fn system_call(&mut self, _callsystem: & CallSystem, _manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{Ok(ElementResult::Result(0))}
     }
 
     #[derive(Default)]
     struct TestElement{
     }
     impl ElementAPI for TestElement{
-        fn system_call(&mut self, callsystem: & CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
+        fn system_call(&mut self, _callsystem: & CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
             codata.enter_element();
             assert_eq!(feature, 1);
             match function{
@@ -265,7 +264,7 @@ mod tests {
         codata.push_key(&[10], &[0]).unwrap();
         let mut callsystem = CallSystem::default();
         let mut element = TestElement::default();
-        callsystem.add_call(1, &mut element);
+        callsystem.add_call(1, &mut element).unwrap();
         let mut storage = TestStorageElement::default();
         callsystem.global_storage = Some(RefCell::from(&mut storage));
 
@@ -293,7 +292,7 @@ mod tests {
         codata.push_key(&[10], &[1]).unwrap();
         let mut callsystem = CallSystem::default();
         let mut element = TestElement::default();
-        callsystem.add_call(1, &mut element);
+        callsystem.add_call(1, &mut element).unwrap();
         let mut storage = TestStorageElement::default();
         callsystem.global_storage = Some(RefCell::from(&mut storage));
 
@@ -320,7 +319,7 @@ mod tests {
         codata.push_key(&[10], &[3]).unwrap();
         let mut callsystem = CallSystem::default();
         let mut element = TestElement::default();
-        callsystem.add_call(1, &mut element);
+        callsystem.add_call(1, &mut element).unwrap();
         let mut storage = TestStorageElement::default();
         callsystem.global_storage = Some(RefCell::from(&mut storage));
 

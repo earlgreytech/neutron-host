@@ -35,7 +35,7 @@ pub enum LoggingFunctions{
 }
 
 impl <'a>ElementAPI for (dyn LoggingInterface + 'a){
-    fn system_call(&mut self, callsystem: &CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
+    fn system_call(&mut self, _callsystem: &CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         self.try_syscall(codata, feature, function)
     }
 }
@@ -66,9 +66,9 @@ pub trait LoggingInterface{
             LoggingFunctions::Available => {
                 Ok(())
             },
-            _ => {
-                self.extensions(function, stack)
-            }
+            // _ => {
+            //     self.extensions(function, stack)
+            // }
         };
         if result.is_err(){
             Err(result.unwrap_err())

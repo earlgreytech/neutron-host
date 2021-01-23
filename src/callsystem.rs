@@ -68,7 +68,7 @@ mod tests {
     }
     impl ElementAPI for TestElementA{
         fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
-            callsystem.call(manager, 12, 0);
+            callsystem.call(manager, 12, 0).unwrap();
             Ok(ElementResult::Result(0))
         }
     }
@@ -85,7 +85,7 @@ mod tests {
     }
     impl ElementAPI for TestElementFail{
         fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
-            callsystem.call(manager, 13, 0);
+            callsystem.call(manager, 13, 0).unwrap();
             Ok(ElementResult::Result(0))
         }
     }
@@ -94,7 +94,7 @@ mod tests {
     }
     impl ElementAPI for TestElementFailA{
         fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
-            callsystem.call(manager, 15, 0);
+            callsystem.call(manager, 15, 0).unwrap();
             Ok(ElementResult::Result(0))
         }
     }
@@ -103,7 +103,7 @@ mod tests {
     }
     impl ElementAPI for TestElementFailB{
         fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, _feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
-            callsystem.call(manager, 14, 0);
+            callsystem.call(manager, 14, 0).unwrap();
             Ok(ElementResult::Result(0))
         }
     }
@@ -114,8 +114,8 @@ mod tests {
     impl ElementAPI for TestElementC{
         fn system_call(&mut self, callsystem: & CallSystem, manager: &mut CoData, feature: u32, _function: u32) -> Result<ElementResult, NeutronError>{
             self.test = feature;
-            callsystem.call(manager, 11, 0);
-            callsystem.call(manager, 11, 0);
+            callsystem.call(manager, 11, 0).unwrap();
+            callsystem.call(manager, 11, 0).unwrap();
             Ok(ElementResult::Result(0))
         }
     }
@@ -125,10 +125,10 @@ mod tests {
         let mut t1 = TestElementA::default();
         let mut t2 = TestElementB::default();
         let mut cs = CallSystem::default();
-        cs.add_call(11, &mut t1);
-        cs.add_call(12, &mut t2);
+        cs.add_call(11, &mut t1).unwrap();
+        cs.add_call(12, &mut t2).unwrap();
         let mut codata = CoData::default();
-        cs.call(&mut codata, 11, 0);
+        cs.call(&mut codata, 11, 0).unwrap();
     }
     #[test]
     fn test_borrowing_back_and_forth(){
@@ -136,11 +136,11 @@ mod tests {
         let mut t2 = TestElementB::default();
         let mut t3 = TestElementC::default();
         let mut cs = CallSystem::default();
-        cs.add_call(11, &mut t1);
-        cs.add_call(12, &mut t2);
-        cs.add_call(13, &mut t3);
+        cs.add_call(11, &mut t1).unwrap();
+        cs.add_call(12, &mut t2).unwrap();
+        cs.add_call(13, &mut t3).unwrap();
         let mut codata = CoData::default();
-        cs.call(&mut codata, 13, 0);
+        cs.call(&mut codata, 13, 0).unwrap();
     }
     #[test]
     #[should_panic]
@@ -149,11 +149,11 @@ mod tests {
         let mut t2 = TestElementB::default();
         let mut t3 = TestElementFail::default();
         let mut cs = CallSystem::default();
-        cs.add_call(11, &mut t1);
-        cs.add_call(12, &mut t2);
-        cs.add_call(13, &mut t3);
+        cs.add_call(11, &mut t1).unwrap();
+        cs.add_call(12, &mut t2).unwrap();
+        cs.add_call(13, &mut t3).unwrap();
         let mut codata = CoData::default();
-        cs.call(&mut codata, 13, 0);
+        cs.call(&mut codata, 13, 0).unwrap();
     }
     #[test]
     #[should_panic]
@@ -164,13 +164,13 @@ mod tests {
         let mut t4 = TestElementFailA::default();
         let mut t5 = TestElementFailB::default();
         let mut cs = CallSystem::default();
-        cs.add_call(11, &mut t1);
-        cs.add_call(12, &mut t2);
-        cs.add_call(13, &mut t3);
-        cs.add_call(14, &mut t4);
-        cs.add_call(15, &mut t5);
+        cs.add_call(11, &mut t1).unwrap();
+        cs.add_call(12, &mut t2).unwrap();
+        cs.add_call(13, &mut t3).unwrap();
+        cs.add_call(14, &mut t4).unwrap();
+        cs.add_call(15, &mut t5).unwrap();
         let mut codata = CoData::default();
-        cs.call(&mut codata, 15, 0);
+        cs.call(&mut codata, 15, 0).unwrap();
     }
 }
 

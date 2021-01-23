@@ -82,7 +82,7 @@ enum HypervisorState{
 }
 
 impl NarmHypervisor{
-    fn wrapped_execute(&mut self, codata: &mut CoData) -> Result<HypervisorState, NarmError>{
+    fn wrapped_execute(&mut self, _codata: &mut CoData) -> Result<HypervisorState, NarmError>{
         let res_low = &LongRegister{register: 0};
         let res_high = &LongRegister{register: 1};
         if self.result.is_some(){
@@ -136,7 +136,7 @@ impl VMHypervisor for NarmHypervisor{
                     }
                 };
             },
-            Err(e) => {
+            Err(_) => {
                 return Err(NeutronError::Recoverable(RecoverableError::ContractExecutionError)); //TODO, decode into useful info
             }
         }

@@ -3,6 +3,7 @@ use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
 use crate::callsystem::*;
 use neutron_star_constants::*;
+use std::convert::*;
 /*
 ## Global Storage
 
@@ -26,7 +27,7 @@ pub enum GlobalStateFunctions{
 }
 
 impl <'a>ElementAPI for (dyn GlobalState +'a){
-    fn system_call(&mut self, callsystem: & CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
+    fn system_call(&mut self, _callsystem: & CallSystem, codata: &mut CoData, feature: u32, function: u32) -> Result<ElementResult, NeutronError>{
         self.try_syscall(codata, feature, function)
     }
 }
@@ -67,9 +68,9 @@ pub trait GlobalState{
             GlobalStateFunctions::Available => {
                 Ok(ElementResult::Result(0))
             },
-            _ => {
-                Ok(ElementResult::Result(0))
-            } //todo
+            // _ => {
+            //     Ok(ElementResult::Result(0))
+            // } //todo
         }
     }
     fn store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>;
@@ -78,13 +79,59 @@ pub trait GlobalState{
 
     fn private_store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>;
     fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>;
+    fn private_load_state_external(&mut self, codata: &mut CoData, address: NeutronAddress, key: &[u8]) -> Result<Vec<u8>, NeutronError>;
+    fn private_store_state_external(&mut self, codata: &mut CoData, address: NeutronAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronError>;
 
-    //do these belong here? They could be done by using a single struct, but impl on two traits. However, this could bring refcell problems
-    fn transfer_balance(&mut self, codata: &mut CoData, address: NeutronAddress, value: u64) -> Result<u64, NeutronError>;
-    fn get_balance(&mut self, codata: &mut CoData) -> Result<u64, NeutronError>;
+    fn create_token_transfer(&mut self, codata: &mut CoData, owner: NeutronAddress, id: u64, value: u64) -> Result<u64, NeutronError>{
+        let c = codata.peek_context(0)?.clone();
+        let balance = self.get_token_balance(codata, owner, id, c.self_address).unwrap_or(0);
+        if balance < value{
+            return Err(NeutronError::Recoverable(RecoverableError::LowTokenBalance));
+        }
+        codata.element_push_transfer(owner, id, value);
+        Ok(balance)
+    }
+    fn claim_token_transfer(&mut self, codata: &mut CoData, owner: NeutronAddress, id: u64) -> Result<u64, NeutronError>{
+        let c = codata.peek_context(0)?.clone();
+        let self_key = build_token_key(c.self_address, id);
+        let sender_key = build_token_key(c.sender, id);
+        let self_balance = self.get_token_balance(codata, owner, id, c.self_address).unwrap_or(0);
+        let value = codata.element_pop_transfer(owner, id).unwrap_or(0);
+        let sender_balance = self.get_token_balance(codata, owner, id, c.sender)?;
+        if sender_balance < value{
+            return Err(Unrecoverable(UnrecoverableError::DeveloperError));
+        }
+        self.private_store_state_external(codata, owner, &self_key, &(self_balance + value).to_le_bytes())?;
+        self.private_store_state_external(codata, owner, &sender_key, &(sender_balance - value).to_le_bytes())?;
+        Ok(0)
+    }
+    
+    fn get_token_balance(&mut self, codata: &mut CoData, owner: NeutronAddress, id: u64, address: NeutronAddress) -> Result<u64, NeutronError>{
+        let key = build_token_key(address, id);
+        match self.private_load_state_external(codata, owner, &key){
+            Ok(v) => {
+                let mut balance = u64::from_le_bytes(v.clone().try_into().unwrap());
+                balance -= codata.compute_outgoing_transfer_value(owner, id, address).unwrap_or(0);
+                Ok(balance)
+            },
+            Err(_) => {
+                Ok(0)
+            }
+        }
+    }
     
     fn create_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>;
     fn revert_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>;
     fn commit_checkpoint(&mut self, codata: &mut CoData) -> Result<(), NeutronError>;
 }
 
+pub fn build_token_key(token_owner: NeutronAddress, id: u64) -> Vec<u8>{
+    use crate::AddressDecoding;
+    let mut key = Vec::with_capacity(1 + 20 + 1 + 8);
+    key.push(0);
+    key.push(0xFF);
+    key.extend(token_owner.decode());
+    key.push(95); //ASCII for _
+    key.extend(&id.to_le_bytes());
+    key
+}

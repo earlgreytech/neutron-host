@@ -3,6 +3,7 @@ use crate::addressing::*;
 use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
 use std::collections::HashMap;
+use std::convert::*;
 
 #[derive(Default)]
 pub struct GasSchedule{
@@ -62,7 +63,7 @@ impl CoData{
             None => {
                 return Err(Recoverable(RecoverableError::ItemDoesntExist));
             },
-            Some(v) => {
+            Some(_) => {
                 return Ok(());
             }
         }
@@ -128,7 +129,94 @@ impl CoData{
             }
         }
     }
+    fn build_transfer_key(&self, token_owner: NeutronAddress, id: u64) -> Vec<u8>{
+        use crate::AddressDecoding;
+        let mut key = Vec::with_capacity(1 + 20 + 1 + 8);
+        key.push(0);
+        key.extend(token_owner.decode());
+        key.push(95); //ASCII for _
+        key.extend(&id.to_le_bytes());
+        key
+    }
+/*
+    pub fn push_transfer(&mut self, token_owner: NeutronAddress, id: u64, value: u64){
+        let key = self.build_transfer_key(token_owner, id);
+        self.maps.get_mut(self.top_output_map).unwrap().insert(key.to_vec(), value.to_le_bytes().to_vec());
+    }
+*/
 
+    pub fn peek_transfer(&self, token_owner: NeutronAddress, id: u64) -> Result<u64, NeutronError>{
+        let key = self.build_transfer_key(token_owner, id);
+        match self.maps[self.top_input_map].get(&key){
+            Some(v) => {
+                Ok(u64::from_le_bytes(v.clone().try_into().unwrap()))
+            },
+            None => {
+                Err(Recoverable(RecoverableError::ItemDoesntExist))
+            }
+        }
+    }
+/* //seems unneeded?
+    pub fn pop_transfer(&mut self, token_owner: NeutronAddress, id: u64) -> Result<u64, NeutronError>{
+        let key = self.build_transfer_key(token_owner, id);
+        match self.maps[self.top_input_map].remove(&key){
+            Some(v) => {
+                Ok(u64::from_le_bytes(v.try_into().unwrap()))
+            },
+            None => {
+                Err(Recoverable(RecoverableError::ItemDoesntExist))
+            }
+        }
+    }
+*/
+
+    pub fn element_push_transfer(&mut self, token_owner: NeutronAddress, id: u64, value: u64){
+        let c = self.context_stack.last().unwrap();
+        let key = self.build_transfer_key(token_owner, id);
+        self.maps.get_mut(c.output_map).unwrap().insert(key.to_vec(), value.to_le_bytes().to_vec());
+    }
+
+    pub fn element_peek_transfer(&self, token_owner: NeutronAddress, id: u64) -> Result<u64, NeutronError>{
+        let c = self.context_stack.last().unwrap();
+        let key = self.build_transfer_key(token_owner, id);
+        match self.maps[c.input_map].get(&key){
+            Some(v) => {
+                Ok(u64::from_le_bytes(v.clone().try_into().unwrap()))
+            },
+            None => {
+                Err(Recoverable(RecoverableError::ItemDoesntExist))
+            }
+        }
+    }
+
+    pub fn element_pop_transfer(&mut self, token_owner: NeutronAddress, id: u64) -> Result<u64, NeutronError>{
+        let c = self.context_stack.last().unwrap();
+        let key = self.build_transfer_key(token_owner, id);
+        match self.maps[c.input_map].remove(&key){
+            Some(v) => {
+                Ok(u64::from_le_bytes(v.try_into().unwrap()))
+            },
+            None => {
+                Err(Recoverable(RecoverableError::ItemDoesntExist))
+            }
+        }
+    }
+    pub fn compute_outgoing_transfer_value(&self, token_owner: NeutronAddress, id: u64, _address: NeutronAddress) -> Result<u64, NeutronError>{
+        let address = self.context_stack.last().unwrap().self_address;
+        let key = self.build_transfer_key(token_owner, id);
+        let mut value = 0;
+        for context in &self.context_stack{
+            if context.self_address == address{
+                match self.maps[context.output_map].get(&key){
+                    Some(v) => {
+                        value += u64::from_le_bytes(v.clone().try_into().unwrap());
+                    },
+                    None => {}
+                }
+            }
+        }
+        Ok(value)
+    }
 
     /// Should only be used by Element APIs. Flip stacks once when entering an Element API and once more when leaving and returning to a contract.
     /// Used so that contract outputs become Element inputs at first, then so that Element outputs becomes contract inputs
@@ -187,7 +275,7 @@ impl CoData{
             None => {
                 return Err(Unrecoverable(UnrecoverableError::ContextIndexEmpty));
             },
-            Some(v) => {}
+            Some(_) => {}
         }
         let c = match self.context_stack.last(){
             None => {
