@@ -1,4 +1,4 @@
-use crate::{codata, narm::narmvm::*};
+use crate::narm::narmvm::*;
 use crate::narm::*;
 use crate::codata::*;
 use crate::neutronerror::*;

@@ -153,7 +153,7 @@ mod tests {
             match codata.pop_stack().unwrap_or(vec![0])[0]{
                 1 => {
                     codata.push_key(&[1], &[1])?;
-                    return Ok(VMResult::Ended);
+                    return Ok(VMResult::Ended(0));
                 },
                 _ => {}
             }
@@ -167,7 +167,7 @@ mod tests {
                     if result == 3{
                         //returns from call 2
                         codata.push_key(&[3], &[1])?;
-                        return Ok(VMResult::Ended);
+                        return Ok(VMResult::Ended(0));
                     }else{
                         //will call 2
                         assert!(self.self_calls <= 10);
@@ -181,7 +181,7 @@ mod tests {
                     //sub-contract call
                     assert!(codata.peek_key(&[1]).unwrap()[0] == 2);
                     codata.push_key(&[2], &[3])?;
-                    return Ok(VMResult::Ended);
+                    return Ok(VMResult::Ended(0));
                 },
                 3 => {
                     //test sub-call error, will call 4

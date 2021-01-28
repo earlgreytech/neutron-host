@@ -7,7 +7,6 @@ use neutron_host::callsystem::*;
 use neutron_host::codata::*;
 use neutron_host::interface::*;
 use neutron_host::narm_hypervisor::*;
-use neutron_testbench::test_interface::*;
 use neutron_host::vmmanager::*;
 
 const MAX_GAS:u64 = 10000000;
@@ -44,7 +43,7 @@ fn main() {
 
     //Setup execution context
     let mut context = ExecutionContext::default();
-    codata.gas_remaining = 1000000;
+    codata.gas_remaining = MAX_GAS;
     neutron_host::reset_to_random_address(&mut context.self_address);
     context.self_address.version = 2; //to match NARM VM number
     context.execution_type = ExecutionType::BareExecution;

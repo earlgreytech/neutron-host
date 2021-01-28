@@ -83,19 +83,19 @@ pub trait LoggingInterface{
 pub struct StdoutLogger{
 }
 impl LoggingInterface for StdoutLogger{
-    fn log_debug(&mut self, stack: &mut CoData, message: String) -> Result<(), NeutronError>{
+    fn log_debug(&mut self, _stack: &mut CoData, message: String) -> Result<(), NeutronError>{
         println!("NEUTRON DEBUG: {}", message);
         Ok(())
     }
-    fn log_info(&mut self, stack: &mut CoData, message: String) -> Result<(), NeutronError>{
+    fn log_info(&mut self, _stack: &mut CoData, message: String) -> Result<(), NeutronError>{
         println!("NEUTRON INFO: {}", message);
         Ok(())
     }
-    fn log_warning(&mut self, stack: &mut CoData, message: String) -> Result<(), NeutronError>{
+    fn log_warning(&mut self, _stack: &mut CoData, message: String) -> Result<(), NeutronError>{
         println!("NEUTRON WARNING: {}", message);
         Ok(())
     }
-    fn log_error(&mut self, stack: &mut CoData, message: String) -> Result<(), NeutronError>{
+    fn log_error(&mut self, _stack: &mut CoData, message: String) -> Result<(), NeutronError>{
         println!("NEUTRON ERROR: {}", message);
         Ok(())
     }
@@ -112,7 +112,7 @@ pub fn compile_log_message(stack: &mut CoData) -> Result<String, NeutronError>{
     }
     let count = count.get(0).unwrap();
     let mut messages:Vec<String> = vec![];
-    for i in 0..*count{
+    for _ in 0..*count{
         let s = stack.pop_stack()?;
         let string = std::string::String::from_utf8_lossy(&s);
         messages.push(string.to_owned().to_string());
