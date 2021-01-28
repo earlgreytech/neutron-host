@@ -13,7 +13,11 @@ const MAX_GAS:u64 = 10000000;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-
+    if args.len() != 2{
+        println!("Syntax: neutron-testbench smart-contract-file");
+        println!("Expected smart contract file is an ARM architecture executable compiled as an ELF file");
+        return;
+    }
     let path = PathBuf::from(&args[1]);
     let file = elf::File::open_path(&path).unwrap();
 
