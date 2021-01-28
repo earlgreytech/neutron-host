@@ -3,6 +3,11 @@ use crate::neutronerror::*;
 use crate::vmmanager::*;
 use crate::callsystem::*;
 
+pub struct NeutronResult{
+    pub gas_used: u64,
+    pub status: u32
+}
+
 #[derive(Default)]
 pub struct Manager{
 }
@@ -25,6 +30,7 @@ impl Manager{
     fn end_execution(&mut self, codata: &mut CoData, _error: u32) -> Result<(), NeutronError>{
         codata.enter_element();
         //gather and push call/execution results etc?
+
         codata.exit_element();
         codata.pop_context()?;
         Ok(())
@@ -43,8 +49,8 @@ impl Manager{
                 }
             };
             match result{
-                VMResult::Ended => {
-                    return Ok(VMResult::Ended);
+                VMResult::Ended(v) => {
+                    return Ok(VMResult::Ended(v));
                 },
                 VMResult::ElementCall(element, function) => {
                     match callsystem.call(codata, element, function){
@@ -89,13 +95,21 @@ impl Manager{
         }
     }
 
-    pub fn execute(&mut self, codata: &mut CoData, callsystem: & CallSystem, vmm: &VMManager) -> Result<(), NeutronError>{
+    pub fn execute(&mut self, codata: &mut CoData, callsystem: & CallSystem, vmm: &VMManager) -> Result<NeutronResult, NeutronError>{
+        let original_gas = codata.gas_remaining;
         let hv = &mut self.start_execution(codata, vmm)?;
         hv.enter_state(codata, callsystem)?;
         let mut error = 0;
         match self.neutron_main_loop(hv, codata, callsystem, vmm){
             Ok(v) => {
-                assert!(v == VMResult::Ended); //element call should never escape
+                match v{
+                    VMResult::Ended(e) => {
+                        error = e;
+                    },
+                    VMResult::ElementCall(_, _) => {
+                        assert!(false, "Element call escaped Neutron execution loop. This should never happen");
+                    }
+                };
             },
             Err(e) => {
                 match e{
@@ -115,7 +129,11 @@ impl Manager{
         };
         self.end_execution(codata, error)?;
         hv.exit_state(codata, callsystem)?;
-        Ok(())
+
+        Ok(NeutronResult{
+            gas_used: original_gas - codata.gas_remaining,
+            status: error
+        })
     }
 }
 

@@ -16,7 +16,7 @@ pub trait VMHypervisor{
 
 #[derive(PartialEq, Debug)]
 pub enum VMResult{
-    Ended,
+    Ended(u32),
     ElementCall(u32, u32)
 }
 

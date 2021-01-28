@@ -1,4 +1,4 @@
-use crate::narm::narmvm::*;
+use crate::{codata, narm::narmvm::*};
 use crate::narm::*;
 use crate::codata::*;
 use crate::neutronerror::*;
@@ -82,7 +82,7 @@ enum HypervisorState{
 }
 
 impl NarmHypervisor{
-    fn wrapped_execute(&mut self, _codata: &mut CoData) -> Result<HypervisorState, NarmError>{
+    fn wrapped_execute(&mut self, codata: &mut CoData) -> Result<HypervisorState, NarmError>{
         let res_low = &LongRegister{register: 0};
         let res_high = &LongRegister{register: 1};
         if self.result.is_some(){
@@ -100,8 +100,9 @@ impl NarmHypervisor{
             self.error = None;
         }
         loop{
+            self.vm.gas_remaining = codata.gas_remaining;
             let syscall = self.vm.execute()?;
-            println!("svc: {}", syscall);
+            codata.gas_remaining = self.vm.gas_remaining;
             match syscall{
                 0xFF => {
                     return Ok(HypervisorState::Ended);
@@ -127,7 +128,7 @@ impl VMHypervisor for NarmHypervisor{
             Ok(v) => {
                 match v {
                     HypervisorState::Ended => {
-                        return Ok(VMResult::Ended);
+                        return Ok(VMResult::Ended(self.vm.external_get_reg(0) & (!0x8000_0000))); //Bottom 31 bits of r0 is the "status code" of the contract
                     },
                     HypervisorState::ElementCall(element, function) => {
                         return Ok(VMResult::ElementCall(element, function));
@@ -152,7 +153,6 @@ impl VMHypervisor for NarmHypervisor{
     }
     /// Creates the initial state, including potentially storing state to the database, decoding of bytecode, etc
     fn enter_state(&mut self, codata: &mut CoData, callsystem: & CallSystem) -> Result<(), NeutronError>{
-        println!("enter_state narm");
         let execution_type = codata.peek_context(0)?.execution_type;
         let mut storage = callsystem.global_storage.as_ref().unwrap().borrow_mut();
         let code = match execution_type{
@@ -160,13 +160,11 @@ impl VMHypervisor for NarmHypervisor{
                 storage.private_load_state(codata, &[0x02, 0])?
             },
             _ => {
-                println!("1");
                 codata.peek_key("!.c".as_bytes())?
             }
         };
-        println!("2");
-        self.vm.memory.add_memory(0x10000, code.len() as u32).unwrap();
-        match self.vm.copy_into_memory(0x10000, &code){
+        self.vm.memory.add_memory(0x1_0000, code.len() as u32).unwrap();
+        match self.vm.copy_into_memory(0x1_0000, &code){
             Err(_) => {
                 return Err(NeutronError::Unrecoverable(UnrecoverableError::ErrorInitializingVM));
             },
@@ -180,8 +178,8 @@ impl VMHypervisor for NarmHypervisor{
                 codata.peek_key("!.d".as_bytes())?
             }
         };
-        self.vm.memory.add_memory(0x80010000, data.len() as u32).unwrap();
-        match self.vm.copy_into_memory(0x10000, &data){
+        self.vm.memory.add_memory(0x8001_0000, data.len() as u32).unwrap();
+        match self.vm.copy_into_memory(0x8001_0000, &data){
             Err(_) => {
                 return Err(NeutronError::Unrecoverable(UnrecoverableError::ErrorInitializingVM));
             },
@@ -195,11 +193,10 @@ impl VMHypervisor for NarmHypervisor{
             },
             _ => {}
         };
+        self.vm.memory.add_memory(0x8100_0000, 0xFFFF).unwrap();
 
         //do init stuff
-        self.vm.set_pc(0x1_0000);
-        self.vm.gas_remaining = codata.peek_context(0)?.gas_limit;
-
+        self.vm.set_thumb_pc_address(0x1_0000);
         Ok(())
     }
     /// Called when exiting the VM, should commit state etc
