@@ -54,8 +54,8 @@ fn main() {
 
     //Push contract bytecode into Neutron from ELF file
     codata.push_context(context).unwrap();
-    codata.element_push_key("!.c".as_bytes(), &text_scn.data).unwrap();
-    codata.element_push_key("!.d".as_bytes(), &[0]).unwrap();
+    codata.push_input_key("!.c".as_bytes(), &text_scn.data).unwrap();
+    codata.push_input_key("!.d".as_bytes(), &[0]).unwrap();
 
     println!("Beginning contract execution");
     let result = manager.execute(&mut codata, &callsystem, &vmm).unwrap();

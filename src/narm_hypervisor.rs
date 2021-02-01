@@ -112,7 +112,7 @@ impl NarmHypervisor{
                 },
                 0x20 => {
                     return Ok(HypervisorState::ElementCall(self.vm.external_get_reg(0), self.vm.external_get_reg(1)));
-                }
+                },
                 0 => {
                     assert!(false, "this should never happen");
                 }
@@ -160,7 +160,7 @@ impl VMHypervisor for NarmHypervisor{
                 storage.private_load_state(codata, &[0x02, 0])?
             },
             _ => {
-                codata.peek_key("!.c".as_bytes())?
+                codata.peek_input_key("!.c".as_bytes())?
             }
         };
         self.vm.memory.add_memory(0x1_0000, code.len() as u32).unwrap();
@@ -175,7 +175,7 @@ impl VMHypervisor for NarmHypervisor{
                 storage.private_load_state(codata, &[0x02, 0x10])?
             },
             _ => {
-                codata.peek_key("!.d".as_bytes())?
+                codata.peek_input_key("!.d".as_bytes())?
             }
         };
         self.vm.memory.add_memory(0x8001_0000, data.len() as u32).unwrap();

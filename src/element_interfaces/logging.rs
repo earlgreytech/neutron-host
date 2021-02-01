@@ -103,7 +103,7 @@ impl LoggingInterface for StdoutLogger{
 
 
 pub fn compile_log_message(stack: &mut CoData) -> Result<String, NeutronError>{
-    let count = stack.pop_stack()?;
+    let count = stack.pop_input_stack()?;
     if count.len() < 1{
         return Err(NeutronError::Recoverable(RecoverableError::StackItemTooSmall));
     }
@@ -113,7 +113,7 @@ pub fn compile_log_message(stack: &mut CoData) -> Result<String, NeutronError>{
     let count = count.get(0).unwrap();
     let mut messages:Vec<String> = vec![];
     for _ in 0..*count{
-        let s = stack.pop_stack()?;
+        let s = stack.pop_input_stack()?;
         let string = std::string::String::from_utf8_lossy(&s);
         messages.push(string.to_owned().to_string());
     }

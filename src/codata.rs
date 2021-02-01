@@ -44,11 +44,11 @@ impl CoData{
         manager
     }
 
-    pub fn push_stack(&mut self, data: &[u8]) -> Result<(), NeutronError>{
+    pub fn push_output_stack(&mut self, data: &[u8]) -> Result<(), NeutronError>{
         self.stacks[self.output_stack].push(data.to_vec());
         Ok(())
     }
-	pub fn pop_stack(&mut self) -> Result<Vec<u8>, NeutronError>{
+	pub fn pop_input_stack(&mut self) -> Result<Vec<u8>, NeutronError>{
         match self.stacks[self.input_stack].pop(){
             None => {
                 return Err(Recoverable(RecoverableError::ItemDoesntExist));
@@ -58,7 +58,7 @@ impl CoData{
             }
         }
     }
-	pub fn drop_stack(&mut self) -> Result<(), NeutronError>{
+	pub fn drop_input_stack(&mut self) -> Result<(), NeutronError>{
         match self.stacks[self.input_stack].pop(){
             None => {
                 return Err(Recoverable(RecoverableError::ItemDoesntExist));
@@ -68,7 +68,7 @@ impl CoData{
             }
         }
     }
-	pub fn peek_stack(&self, index: u32) -> Result<Vec<u8>, NeutronError>{
+	pub fn peek_input_stack(&self, index: u32) -> Result<Vec<u8>, NeutronError>{
         let stack = &self.stacks[self.input_stack];
         let i = (stack.len() as isize - 1) - index as isize;
         if i < 0{
@@ -84,14 +84,14 @@ impl CoData{
         }
     }
 
-    pub fn push_key(&mut self, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
+    pub fn push_output_key(&mut self, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
         if key[0] == 0{
             return Err(NeutronError::Recoverable(RecoverableError::InvalidCoMapAccess));
         }
         self.maps.get_mut(self.top_output_map).unwrap().insert(key.to_vec(), value.to_vec());
         Ok(())
     }
-    pub fn element_push_key(&mut self, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
+    pub fn push_input_key(&mut self, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
         if key[0] == 0{
             return Err(NeutronError::Recoverable(RecoverableError::InvalidCoMapAccess));
         }
@@ -110,7 +110,7 @@ impl CoData{
         }
     }
     */
-    pub fn peek_key(&self, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
+    pub fn peek_input_key(&self, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
         if key[0] == 0{
             return Err(NeutronError::Recoverable(RecoverableError::InvalidCoMapAccess));
         }
@@ -145,45 +145,14 @@ impl CoData{
         key.extend(&id.to_le_bytes());
         key
     }
-/*
-    pub fn push_transfer(&mut self, token_owner: NeutronAddress, id: u64, value: u64){
-        let key = self.build_transfer_key(token_owner, id);
-        self.maps.get_mut(self.top_output_map).unwrap().insert(key.to_vec(), value.to_le_bytes().to_vec());
-    }
-*/
 
-    pub fn peek_transfer(&self, token_owner: NeutronAddress, id: u64) -> Result<u64, NeutronError>{
-        let key = self.build_transfer_key(token_owner, id);
-        match self.maps[self.top_input_map].get(&key){
-            Some(v) => {
-                Ok(u64::from_le_bytes(v.clone().try_into().unwrap()))
-            },
-            None => {
-                Err(Recoverable(RecoverableError::ItemDoesntExist))
-            }
-        }
-    }
-/* //seems unneeded?
-    pub fn pop_transfer(&mut self, token_owner: NeutronAddress, id: u64) -> Result<u64, NeutronError>{
-        let key = self.build_transfer_key(token_owner, id);
-        match self.maps[self.top_input_map].remove(&key){
-            Some(v) => {
-                Ok(u64::from_le_bytes(v.try_into().unwrap()))
-            },
-            None => {
-                Err(Recoverable(RecoverableError::ItemDoesntExist))
-            }
-        }
-    }
-*/
-
-    pub fn element_push_transfer(&mut self, token_owner: NeutronAddress, id: u64, value: u64){
+    pub fn push_output_transfer(&mut self, token_owner: NeutronAddress, id: u64, value: u64){
         let c = self.context_stack.last().unwrap();
         let key = self.build_transfer_key(token_owner, id);
         self.maps.get_mut(c.output_map).unwrap().insert(key.to_vec(), value.to_le_bytes().to_vec());
     }
 
-    pub fn element_peek_transfer(&self, token_owner: NeutronAddress, id: u64) -> Result<u64, NeutronError>{
+    pub fn peek_input_transfer(&self, token_owner: NeutronAddress, id: u64) -> Result<u64, NeutronError>{
         let c = self.context_stack.last().unwrap();
         let key = self.build_transfer_key(token_owner, id);
         match self.maps[c.input_map].get(&key){
@@ -392,43 +361,43 @@ mod tests {
         let c3 = ExecutionContext::default();
         let key = [1];
         //ABI data
-        manager.push_key(&key, &[1]).unwrap();
-        manager.push_key(&[2], &[2]).unwrap();
+        manager.push_output_key(&key, &[1]).unwrap();
+        manager.push_output_key(&[2], &[2]).unwrap();
         //call from transaction
         {
             manager.push_context(c1).unwrap();
-            manager.push_key(&key, &[2]).unwrap();
-            assert_eq!(manager.peek_key(&key).unwrap()[0], 1);
+            manager.push_output_key(&key, &[2]).unwrap();
+            assert_eq!(manager.peek_input_key(&key).unwrap()[0], 1);
             //call into sub contract
             {
                 manager.enter_element(); // as if the contract had called an element to make a call
                 manager.exit_element(); // element must be exited before execution can be transferred
                 manager.push_context(c2).unwrap();
-                manager.push_key(&key, &[3]).unwrap();
-                assert_eq!(manager.peek_key(&key).unwrap()[0], 2);
+                manager.push_output_key(&key, &[3]).unwrap();
+                assert_eq!(manager.peek_input_key(&key).unwrap()[0], 2);
                 //call into sub sub contract
                 {
                     manager.enter_element();
                     manager.exit_element();
                     manager.push_context(c3).unwrap();
-                    manager.push_key(&key, &[4]).unwrap();
-                    assert_eq!(manager.peek_key(&key).unwrap()[0], 3);
+                    manager.push_output_key(&key, &[4]).unwrap();
+                    assert_eq!(manager.peek_input_key(&key).unwrap()[0], 3);
                     manager.pop_context().unwrap();
                     manager.enter_element();
                     manager.exit_element();
                 }
                 assert_eq!(manager.peek_result_key(&key).unwrap()[0], 4);
-                assert_eq!(manager.peek_key(&key).unwrap()[0], 2);
+                assert_eq!(manager.peek_input_key(&key).unwrap()[0], 2);
                 manager.pop_context().unwrap();
                 manager.enter_element(); // return to element context (ie to check results and push relevant data)
                 manager.exit_element(); // finally, exit element to return execution to contract
             }
             assert_eq!(manager.peek_result_key(&key).unwrap()[0], 3);
-            assert_eq!(manager.peek_key(&key).unwrap()[0], 1);
+            assert_eq!(manager.peek_input_key(&key).unwrap()[0], 1);
             manager.pop_context().unwrap();
         }
-        assert!(manager.peek_key(&[2]).is_err());
-        assert_eq!(manager.peek_key(&key).unwrap()[0], 2);
+        assert!(manager.peek_input_key(&[2]).is_err());
+        assert_eq!(manager.peek_input_key(&key).unwrap()[0], 2);
         assert_eq!(manager.peek_result_key(&key).unwrap()[0], 2);
     }
     #[test]
@@ -437,21 +406,21 @@ mod tests {
         let c1 = ExecutionContext::default();        
         let key = [1];
         //ABI data
-        manager.push_key(&key, &[1]).unwrap();
+        manager.push_output_key(&key, &[1]).unwrap();
         //element data
         manager.push_context(c1).unwrap();
-        manager.push_stack(&[2]).unwrap();
-        manager.push_key(&key, &[5]).unwrap();
+        manager.push_output_stack(&[2]).unwrap();
+        manager.push_output_key(&key, &[5]).unwrap();
         {
             manager.enter_element();
-            manager.push_stack(&[3]).unwrap();
-            manager.push_key(&key, &[4]).unwrap();
-            assert_eq!(manager.peek_key(&key).unwrap()[0], 5);
-            assert_eq!(manager.pop_stack().unwrap()[0], 2);
+            manager.push_output_stack(&[3]).unwrap();
+            manager.push_output_key(&key, &[4]).unwrap();
+            assert_eq!(manager.peek_input_key(&key).unwrap()[0], 5);
+            assert_eq!(manager.pop_input_stack().unwrap()[0], 2);
             manager.exit_element();
         }
         assert_eq!(manager.peek_result_key(&key).unwrap()[0], 4);
-        assert_eq!(manager.pop_stack().unwrap()[0], 3);
+        assert_eq!(manager.pop_input_stack().unwrap()[0], 3);
         manager.pop_context().unwrap();
         assert_eq!(manager.peek_result_key(&key).unwrap()[0], 5); //note: unsure if this behavior is correct
     }
