@@ -9,7 +9,7 @@ use neutron_host::interface::*;
 use neutron_host::narm_hypervisor::*;
 use neutron_host::vmmanager::*;
 
-const MAX_GAS:u64 = 10000000;
+const MAX_GAS:u64 = 10000;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

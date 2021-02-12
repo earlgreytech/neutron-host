@@ -113,10 +113,25 @@ impl NarmHypervisor{
                 0x20 => {
                     return Ok(HypervisorState::ElementCall(self.vm.external_get_reg(0), self.vm.external_get_reg(1)));
                 },
+
+                //SVC 0x10: push_costack (buffer: pointer, size: u32)
+                0x10 => {
+                    let address = self.vm.external_get_reg(0);
+                    let size = self.vm.external_get_reg(1);
+                    let data = self.vm.memory.get_sized_memory(address, size)?;
+                    match codata.push_output_stack(data){
+                        Ok(_) => {},
+                        Err(e) => { 
+                            return Ok(HypervisorState::Error(e)); 
+                        }
+                    }
+                }
                 0 => {
                     assert!(false, "this should never happen");
                 }
-                _ => {}
+                _ => {
+                    println!("Unknown element call: {}", syscall);
+                }
             }
         }
     }
@@ -140,6 +155,7 @@ impl VMHypervisor for NarmHypervisor{
             },
             Err(e) => {
                 dbg!(&e);
+                println!("{}", self.vm.get_diagnostics_message());
                 return Err(NeutronError::Recoverable(RecoverableError::ContractExecutionError)); //TODO, decode into useful info
             }
         }

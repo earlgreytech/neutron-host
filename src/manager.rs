@@ -1,4 +1,4 @@
-use crate::codata::*;
+use crate::codata::{*};
 use crate::neutronerror::*;
 use crate::vmmanager::*;
 use crate::callsystem::*;
@@ -53,8 +53,10 @@ impl Manager{
                     return Ok(VMResult::Ended(v));
                 },
                 VMResult::ElementCall(element, function) => {
+                    codata.enter_element();
                     match callsystem.call(codata, element, function){
                         Ok(v) => {
+                            codata.exit_element();
                             match v{
                                 ElementResult::Result(result) => {
                                     hypervisor.set_result(result);
@@ -78,6 +80,7 @@ impl Manager{
                             }
                         },
                         Err(e) => {
+                            codata.exit_element();
                             match e{
                                 NeutronError::Recoverable(v) => {
                                     dbg!(&v);
