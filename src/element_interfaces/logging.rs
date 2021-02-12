@@ -50,25 +50,23 @@ pub trait LoggingInterface{
             return Err(Recoverable(RecoverableError::InvalidSystemFunction));
         }
         let f=f.unwrap();
+        let message = compile_log_message(stack)?;
         let result = match f{
             LoggingFunctions::LogDebug => {
-                self.log_debug(stack)
+                self.log_debug(stack, message)
             },
             LoggingFunctions::LogInfo => {
-                self.log_info(stack)
+                self.log_info(stack, message)
             },
             LoggingFunctions::LogWarning => {
-                self.log_warning(stack)
+                self.log_warning(stack, message)
             },
             LoggingFunctions::LogError => {
-                self.log_error(stack)
+                self.log_error(stack, message)
             },
             LoggingFunctions::Available => {
                 Ok(())
             },
-            // _ => {
-            //     self.extensions(function, stack)
-            // }
         };
         if result.is_err(){
             Err(result.unwrap_err())
@@ -76,12 +74,53 @@ pub trait LoggingInterface{
             return Ok(ElementResult::Result(0));
         }
     }
-    fn log_debug(&mut self, stack: &mut CoData) -> Result<(), NeutronError>;
-    fn log_info(&mut self, stack: &mut CoData) -> Result<(), NeutronError>;
-    fn log_warning(&mut self, stack: &mut CoData) -> Result<(), NeutronError>;
-    fn log_error(&mut self, stack: &mut CoData) -> Result<(), NeutronError>;
-    fn extensions(&mut self, _function: u32, _stack: &mut CoData) -> Result<(), NeutronError>{
+    fn log_debug(&mut self, stack: &mut CoData, message: String) -> Result<(), NeutronError>;
+    fn log_info(&mut self, stack: &mut CoData, message: String) -> Result<(), NeutronError>;
+    fn log_warning(&mut self, stack: &mut CoData, message: String) -> Result<(), NeutronError>;
+    fn log_error(&mut self, stack: &mut CoData, message: String) -> Result<(), NeutronError>;
+}
+
+pub struct StdoutLogger{
+}
+impl LoggingInterface for StdoutLogger{
+    fn log_debug(&mut self, _stack: &mut CoData, message: String) -> Result<(), NeutronError>{
+        println!("NEUTRON DEBUG: {}", message);
         Ok(())
     }
+    fn log_info(&mut self, _stack: &mut CoData, message: String) -> Result<(), NeutronError>{
+        println!("NEUTRON INFO: {}", message);
+        Ok(())
+    }
+    fn log_warning(&mut self, _stack: &mut CoData, message: String) -> Result<(), NeutronError>{
+        println!("NEUTRON WARNING: {}", message);
+        Ok(())
+    }
+    fn log_error(&mut self, _stack: &mut CoData, message: String) -> Result<(), NeutronError>{
+        println!("NEUTRON ERROR: {}", message);
+        Ok(())
+    }
+}
+
+
+pub fn compile_log_message(stack: &mut CoData) -> Result<String, NeutronError>{
+    let count = stack.pop_input_stack()?;
+    if count.len() < 1{
+        return Err(NeutronError::Recoverable(RecoverableError::StackItemTooSmall));
+    }
+    if count.len() > 1 {
+        return Err(Recoverable(RecoverableError::StackItemTooLarge));
+    }
+    let count = count.get(0).unwrap();
+    let mut messages:Vec<String> = vec![];
+    for _ in 0..*count{
+        let s = stack.pop_input_stack()?;
+        let string = std::string::String::from_utf8_lossy(&s);
+        messages.push(string.to_owned().to_string());
+    }
+    let mut string = String::default();
+    for msg in messages.iter().rev(){
+        string.push_str(&msg);
+    }
+    Ok(string)
 }
 

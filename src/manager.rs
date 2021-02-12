@@ -1,7 +1,12 @@
-use crate::codata::*;
+use crate::codata::{*};
 use crate::neutronerror::*;
 use crate::vmmanager::*;
 use crate::callsystem::*;
+
+pub struct NeutronResult{
+    pub gas_used: u64,
+    pub status: u32
+}
 
 #[derive(Default)]
 pub struct Manager{
@@ -25,6 +30,7 @@ impl Manager{
     fn end_execution(&mut self, codata: &mut CoData, _error: u32) -> Result<(), NeutronError>{
         codata.enter_element();
         //gather and push call/execution results etc?
+
         codata.exit_element();
         codata.pop_context()?;
         Ok(())
@@ -43,12 +49,14 @@ impl Manager{
                 }
             };
             match result{
-                VMResult::Ended => {
-                    return Ok(VMResult::Ended);
+                VMResult::Ended(v) => {
+                    return Ok(VMResult::Ended(v));
                 },
                 VMResult::ElementCall(element, function) => {
+                    codata.enter_element();
                     match callsystem.call(codata, element, function){
                         Ok(v) => {
+                            codata.exit_element();
                             match v{
                                 ElementResult::Result(result) => {
                                     hypervisor.set_result(result);
@@ -72,6 +80,7 @@ impl Manager{
                             }
                         },
                         Err(e) => {
+                            codata.exit_element();
                             match e{
                                 NeutronError::Recoverable(v) => {
                                     dbg!(&v);
@@ -89,13 +98,21 @@ impl Manager{
         }
     }
 
-    pub fn execute(&mut self, codata: &mut CoData, callsystem: & CallSystem, vmm: &VMManager) -> Result<(), NeutronError>{
+    pub fn execute(&mut self, codata: &mut CoData, callsystem: & CallSystem, vmm: &VMManager) -> Result<NeutronResult, NeutronError>{
+        let original_gas = codata.gas_remaining;
         let hv = &mut self.start_execution(codata, vmm)?;
         hv.enter_state(codata, callsystem)?;
         let mut error = 0;
         match self.neutron_main_loop(hv, codata, callsystem, vmm){
             Ok(v) => {
-                assert!(v == VMResult::Ended); //element call should never escape
+                match v{
+                    VMResult::Ended(e) => {
+                        error = e;
+                    },
+                    VMResult::ElementCall(_, _) => {
+                        assert!(false, "Element call escaped Neutron execution loop. This should never happen");
+                    }
+                };
             },
             Err(e) => {
                 match e{
@@ -115,7 +132,11 @@ impl Manager{
         };
         self.end_execution(codata, error)?;
         hv.exit_state(codata, callsystem)?;
-        Ok(())
+
+        Ok(NeutronResult{
+            gas_used: original_gas - codata.gas_remaining,
+            status: error
+        })
     }
 }
 
@@ -132,14 +153,14 @@ mod tests {
     impl VMHypervisor for TestVM{
         fn execute(&mut self, codata: &mut CoData) -> Result<VMResult, NeutronError>{
             self.self_calls += 1;
-            match codata.pop_stack().unwrap_or(vec![0])[0]{
+            match codata.pop_input_stack().unwrap_or(vec![0])[0]{
                 1 => {
-                    codata.push_key(&[1], &[1])?;
-                    return Ok(VMResult::Ended);
+                    codata.push_output_key(&[1], &[1])?;
+                    return Ok(VMResult::Ended(0));
                 },
                 _ => {}
             }
-            match codata.peek_key(&[10])?[0]{
+            match codata.peek_input_key(&[10])?[0]{
                 0 => {
                     assert_eq!(self.self_calls, 1);
                     return Ok(VMResult::ElementCall(1, 0));
@@ -148,32 +169,32 @@ mod tests {
                     let result = codata.peek_result_key(&[2]).unwrap_or(vec![0])[0];
                     if result == 3{
                         //returns from call 2
-                        codata.push_key(&[3], &[1])?;
-                        return Ok(VMResult::Ended);
+                        codata.push_output_key(&[3], &[1])?;
+                        return Ok(VMResult::Ended(0));
                     }else{
                         //will call 2
                         assert!(self.self_calls <= 10);
-                        codata.push_key(&[10], &[2])?;
-                        codata.push_key(&[1], &[2])?;
+                        codata.push_output_key(&[10], &[2])?;
+                        codata.push_output_key(&[1], &[2])?;
                         return Ok(VMResult::ElementCall(1, 2));
                     }
                 },
                 2 => {
                     assert_eq!(self.self_calls, 1);
                     //sub-contract call
-                    assert!(codata.peek_key(&[1]).unwrap()[0] == 2);
-                    codata.push_key(&[2], &[3])?;
-                    return Ok(VMResult::Ended);
+                    assert!(codata.peek_input_key(&[1]).unwrap()[0] == 2);
+                    codata.push_output_key(&[2], &[3])?;
+                    return Ok(VMResult::Ended(0));
                 },
                 3 => {
                     //test sub-call error, will call 4
-                    codata.push_key(&[10], &[4])?;
+                    codata.push_output_key(&[10], &[4])?;
                     return Ok(VMResult::ElementCall(1, 2));
                 },
                 4 => {
                     assert_eq!(self.self_calls, 1);
                     //sub-contract call 2
-                    codata.push_key(&[2], &[4])?;
+                    codata.push_output_key(&[2], &[4])?;
                     return Err(NeutronError::Unrecoverable(UnrecoverableError::StateOutOfRent));
                 }
                 _ => {
@@ -229,7 +250,7 @@ mod tests {
             assert_eq!(feature, 1);
             match function{
                 0 => {
-                    codata.push_stack(&[1])?;
+                    codata.push_output_stack(&[1])?;
                 },
                 2 => {
                     let mut context = crate::interface::ExecutionContext::default();
@@ -261,7 +282,7 @@ mod tests {
     #[test]
     fn test_bare_behavior_correct(){
         let mut codata = CoData::new();
-        codata.push_key(&[10], &[0]).unwrap();
+        codata.push_output_key(&[10], &[0]).unwrap();
         let mut callsystem = CallSystem::default();
         let mut element = TestElement::default();
         callsystem.add_call(1, &mut element).unwrap();
@@ -280,8 +301,8 @@ mod tests {
         codata.push_context(context).unwrap();
 
         manager.execute(&mut codata, &callsystem, &vmm).unwrap();
-        assert!(codata.peek_key(&[10]).is_err());
-        assert!(codata.peek_key(&[1]).unwrap()[0] == 1);
+        assert!(codata.peek_input_key(&[10]).is_err());
+        assert!(codata.peek_input_key(&[1]).unwrap()[0] == 1);
         assert!(codata.peek_result_key(&[0]).is_err());
         assert!(codata.peek_result_key(&[1]).unwrap()[0] == 1);
     }
@@ -289,7 +310,7 @@ mod tests {
     #[test]
     fn test_single_call_behavior_correct(){
         let mut codata = CoData::new();
-        codata.push_key(&[10], &[1]).unwrap();
+        codata.push_output_key(&[10], &[1]).unwrap();
         let mut callsystem = CallSystem::default();
         let mut element = TestElement::default();
         callsystem.add_call(1, &mut element).unwrap();
@@ -308,7 +329,7 @@ mod tests {
         codata.push_context(context).unwrap();
 
         manager.execute(&mut codata, &callsystem, &vmm).unwrap();
-        assert!(codata.peek_key(&[3]).unwrap()[0] == 1);
+        assert!(codata.peek_input_key(&[3]).unwrap()[0] == 1);
         assert!(codata.peek_result_key(&[3]).unwrap()[0] == 1);
         //assert!(codata.peek_result_key(&[0]).is_err()); //TODO is this correct?
     }
@@ -316,7 +337,7 @@ mod tests {
     #[test]
     fn test_single_call_recoverable_error_behavior_correct(){
         let mut codata = CoData::new();
-        codata.push_key(&[10], &[3]).unwrap();
+        codata.push_output_key(&[10], &[3]).unwrap();
         let mut callsystem = CallSystem::default();
         let mut element = TestElement::default();
         callsystem.add_call(1, &mut element).unwrap();

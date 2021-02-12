@@ -1,4 +1,5 @@
 extern crate neutron_star_constants;
+/*
 use neutron_host::hypervisor::*;
 use neutron_host::interface::*;
 use neutron_host::db::*;
@@ -153,3 +154,5 @@ mod tests {
     }
     
 }
+
+*/
