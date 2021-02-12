@@ -58,6 +58,9 @@ impl CoData{
             }
         }
     }
+    pub fn clear_input_stack(&mut self){
+        self.stacks[self.input_stack].clear();
+    }
 	pub fn drop_input_stack(&mut self) -> Result<(), NeutronError>{
         match self.stacks[self.input_stack].pop(){
             None => {

@@ -126,6 +126,27 @@ impl NarmHypervisor{
                         }
                     }
                 }
+                //SVC 0x11: pop_costack (buffer: pointer, max_size: u32) -> actual_size: u32 -- note: if buffer and max_size is 0, then the item will be popped without copying the item to memory and only the actual_size will be returned
+                0x11 => {
+                    let address = self.vm.external_get_reg(0);
+                    let max_size = self.vm.external_get_reg(1);
+                    let data = match codata.pop_input_stack(){
+                        Ok(d) => {
+                            d
+                        },
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+                    self.vm.external_set_reg(0, data.len() as u32);
+                    if max_size != 0{
+                        self.vm.copy_into_memory(address, &data[0..(max_size as usize)])?;
+                    }
+                },
+                //SVC 0x14: costack_clear() 
+                0x14 => {
+                    codata.clear_input_stack();
+                }
                 0 => {
                     assert!(false, "this should never happen");
                 }
