@@ -1,5 +1,5 @@
 use crate::addressing::*;
-
+use crate::neutronerror::*;
 
 /// The result of a smart contract execution
 #[derive(Clone, Debug, Eq, PartialEq, Default)]
@@ -29,6 +29,94 @@ impl Default for ExecutionType{
     }
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Default, Copy)]
+pub struct ContextPermissions{
+    /// Program can modify its own state and status
+    pub modify_self: bool,
+    /// program can modify (or trigger modification of) external state and status
+    pub modify_external: bool,
+    /// Program can access external state
+    pub access_external: bool,
+    /// Program can access its own data and storage (NOTE bytecode is excluded from this; only valid to be false when contract code can not be upgraded or modified)
+    pub access_self: bool,
+}
+/*
+Implications of permission sets:
+
+Pure -- can always be executed in parallel safely and also called from any other context (including isolated, since "pure" is regarded as stateless)
+Isolated -- Can be executed in parallel with other isolated calls which are not using the same address
+Immutable -- Can be executed in parallel with other immutable and pure calls in between "barriers" of mutable/isolated calls 
+Mutable -- Can never be executed in parallel
+
+Pure can only make pure calls
+Isolated can make all calls which do not touch external state or other addresses, and are capable of making pure calls (including to other external addresses)
+Immutable can only make other immutable and pure calls
+Mutable can make all calls and all types of calls can be utilized within a mutable context
+*/
+impl ContextPermissions{
+    pub fn pure_call() -> ContextPermissions{
+        ContextPermissions{
+            modify_self: false,
+            modify_external: false,
+            access_external: false,
+            access_self: false,
+        }
+    }
+    pub fn isolated_call() -> ContextPermissions{
+        ContextPermissions{
+            modify_external: false,
+            modify_self: true,
+            access_self: true,
+            access_external: false
+        }
+    }
+    pub fn immutable_call() -> ContextPermissions{
+        ContextPermissions{
+            modify_external: false,
+            modify_self: false,
+            access_self: true,
+            access_external: true
+        }
+    }
+    pub fn mutable_call() -> ContextPermissions{
+        ContextPermissions{
+            modify_external: true,
+            modify_self: true,
+            access_self: true,
+            access_external: true
+        }
+    }
+    pub fn assert_has_self_access(&self) -> Result<(), NeutronError>{
+        if !self.access_self{
+            Err(NeutronError::Recoverable(RecoverableError::RequiresPermissionSelfAccess))
+        }else{
+            Ok(())
+        }
+    }
+    pub fn assert_has_self_modification(&self) -> Result<(), NeutronError>{
+        if !self.modify_self{
+            Err(NeutronError::Recoverable(RecoverableError::RequiresPermissionSelfMod))
+        }else{
+            Ok(())
+        }
+    }
+    pub fn assert_has_external_access(&self) -> Result<(), NeutronError>{
+        if !self.access_external{
+            Err(NeutronError::Recoverable(RecoverableError::RequiresPermissionExternalAccess))
+        }else{
+            Ok(())
+        }
+    }
+    pub fn assert_has_external_modification(&self) -> Result<(), NeutronError>{
+        if !self.modify_external{
+            Err(NeutronError::Recoverable(RecoverableError::RequiresPermissionExternalMod))
+        }else{
+            Ok(())
+        }
+    }
+}
+
+
 /// The execution context of the current smart contract
 /// Multiple ExecContext structs are expected, a new one for each smart contract call performed. 
 #[derive(Clone, Debug, Eq, PartialEq, Default)]
@@ -52,7 +140,8 @@ pub struct ExecutionContext{
     pub output_stack: usize,
     pub input_map: usize,
     pub output_map: usize,
-    pub result_map: usize
+    pub result_map: usize,
+    pub permissions: ContextPermissions
 }
 
 impl ExecutionContext{

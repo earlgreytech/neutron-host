@@ -28,7 +28,11 @@ pub struct CoData{
     pub gas_remaining: u64,
     pub vm_writeable_memory: u32,
     pub vm_read_only_memory: u32,
-    pub gas_schedule: GasSchedule
+    pub gas_schedule: GasSchedule,
+
+    /// Used for certain internal operations, such as loading bytecode, 
+    /// where a "pure" call should be allowed to ignore otherwise restrictive permissions for special and determined-safe purposes
+    pub ignore_permissions: bool
 }
 
 impl CoData{
@@ -43,7 +47,13 @@ impl CoData{
         manager.output_stack = 1;
         manager
     }
-
+    pub fn permissions(&self) -> ContextPermissions{
+        if self.ignore_permissions{
+            ContextPermissions::mutable_call()
+        }else{
+            self.current_context().permissions
+        }
+    }
     pub fn push_output_stack(&mut self, data: &[u8]) -> Result<(), NeutronError>{
         self.stacks[self.output_stack].push(data.to_vec());
         Ok(())

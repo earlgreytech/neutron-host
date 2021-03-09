@@ -32,8 +32,11 @@ pub enum RecoverableError{
     InvalidVM,
     ContractRevertedExecution,
     InvalidCoMapAccess,
-    LowTokenBalance
-
+    LowTokenBalance,
+    RequiresPermissionSelfAccess,
+    RequiresPermissionSelfMod,
+    RequiresPermissionExternalAccess,
+    RequiresPermissionExternalMod
 }
 
 //TODO: add error codes for recoverable failures
