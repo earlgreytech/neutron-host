@@ -44,6 +44,7 @@ pub trait GlobalState{
         let f=f.unwrap();
         match f{
             GlobalStateFunctions::KeyExists => {
+                codata.permissions().assert_has_self_access()?;
                 let key = codata.pop_input_stack()?;
                 let result = if self.key_exists(codata, &key)?{
                     1
@@ -54,12 +55,15 @@ pub trait GlobalState{
                 Ok(ElementResult::Result(0))
             },
             GlobalStateFunctions::LoadState => {
+                codata.permissions().assert_has_self_access()?;
                 let key = codata.pop_input_stack()?;
                 let value = self.load_state(codata, &key)?;
                 codata.push_output_stack(&value)?;
                 Ok(ElementResult::Result(0))
             },
             GlobalStateFunctions::StoreState => {
+                codata.permissions().assert_has_self_access()?;
+                codata.permissions().assert_has_self_modification()?;
                 let key = codata.pop_input_stack()?;
                 let value = codata.pop_input_stack()?;
                 self.store_state(codata, &key, &value)?;

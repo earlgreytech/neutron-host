@@ -36,7 +36,8 @@ pub enum RecoverableError{
     RequiresPermissionSelfAccess,
     RequiresPermissionSelfMod,
     RequiresPermissionExternalAccess,
-    RequiresPermissionExternalMod
+    RequiresPermissionExternalMod,
+    PureCallOfImpureContract
 }
 
 //TODO: add error codes for recoverable failures
