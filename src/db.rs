@@ -1,10 +1,10 @@
-extern crate neutron_star_constants;
+extern crate neutron_common;
 use std::collections::HashMap;
 //use std::collections::HashSet;
-use neutron_star_constants::*;
 use crate::neutronerror::*;
 use crate::element_interfaces::storage::*;
 use crate::codata::*;
+use neutron_common::*;
 
 const USER_SPACE: u8 = '_' as u8;
 
@@ -72,25 +72,32 @@ impl MemoryGlobalState{
 
 impl GlobalState for MemoryGlobalState{
     fn store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
+        codata.permissions().assert_has_self_modification()?;
         self.write_key(&codata.peek_context(0).unwrap().self_address, &self.create_user_key(key), value)
     }
     fn load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
+        codata.permissions().assert_has_self_access()?;
         self.read_key(&codata.peek_context(0).unwrap().self_address, &self.create_user_key(key))
     }
-    fn key_exists(&mut self, _codata: &mut CoData, _key: &[u8]) -> Result<bool, NeutronError>{
+    fn key_exists(&mut self, codata: &mut CoData, _key: &[u8]) -> Result<bool, NeutronError>{
+        codata.permissions().assert_has_self_access()?;
         Err(NeutronError::Unrecoverable(UnrecoverableError::NotImplemented))
     }
 
     fn private_store_state(&mut self, codata: &mut CoData, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
+        codata.permissions().assert_has_self_modification()?;
         self.write_key(&codata.peek_context(0).unwrap().self_address,  key, value)
     }
     fn private_load_state(&mut self, codata: &mut CoData, key: &[u8]) -> Result<Vec<u8>, NeutronError>{
+        codata.permissions().assert_has_self_access()?;
         self.read_key(&codata.peek_context(0).unwrap().self_address, key)
     }
     fn private_store_state_external(&mut self, codata: &mut CoData, _address: NeutronAddress, key: &[u8], value: &[u8]) -> Result<(), NeutronError> {
+        codata.permissions().assert_has_external_modification()?;
         self.write_key(&codata.peek_context(0).unwrap().self_address, &key, value)
     }
     fn private_load_state_external(&mut self, codata: &mut CoData, _address: NeutronAddress, key: &[u8]) -> Result<Vec<u8>, NeutronError> {
+        codata.permissions().assert_has_external_access()?;
         self.read_key(&codata.peek_context(0).unwrap().self_address, &key)
     }
 

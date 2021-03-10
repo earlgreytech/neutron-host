@@ -1,6 +1,6 @@
 use std::fmt;
 use std::error;
-
+use neutron_common::RecoverableError;
 
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -17,24 +17,7 @@ pub enum UnrecoverableError{
     DeveloperError //used for things that should only happen by Neutron developer error
 }
 
-//TODO: this later needs to be moved/copied to neutron-constants for sharing with neutron-star
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum RecoverableError{
-    ItemDoesntExist = 0x8000_0001,
-    StackItemTooLarge,
-    InvalidSystemFunction,
-    InvalidSystemFeature,
-    ErrorCopyingIntoVM,
-    ErrorCopyingFromVM,
-    ContractExecutionError,
-    InvalidHypervisorInterrupt,
-    StackItemTooSmall,
-    InvalidVM,
-    ContractRevertedExecution,
-    InvalidCoMapAccess,
-    LowTokenBalance
 
-}
 
 //TODO: add error codes for recoverable failures
 /// The primary error structure of NeutronAPI calls

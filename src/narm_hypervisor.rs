@@ -5,6 +5,7 @@ use crate::neutronerror::*;
 use crate::vmmanager::*;
 use crate::callsystem::*;
 use crate::interface::*;
+use neutron_common::RecoverableError;
 
 /*
 Service calls
@@ -191,6 +192,13 @@ impl VMHypervisor for NarmHypervisor{
     /// Creates the initial state, including potentially storing state to the database, decoding of bytecode, etc
     fn enter_state(&mut self, codata: &mut CoData, callsystem: & CallSystem) -> Result<(), NeutronError>{
         let execution_type = codata.peek_context(0)?.execution_type;
+        if execution_type == ExecutionType::Deploy && !codata.permissions().access_self{
+            return Err(NeutronError::Recoverable(RecoverableError::PureCallOfImpureContract));
+        }
+        if execution_type == ExecutionType::Deploy{
+            codata.permissions().assert_has_self_modification()?;
+        }
+        //TODO check flags for "can contract be upgraded" and if so and a pure call then return PureCallOfImpureContract
         let mut storage = callsystem.global_storage.as_ref().unwrap().borrow_mut();
         let code = match execution_type{
             ExecutionType::Call => {
@@ -209,7 +217,10 @@ impl VMHypervisor for NarmHypervisor{
         }
         let data = match execution_type{
             ExecutionType::Call => {
-                storage.private_load_state(codata, &[0x02, 0x10])?
+                codata.ignore_permissions = true;
+                let v = storage.private_load_state(codata, &[0x02, 0x10]);
+                codata.ignore_permissions = false;
+                v?
             },
             _ => {
                 codata.peek_input_key("!.d".as_bytes())?

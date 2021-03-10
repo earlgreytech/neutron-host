@@ -1,6 +1,7 @@
 use crate::codata::*;
 use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
+use neutron_common::RecoverableError;
 use crate::callsystem::*;
 /*
 ## Logging

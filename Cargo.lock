@@ -104,12 +104,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "neutron-common"
+version = "0.1.0"
+
+[[package]]
 name = "neutron-host"
 version = "0.1.0"
 dependencies = [
  "elf",
  "narm",
- "neutron-star-constants",
+ "neutron-common",
  "num 0.3.1",
  "num-derive",
  "num-traits",
