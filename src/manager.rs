@@ -2,6 +2,7 @@ use crate::codata::{*};
 use crate::neutronerror::*;
 use crate::vmmanager::*;
 use crate::callsystem::*;
+use neutron_common::RecoverableError;
 
 pub struct NeutronResult{
     pub gas_used: u64,

@@ -5,6 +5,7 @@ use crate::neutronerror::*;
 use crate::vmmanager::*;
 use crate::callsystem::*;
 use crate::interface::*;
+use neutron_common::RecoverableError;
 
 /*
 Service calls

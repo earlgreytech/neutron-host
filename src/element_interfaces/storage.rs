@@ -2,7 +2,7 @@ use crate::codata::*;
 use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
 use crate::callsystem::*;
-use neutron_star_constants::*;
+use neutron_common::*;
 use std::convert::*;
 /*
 ## Global Storage

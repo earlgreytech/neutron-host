@@ -14,8 +14,7 @@ members = [
 
 [dependencies]
 narm = { path = "../narm" }
-#neutron-star-constants = { git = "https://github.com/qtumproject/neutronstar-constants", branch = "master"}
-neutron-star-constants = { path = "../neutron-star-constants"}
+neutron-common = { path = "../neutron-common" }
 ring = "0.16"
 num = "0.3"
 num-derive = "0.3"

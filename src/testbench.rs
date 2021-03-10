@@ -1,4 +1,4 @@
-extern crate neutron_star_constants;
+extern crate neutron_common;
 extern crate ring;
 extern crate elf;
 /*

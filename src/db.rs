@@ -1,10 +1,10 @@
-extern crate neutron_star_constants;
+extern crate neutron_common;
 use std::collections::HashMap;
 //use std::collections::HashSet;
-use neutron_star_constants::*;
 use crate::neutronerror::*;
 use crate::element_interfaces::storage::*;
 use crate::codata::*;
+use neutron_common::*;
 
 const USER_SPACE: u8 = '_' as u8;
 
