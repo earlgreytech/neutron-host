@@ -94,7 +94,8 @@ impl NarmHypervisor{
         }
         //note: error will overwrite a result
         if self.error.is_some(){
-            let error = self.error.unwrap();
+            //always set top 32nd bit of error (most errors will only be 32 bits)
+            let error = self.error.unwrap() | 0x8000_0000;
             self.vm.set_reg(res_low, (error & 0xFFFF_FFFF) as u32);
             self.vm.set_reg(res_high, ((error & 0xFFFF_FFFF_0000_0000) >> 32) as u32);
             //should a flag be set here?
