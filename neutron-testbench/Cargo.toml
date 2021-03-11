@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 #neutron-star-constants = { git = "https://github.com/qtumproject/neutronstar-constants", branch = "master"}
-neutron-star-constants = { path = "../../neutron-star-constants"}
+neutron-common = { path = "../../neutron-common"}
 neutron-host = { path = "../"}
 elf = "0.0.10"
 num = "0.2.0"
