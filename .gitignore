@@ -1,2 +1,6 @@
 /target
 **/*.rs.bk
+
+*.lock
+
+tests/test_smoke/contract_smoke/target/
