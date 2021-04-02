@@ -116,7 +116,7 @@ macro_rules! initiateAndRun {
             .codata
             .push_input_key("!.d".as_bytes(), &[0])
             .unwrap();
-            
+
         println!("Beginning contract execution");
         let result = $test_setup_ident
             .manager
