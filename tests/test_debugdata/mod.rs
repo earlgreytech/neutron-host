@@ -19,6 +19,9 @@ const MAX_GAS: u64 = 10000;
 
 use neutron_host::element_interfaces::debug_data::*;
 
+const DIR_NAME: &'static str = "test_debugdata";
+const CONTRACT_DIR_NAME: &'static str = "contract_mirror";
+
 #[test]
 fn mirror_bytes() {
     let mut stack = DebugCoDataStack::default();
@@ -34,7 +37,7 @@ fn mirror_bytes() {
         debug_codata: result_stack,
     };
 
-    harness.load_contract_binary_default_path("test_debugdata", "contract_debugdata");
+    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
     initiateAndRun!(harness);
 }
 
@@ -55,7 +58,7 @@ fn mirror_bytes_negtest_wrong_content() {
         debug_codata: result_stack,
     };
 
-    harness.load_contract_binary_default_path("test_debugdata", "contract_debugdata");
+    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
     initiateAndRun!(harness);
 }
 
@@ -76,7 +79,7 @@ fn mirror_bytes_negtest_wrong_size() {
         debug_codata: result_stack,
     };
 
-    harness.load_contract_binary_default_path("test_debugdata", "contract_debugdata");
+    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
     initiateAndRun!(harness);
 }
 
@@ -107,7 +110,7 @@ fn mirror_unsigned() {
         debug_codata: result_stack,
     };
 
-    harness.load_contract_binary_default_path("test_debugdata", "contract_debugdata");
+    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
     initiateAndRun!(harness);
 }
 
@@ -138,6 +141,6 @@ fn mirror_signed() {
         debug_codata: result_stack,
     };
 
-    harness.load_contract_binary_default_path("test_debugdata", "contract_debugdata");
+    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
     initiateAndRun!(harness);
 }
