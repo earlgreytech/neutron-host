@@ -85,7 +85,7 @@ impl DebugCoDataStack {
 
     // The following functions are adapted from neutron-star/src/syscall.rs
     
-    /// Pushes a u64 value to the stack. 
+    // Pushes a u64 value to the stack. 
     pub fn push_u64(&mut self, value: u64){
         const SIZE:usize = 8;
         let t = unsafe{
@@ -95,7 +95,7 @@ impl DebugCoDataStack {
             self.stack.push(*byte);
         }
     }
-    /// Pushes a u32 value to the stack. 
+    // Pushes a u32 value to the stack. 
     pub fn push_u32(&mut self, value: u32){
         const SIZE:usize = 4;
         let t = unsafe{
@@ -106,7 +106,7 @@ impl DebugCoDataStack {
         }
     }
 
-    /// Pushes a u16 value to the stack. 
+    // Pushes a u16 value to the stack. 
     pub fn push_u16(&mut self, value: u16){
         const SIZE:usize = 2;
         let t = unsafe{
@@ -117,7 +117,7 @@ impl DebugCoDataStack {
         }
     }
 
-    /// Pushes a u8 value to the stack. 
+    // Pushes a u8 value to the stack. 
     pub fn push_u8(&mut self, value: u8){
         const SIZE:usize = 1;
         let t = unsafe{
@@ -126,6 +126,20 @@ impl DebugCoDataStack {
         for byte in &t {
             self.stack.push(*byte);
         }
+    }
+    
+    // Wrappers for the above functions to also handle signed integers
+    pub fn push_i64(&mut self, value: i64){
+        self.push_u64(value as u64);
+    }
+    pub fn push_i32(&mut self, value: i32){
+        self.push_u32(value as u32);
+    }
+    pub fn push_i16(&mut self, value: i16){
+        self.push_u16(value as u16);
+    }
+    pub fn push_i8(&mut self, value: i8){
+        self.push_u8(value as u8);
     }
     
     /// Pushes a byte sequence to the stack. 
@@ -157,55 +171,77 @@ pub struct DebugCoData {
 }
 
 impl DebugCoData {
-    /// Pushes a u64 value to the stack. 
+    // Pushes a u64 value to the stack. 
     pub fn push_u64(&mut self, value: u64, name: &str){
         const SIZE:usize = 8;
         self.output_stack.push_u64(value);
         
-        self.variable_names.push(String::from(name));
-        self.variable_types.push(String::from("u64"));
-        self.variable_sizes.push(SIZE);
+        self.push_debug_data(name, "u64", SIZE);
     }
-    /// Pushes a u32 value to the stack. 
+    
+    // Pushes a u32 value to the stack. 
     pub fn push_u32(&mut self, value: u32, name: &str){
         const SIZE:usize = 4;
         self.output_stack.push_u32(value);
         
-        self.variable_names.push(String::from(name));
-        self.variable_types.push(String::from("u32"));
-        self.variable_sizes.push(SIZE);
+        self.push_debug_data(name, "u32", SIZE);
     }
 
-    /// Pushes a u16 value to the stack. 
+    // Pushes a u16 value to the stack. 
     pub fn push_u16(&mut self, value: u16, name: &str){
         const SIZE:usize = 2;
         self.output_stack.push_u16(value);
         
-        self.variable_names.push(String::from(name));
-        self.variable_types.push(String::from("u16"));
-        self.variable_sizes.push(SIZE);
+        self.push_debug_data(name, "u16", SIZE);
     }
 
-    /// Pushes a u8 value to the stack. 
+    // Pushes a u8 value to the stack. 
     pub fn push_u8(&mut self, value: u8, name: &str){
         const SIZE:usize = 1;
         self.output_stack.push_u8(value);
         
-        self.variable_names.push(String::from(name));
-        self.variable_types.push(String::from("u8"));
-        self.variable_sizes.push(SIZE);
+        self.push_debug_data(name, "u8", SIZE);
     }
     
-    /// Pushes a byte sequence to the stack. 
+    // Pushes a i64 value to the stack. 
+    pub fn push_i64(&mut self, value: i64, name: &str){
+        const SIZE:usize = 8;
+        self.output_stack.push_i64(value);
+        
+        self.push_debug_data(name, "i64", SIZE);
+    }
+    
+    // Pushes a i32 value to the stack. 
+    pub fn push_i32(&mut self, value: i32, name: &str){
+        const SIZE:usize = 4;
+        self.output_stack.push_i32(value);
+        
+        self.push_debug_data(name, "i32", SIZE);
+    }
+
+    // Pushes a i16 value to the stack. 
+    pub fn push_i16(&mut self, value: i16, name: &str){
+        const SIZE:usize = 2;
+        self.output_stack.push_i16(value);
+        
+        self.push_debug_data(name, "i16", SIZE);
+    }
+
+    // Pushes a i8 value to the stack. 
+    pub fn push_i8(&mut self, value: i8, name: &str){
+        const SIZE:usize = 1;
+        self.output_stack.push_i8(value);
+        
+        self.push_debug_data(name, "i8", SIZE);
+    }
+    
+    // Pushes a byte sequence to the stack. 
     pub fn push_bytes(&mut self, value: &[u8], name: &str){
         let SIZE:usize = value.len();
         self.output_stack.push_bytes(value);
         
-        self.variable_names.push(String::from(name));
-        self.variable_types.push(String::from("byte sequence"));
-        self.variable_sizes.push(SIZE);
+        self.push_debug_data(name, "byte-sequence", SIZE);
     }
-    
     
     // Checks stack
     pub fn assert_output_eq(&mut self, stack_to_compare: &mut Vec<u8>){
@@ -230,5 +266,12 @@ impl DebugCoData {
             }
             println!("[DebugCoData] assert_output_eq: Correct value found in {} named {}", data_type, name);
         }
+    }
+    
+    // Internal stuff
+    fn push_debug_data(&mut self, name: &str, type_str: &str, size: usize) {
+        self.variable_names.push(String::from(name));
+        self.variable_types.push(String::from(type_str));
+        self.variable_sizes.push(size);
     }
 }
