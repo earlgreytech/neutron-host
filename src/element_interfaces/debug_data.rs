@@ -138,20 +138,6 @@ impl DebugCoDataStack {
         }
     }
 
-    // Wrappers for the above functions to also handle signed integers
-    pub fn push_i64(&mut self, value: i64) {
-        self.push_u64(value as u64);
-    }
-    pub fn push_i32(&mut self, value: i32) {
-        self.push_u32(value as u32);
-    }
-    pub fn push_i16(&mut self, value: i16) {
-        self.push_u16(value as u16);
-    }
-    pub fn push_i8(&mut self, value: i8) {
-        self.push_u8(value as u8);
-    }
-
     /// Pushes a byte sequence to the stack.
     pub fn push_bytes(&mut self, value: &[u8]) {
         for byte in value {
@@ -210,38 +196,6 @@ impl DebugCoData {
         self.output_stack.push_u8(value);
 
         self.push_debug_data(name, "u8", SIZE);
-    }
-
-    // Pushes a i64 value to the stack.
-    pub fn push_i64(&mut self, value: i64, name: &str) {
-        const SIZE: usize = 8;
-        self.output_stack.push_i64(value);
-
-        self.push_debug_data(name, "i64", SIZE);
-    }
-
-    // Pushes a i32 value to the stack.
-    pub fn push_i32(&mut self, value: i32, name: &str) {
-        const SIZE: usize = 4;
-        self.output_stack.push_i32(value);
-
-        self.push_debug_data(name, "i32", SIZE);
-    }
-
-    // Pushes a i16 value to the stack.
-    pub fn push_i16(&mut self, value: i16, name: &str) {
-        const SIZE: usize = 2;
-        self.output_stack.push_i16(value);
-
-        self.push_debug_data(name, "i16", SIZE);
-    }
-
-    // Pushes a i8 value to the stack.
-    pub fn push_i8(&mut self, value: i8, name: &str) {
-        const SIZE: usize = 1;
-        self.output_stack.push_i8(value);
-
-        self.push_debug_data(name, "i8", SIZE);
     }
 
     // Pushes a byte sequence to the stack.

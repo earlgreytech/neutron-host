@@ -113,34 +113,3 @@ fn mirror_unsigned() {
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
     initiateAndRun!(harness);
 }
-
-#[test]
-fn mirror_signed() {
-    let mut stack = DebugCoDataStack::default();
-    let mut result_stack = DebugCoData::default();
-
-    let var_i64 = i64::MIN;
-    stack.push_i64(var_i64);
-    result_stack.push_i64(var_i64, "var_i64");
-
-    let var_i32 = i32::MIN;
-    stack.push_i32(var_i32);
-    result_stack.push_i32(var_i32, "var_i32");
-
-    let var_i16 = i16::MIN;
-    stack.push_i16(var_i16);
-    result_stack.push_i16(var_i16, "var_i16");
-
-    let var_i8 = i8::MIN;
-    stack.push_i8(var_i8);
-    result_stack.push_i8(var_i8, "var_i8");
-
-    let mut harness = TestHarness::default();
-    harness.debugdata = DebugDataInjector {
-        mock_input_stack: stack,
-        expected_output_stack: result_stack,
-    };
-
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
-}
