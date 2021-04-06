@@ -33,8 +33,8 @@ fn mirror_bytes() {
 
     let mut harness = TestHarness::default();
     harness.debugdata = DebugDataInjector {
-        input_stack: stack,
-        debug_codata: result_stack,
+        mock_input_stack: stack,
+        expected_output_stack: result_stack,
     };
 
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
@@ -54,8 +54,8 @@ fn mirror_bytes_negtest_wrong_content() {
 
     let mut harness = TestHarness::default();
     harness.debugdata = DebugDataInjector {
-        input_stack: stack,
-        debug_codata: result_stack,
+        mock_input_stack: stack,
+        expected_output_stack: result_stack,
     };
 
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
@@ -75,8 +75,8 @@ fn mirror_bytes_negtest_wrong_size() {
 
     let mut harness = TestHarness::default();
     harness.debugdata = DebugDataInjector {
-        input_stack: stack,
-        debug_codata: result_stack,
+        mock_input_stack: stack,
+        expected_output_stack: result_stack,
     };
 
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
@@ -106,8 +106,8 @@ fn mirror_unsigned() {
 
     let mut harness = TestHarness::default();
     harness.debugdata = DebugDataInjector {
-        input_stack: stack,
-        debug_codata: result_stack,
+        mock_input_stack: stack,
+        expected_output_stack: result_stack,
     };
 
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
@@ -137,8 +137,8 @@ fn mirror_signed() {
 
     let mut harness = TestHarness::default();
     harness.debugdata = DebugDataInjector {
-        input_stack: stack,
-        debug_codata: result_stack,
+        mock_input_stack: stack,
+        expected_output_stack: result_stack,
     };
 
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);

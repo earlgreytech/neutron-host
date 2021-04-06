@@ -6,15 +6,24 @@ use crate::callsystem::*;
 use std::str;
 use core::mem::transmute;
 /*
-## NAME
+## Debug Data Injector ElementAPI
 
-ID: 0x8000_0001
+ID: 0x8000_0001 
 
-Functions:
+This API is used in a testing environment to inject data into a test instance of the Neutron stack
+This file also contains some data structures that simplifies construction of this data
 
-* FUNCTIONS
- 
- TODO: This entire comment block
+Data structures: 
+
+* mock_input_stack          - An initial input stack state that the testing smart contract can load
+* expected_output_stack     - An expected state for the output stack that the testing smart contract can asserted against, 
+                              along with debug information to make a failed assertion more informative than "bytes in stacks didn't match"
+
+functions:
+
+* [0] Available()           - Check if API is available in current instance (standard function)
+* [1] PushInputStack()      - Pushes the provided mock input stack to the current instance
+* [2] AssertOutputStack()   - Asserts the provided expected output stack against the current instance
 
 */
 
@@ -30,8 +39,8 @@ pub enum DebugDataFunctions{
 
 #[derive(Default)]
 pub struct DebugDataInjector{
-    pub input_stack: DebugCoDataStack,
-    pub debug_codata: DebugCoData,
+    pub mock_input_stack: DebugCoDataStack,
+    pub expected_output_stack: DebugCoData,
 }
 
 impl ElementAPI for DebugDataInjector{
@@ -45,23 +54,23 @@ impl ElementAPI for DebugDataInjector{
         
         let result = match f {
             DebugDataFunctions::Available => {
-                println!("[DebugData] Called with feature: 0 (Available)");
+                println!("[DebugDataInjector] Called with feature: 0 (Available)");
                 Ok(())
             }, 
             DebugDataFunctions::PushInputStack => {
-                println!("[DebugData] Called with feature: 1 (PushInputStack)");
+                println!("[DebugDataInjector] Called with feature: 1 (PushInputStack)");
 
-                codata.push_output_stack(&self.input_stack.stack.as_slice());
+                codata.push_output_stack(&self.mock_input_stack.stack.as_slice());
                 Ok(())
             }, 
             DebugDataFunctions::AssertOutputStack => {
-                println!("[DebugData] Called with feature: 2 (AssertOutputStack)");
+                println!("[DebugDataInjector] Called with feature: 2 (AssertOutputStack)");
                 
                 let mut exec_output_stack = codata.pop_input_stack().unwrap();
 
                 println!("    Popped {} elements from codata", exec_output_stack.len());
 
-                self.debug_codata.assert_output_eq(&mut exec_output_stack);
+                self.expected_output_stack.assert_output_eq(&mut exec_output_stack);
 
                 Ok(())
             }, 
