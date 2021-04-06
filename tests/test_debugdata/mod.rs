@@ -1,23 +1,19 @@
-extern crate elf;
-
 use crate::harness::*;
 use crate::*;
 
+// These will throw lots of unused import warnings because some are only used in macros
 use neutron_host::callsystem::*;
 use neutron_host::codata::*;
+use neutron_host::db::MemoryGlobalState;
+use neutron_host::element_interfaces::debug_data::*;
+use neutron_host::element_interfaces::logging::StdoutLogger;
 use neutron_host::interface::*;
+use neutron_host::manager::*;
 use neutron_host::narm_hypervisor::*;
 use neutron_host::vmmanager::*;
-use neutron_host::{
-    db::MemoryGlobalState, element_interfaces::debug_data::*,
-    element_interfaces::logging::StdoutLogger, manager::*,
-};
-use std::path::PathBuf;
-use std::{cell::RefCell, env};
 
-const MAX_GAS: u64 = 10000;
-
-use neutron_host::element_interfaces::debug_data::*;
+use std::cell::RefCell;
+use std::env;
 
 const DIR_NAME: &'static str = "test_debugdata";
 const CONTRACT_DIR_NAME: &'static str = "contract_mirror";

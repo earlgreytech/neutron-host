@@ -1,34 +1,38 @@
-#![allow(dead_code)] // Stuff used only in/by the macros generate warnings otherwise
-
 extern crate elf;
 
+// These will throw lots of unused import warnings because some are only used in macros
 use neutron_host::callsystem::*;
 use neutron_host::codata::*;
+use neutron_host::db::MemoryGlobalState;
+use neutron_host::element_interfaces::debug_data::*;
+use neutron_host::element_interfaces::logging::StdoutLogger;
 use neutron_host::interface::*;
+use neutron_host::manager::*;
 use neutron_host::narm_hypervisor::*;
 use neutron_host::vmmanager::*;
-use neutron_host::{
-    db::MemoryGlobalState, element_interfaces::debug_data::DebugDataInjector,
-    element_interfaces::logging::StdoutLogger, manager::*,
-};
+
+use std::cell::RefCell;
+use std::env;
 use std::path::PathBuf;
-use std::{cell::RefCell, env};
 
-//use core::mem::transmute; // TODO: Remove???
+pub const MAX_GAS: u64 = 10000;
 
-use neutron_host::element_interfaces::debug_data::*;
+/*
+Harness for Neutron stack integration testing
 
-const MAX_GAS: u64 = 10000;
+Currently very basic functionality:
+* Load and run a smart contract
+* Output stream from execution context to the testing function
+* Inject debug data into the execution context to push an initial input stack and/or assert state of output stack
 
-// TODO: #[cfg(test)]???
+*/
 
-// TODO: What does the lifetime parameter actually DO?
 pub struct TestHarness<'a> {
     pub manager: Manager,
     pub codata: CoData,
 
     pub callsystem: CallSystem<'a>,
-    pub db: MemoryGlobalState, // TODO: Make elementAPIs private
+    pub db: MemoryGlobalState,
     pub logger: StdoutLogger,
     pub debugdata: DebugDataInjector,
 
