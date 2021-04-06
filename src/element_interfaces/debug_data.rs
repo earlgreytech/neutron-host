@@ -93,7 +93,8 @@ impl ElementAPI for DebugDataInjector {
     }
 }
 
-// Used to easily construct an expected codata state, along with some extra debugging information
+// Wrapper for a byte vector that represents a neutron codata stack
+// Contains copies of internal ecosystem functions that normally manipulate the stacks
 #[derive(Default)]
 pub struct DebugCoDataStack {
     pub stack: Vec<u8>,
