@@ -23,9 +23,11 @@ Data structures:
 
 functions:
 
-* [0] Available()           - Check if API is available in current instance (standard function)
-* [1] PushInputStack()      - Pushes the provided mock input stack to the current instance
-* [2] AssertOutputStack()   - Asserts the provided expected output stack against the current instance
+* [0]  Available()          - Check if API is available in current instance (standard function)
+* [1]  PushInputStack()     - Pushes the provided mock input stack to the current instance
+* [2]  AssertOutputStack()  - Asserts the provided expected output stack against the current instance
+* [10] GetInputStackLen()   - Push length of provided mock input stack to the current instance
+* [11] ReverseInputStack()  - Reverse item order of provided mock input stack
 
 */
 
