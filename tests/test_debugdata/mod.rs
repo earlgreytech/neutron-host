@@ -19,13 +19,14 @@ const DIR_NAME: &'static str = "test_debugdata";
 const CONTRACT_DIR_NAME: &'static str = "contract_mirror";
 
 #[test]
+// Push a byte slice to contract
 fn mirror_bytes() {
     let mut stack = DebugCoDataStack::default();
     let mut result_stack = DebugCoData::default();
 
-    let var_str = "teststring";
-    stack.push_bytes(var_str.as_bytes());
-    result_stack.push_bytes(var_str.as_bytes(), "var_str");
+    let var_bytes = "testbytes";
+    stack.push_bytes(var_bytes.as_bytes());
+    result_stack.push_bytes(var_bytes.as_bytes(), "var_bytes");
 
     let mut harness = TestHarness::default();
     harness.debugdata = DebugDataInjector {
@@ -39,14 +40,15 @@ fn mirror_bytes() {
 
 #[test]
 #[should_panic]
-fn mirror_bytes_negtest_wrong_content() {
+// Expect the wrong content
+fn mirror_negtest_wrong_content() {
     let mut stack = DebugCoDataStack::default();
     let mut result_stack = DebugCoData::default();
 
-    let var_str = "teststring";
-    let var_str_wrong = "stringtest";
-    stack.push_bytes(var_str.as_bytes());
-    result_stack.push_bytes(var_str_wrong.as_bytes(), "var_str");
+    let var_bytes = "testbytes";
+    let var_bytes_wrong = "bytestest";
+    stack.push_bytes(var_bytes_wrong.as_bytes());
+    result_stack.push_bytes(var_bytes.as_bytes(), "var_bytes");
 
     let mut harness = TestHarness::default();
     harness.debugdata = DebugDataInjector {
@@ -60,14 +62,15 @@ fn mirror_bytes_negtest_wrong_content() {
 
 #[test]
 #[should_panic]
-fn mirror_bytes_negtest_wrong_size() {
+// Expect fewer stack items than we get
+fn mirror_negtest_too_many() {
     let mut stack = DebugCoDataStack::default();
     let mut result_stack = DebugCoData::default();
 
-    let var_str = "teststring";
-    let var_str_wrong = "teststringplussome";
-    stack.push_bytes(var_str.as_bytes());
-    result_stack.push_bytes(var_str_wrong.as_bytes(), "var_str");
+    let var_bytes = "testbytes";
+    stack.push_bytes(var_bytes.as_bytes());
+    stack.push_bytes(var_bytes.as_bytes());
+    result_stack.push_bytes(var_bytes.as_bytes(), "var_bytes");
 
     let mut harness = TestHarness::default();
     harness.debugdata = DebugDataInjector {
@@ -80,6 +83,49 @@ fn mirror_bytes_negtest_wrong_size() {
 }
 
 #[test]
+#[should_panic]
+// Expect more stack items than we get
+fn mirror_negtest_too_few() {
+    let mut stack = DebugCoDataStack::default();
+    let mut result_stack = DebugCoData::default();
+
+    let var_bytes = "testbytes";
+    stack.push_bytes(var_bytes.as_bytes());
+    result_stack.push_bytes(var_bytes.as_bytes(), "var_bytes");
+    result_stack.push_bytes(var_bytes.as_bytes(), "var_bytes");
+
+    let mut harness = TestHarness::default();
+    harness.debugdata = DebugDataInjector {
+        mock_input_stack: stack,
+        expected_output_stack: result_stack,
+    };
+
+    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
+    initiateAndRun!(harness);
+}
+
+#[test]
+// Push a str to contract
+fn mirror_str() {
+    let mut stack = DebugCoDataStack::default();
+    let mut result_stack = DebugCoData::default();
+
+    let var_str = "teststr";
+    stack.push_str(var_str);
+    result_stack.push_str(var_str, "var_str");
+
+    let mut harness = TestHarness::default();
+    harness.debugdata = DebugDataInjector {
+        mock_input_stack: stack,
+        expected_output_stack: result_stack,
+    };
+
+    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
+    initiateAndRun!(harness);
+}
+
+#[test]
+// Push some unsigned values to contract
 fn mirror_unsigned() {
     let mut stack = DebugCoDataStack::default();
     let mut result_stack = DebugCoData::default();
