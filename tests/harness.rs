@@ -89,7 +89,7 @@ macro_rules! initiateAndRun {
         $test_setup_ident.callsystem.logging = Some(RefCell::new(&mut $test_setup_ident.logger));
         $test_setup_ident
             .callsystem
-            .add_call(0x8000_0001, &mut $test_setup_ident.debugdata)
+            .add_call(DEBUG_DATA_FEATURE, &mut $test_setup_ident.debugdata)
             .unwrap();
         //todo, setup other ElementAPIs here
 

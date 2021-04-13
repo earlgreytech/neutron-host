@@ -10,7 +10,7 @@ use std::str;
 /*
 ## Debug Data Injector ElementAPI
 
-ID: 0x8000_0001
+ID: 0x4000_0001
 
 This API is used in a testing environment to inject data into a test instance of the Neutron stack
 This file also contains some data structures that simplifies construction of this data
@@ -30,7 +30,7 @@ functions:
 */
 
 // IDs >= 0x8000_0000 are meant for "internal" usage within the project, e.g. for unit/integration testing.
-pub const DEBUG_DATA_FEATURE: u32 = 0x8000_0001;
+pub const DEBUG_DATA_FEATURE: u32 = 0x4000_0001;
 
 #[derive(FromPrimitive)]
 pub enum DebugDataFunctions {
