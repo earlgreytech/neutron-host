@@ -17,7 +17,7 @@ This file also contains some data structures that simplifies construction of thi
 
 Data structures:
 
-* mock_input_stack          - An initial input stack state that the testing smart contract can load
+* injected_input_stack      - An initial input stack state that the testing smart contract can load
 * expected_output_stack     - An expected state for the output stack that the testing smart contract can asserted against,
                               along with debug information to make a failed assertion more informative than "bytes in stacks didn't match"
 
@@ -45,8 +45,8 @@ pub enum DebugDataFunctions {
 
 #[derive(Default)]
 pub struct DebugDataInjector {
-    pub mock_input_stack: DebugCoDataStack,
-    pub expected_output_stack: DebugCoData,
+    pub injected_input_stack: DebugCoStack,
+    pub expected_output_stack: WrappedDebugCoStack,
 }
 
 impl ElementAPI for DebugDataInjector {
@@ -72,13 +72,13 @@ impl ElementAPI for DebugDataInjector {
             DebugDataFunctions::PushInputStack => {
                 println!("[DebugDataInjector] Called with function: 1 (PushInputStack)");
 
-                for i in 0..self.mock_input_stack.len() {
+                for i in 0..self.injected_input_stack.len() {
                     println!(
                         "    Pushing item {}/{} to CoData stack...",
                         i + 1,
-                        self.mock_input_stack.len()
+                        self.injected_input_stack.len()
                     );
-                    codata.push_output_stack(self.mock_input_stack.stack[i].as_slice())?;
+                    codata.push_output_stack(self.injected_input_stack.stack[i].as_slice())?;
                 }
                 println!("    Done pushing to CoData stack!");
 
@@ -87,7 +87,7 @@ impl ElementAPI for DebugDataInjector {
             DebugDataFunctions::AssertOutputStack => {
                 println!("[DebugDataInjector] Called with function: 2 (AssertOutputStack)");
                 println!("    Asserting state of CoData stack against expected state: ");
-                self.expected_output_stack.assert_output_eq(&mut codata);
+                self.expected_output_stack.assert_eq(&mut codata);
 
                 Ok(())
             }
@@ -95,7 +95,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 10 (GetInputStackLen)");
 
                 println!("    Pushing length of provided input stack to CoData stack...");
-                codata.push_output_stack(&[self.mock_input_stack.stack.len() as u8])?;
+                codata.push_output_stack(&[self.injected_input_stack.stack.len() as u8])?;
 
                 Ok(())
             }
@@ -103,7 +103,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 11 (ReverseInputStack)");
 
                 println!("    Reverse order in provided input stack (first item become last item and so forth)...");
-                self.mock_input_stack.reverse();
+                self.injected_input_stack.reverse();
 
                 Ok(())
             }
@@ -117,14 +117,14 @@ impl ElementAPI for DebugDataInjector {
     }
 }
 
-// Wrapper for a byte vector that represents a neutron codata stack
+// A vector of byte vectors that represents a neutron codata stack
 // Contains copies of internal ecosystem functions that normally manipulate the stacks
 #[derive(Default)]
-pub struct DebugCoDataStack {
+pub struct DebugCoStack {
     pub stack: Vec<Vec<u8>>,
 }
 
-impl DebugCoDataStack {
+impl DebugCoStack {
     // The following functions are adapted from neutron-star/src/syscall.rs
 
     pub fn push_u64(&mut self, value: u64) {
@@ -184,15 +184,15 @@ pub enum DebugDataType {
     STR,
 }
 
-// Used to easily construct an expected codata state, along with extra debugging information
+// Used to easily construct an expected output CoStack state, along with extra debugging information
 #[derive(Default)]
-pub struct DebugCoData {
-    pub output_stack: DebugCoDataStack,
+pub struct WrappedDebugCoStack {
+    pub output_stack: DebugCoStack,
     pub variable_names: Vec<String>,
     pub variable_types: Vec<DebugDataType>,
 }
 
-impl DebugCoData {
+impl WrappedDebugCoStack {
     pub fn push_u64(&mut self, value: u64, name: &str) {
         self.output_stack.push_u64(value);
         self.push_debug_data(name, DebugDataType::U64);
@@ -224,7 +224,7 @@ impl DebugCoData {
     }
 
     // Check contract output stack against expected state
-    pub fn assert_output_eq(&mut self, codata: &mut CoData) {
+    pub fn assert_eq(&mut self, codata: &mut CoData) {
         while self.variable_names.len() > 0 {
             let expected_data = self.output_stack.pop().unwrap();
             let actual_data = match codata.pop_input_stack() {
