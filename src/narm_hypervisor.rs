@@ -36,6 +36,10 @@ CoMap operations:
 * SVC 0x37: clear_comap_outputs()
 * SVC 0x38: clear_comap_inputs()
 * SVC 0x39: clear_comap_results()
+// TODO: Better names for these?
+* SVC 0x40: push_raw_output(key: stack [u8], data: stack [u8])
+* SVC 0x42: peek_raw_input(key: stack [u8], max_size: u32) -> data: stack [u8]
+* SVC 0x44: peek_raw_result(key: stack [u8], max_size: u32) -> data: stack [u8]
 --todo: map copying operations
 
 Hypervisor Functions:
@@ -127,6 +131,7 @@ impl NarmHypervisor {
                 0x10 => {
                     let address = self.vm.external_get_reg(0);
                     let size = self.vm.external_get_reg(1);
+
                     let data = self.vm.memory.get_sized_memory(address, size)?;
                     match codata.push_output_stack(data) {
                         Ok(_) => {}
@@ -157,6 +162,90 @@ impl NarmHypervisor {
                 0x14 => {
                     codata.clear_input_stack();
                 }
+
+                //SVC 0x40: push_raw_output(key: stack [u8], data: stack [u8])
+                //Pop two values from costack and push as key and value to comap
+                0x40 => {
+                    // Since key and data is pushed in the "correct" order we pop the other way around
+                    let data = match codata.pop_input_stack() {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+                    let key = match codata.pop_input_stack() {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+
+                    match codata.push_output_key(&key, &data) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    }
+                }
+
+                //SVC 0x42: peek_raw_input(key: stack [u8], max_size: u32) -> data: stack [u8]
+                //Pop one value from costack and use as key to get input comap value, which is then pushed to costack (limited to provided max size)
+                0x42 => {
+                    let max_size = self.vm.external_get_reg(0) as usize;
+                    let key = match codata.pop_input_stack() {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+
+                    let mut data = match codata.peek_input_key(&key) {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+
+                    // Truncate the data if above provided max size
+                    data.truncate(max_size);
+
+                    match codata.push_output_stack(&data) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    }
+                }
+
+                //SVC 0x44: peek_raw_result(key: stack [u8], max_size: u32) -> data: stack [u8]
+                //Pop one value from costack and use as key to get result comap value, which is then pushed to costack (limited to provided max size)
+                0x44 => {
+                    let max_size = self.vm.external_get_reg(0) as usize;
+                    let key = match codata.pop_input_stack() {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+
+                    let mut data = match codata.peek_result_key(&key) {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+
+                    // Truncate the data if above provided max size
+                    data.truncate(max_size);
+
+                    match codata.push_output_stack(&data) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    }
+                }
+
                 0 => {
                     assert!(false, "this should never happen");
                 }
