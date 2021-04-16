@@ -57,13 +57,13 @@ impl NarmHypervisor {
                 0xFF => {
                     return Ok(HypervisorState::Ended);
                 }
-                
+
                 0xFE => {
                     return Ok(HypervisorState::Error(NeutronError::Recoverable(
                         RecoverableError::ContractRevertedExecution,
                     )));
                 }
-                
+
                 0x20 => {
                     return Ok(HypervisorState::ElementCall(
                         self.vm.external_get_reg(0),
@@ -84,7 +84,7 @@ impl NarmHypervisor {
                         }
                     }
                 }
-                
+
                 //SVC 0x11: pop_costack (buffer: pointer, max_size: u32) -> actual_size: u32 -- note: if buffer and max_size is 0, then the item will be popped without copying the item to memory and only the actual_size will be returned
                 0x11 => {
                     let address = self.vm.external_get_reg(0);
@@ -103,15 +103,15 @@ impl NarmHypervisor {
                         )?;
                     }
                 }
-                
+
                 //SVC 0x14: clear_costack()
                 0x14 => {
                     codata.clear_input_stack();
                 }
 
-                //SVC 0x40: push_raw_output(key: stack [u8], data: stack [u8])
+                //SVC 0x31: push_raw_comap(key: stack [u8], raw_value: stack [u8])
                 //Pop two values from costack and push as key and value to comap
-                0x40 => {
+                0x31 => {
                     // Since key and data is pushed in the "correct" order we pop the other way around
                     let data = match codata.pop_input_stack() {
                         Ok(d) => d,
@@ -134,10 +134,12 @@ impl NarmHypervisor {
                     }
                 }
 
-                //SVC 0x42: peek_raw_input(key: stack [u8], max_size: u32) -> data: stack [u8]
-                //Pop one value from costack and use as key to get input comap value, which is then pushed to costack (limited to provided max size)
-                0x42 => {
-                    let max_size = self.vm.external_get_reg(0) as usize;
+                //SVC 0x33: peek_raw_comap(key: stack [u8], begin: u32, max_length: u32) -> (raw_value: stack [u8])
+                //Pop one value from costack and use as key to get input comap value, which is then pushed to costack (constrained by begin and max_length)
+                0x33 => {
+                    let begin = self.vm.external_get_reg(0) as usize;
+                    let max_length = self.vm.external_get_reg(1) as usize;
+
                     let key = match codata.pop_input_stack() {
                         Ok(d) => d,
                         Err(e) => {
@@ -152,8 +154,14 @@ impl NarmHypervisor {
                         }
                     };
 
+                    // Discard data before specified start position
+                    // TODO: Find solution that doesn't reallocate? Not super important though since read from start should be by far most common in calls
+                    if begin > 0 {
+                        data = data.split_off(begin);
+                    }
+
                     // Truncate the data if above provided max size
-                    data.truncate(max_size);
+                    data.truncate(max_length);
 
                     match codata.push_output_stack(&data) {
                         Ok(_) => {}
@@ -163,10 +171,12 @@ impl NarmHypervisor {
                     }
                 }
 
-                //SVC 0x44: peek_raw_result(key: stack [u8], max_size: u32) -> data: stack [u8]
-                //Pop one value from costack and use as key to get result comap value, which is then pushed to costack (limited to provided max size)
-                0x44 => {
-                    let max_size = self.vm.external_get_reg(0) as usize;
+                //SVC 0x35: peek_raw_result_comap(key: stack [u8], begin: u32, max_length: u32) -> (raw_value: stack [u8])
+                //Pop one value from costack and use as key to get result comap value, which is then pushed to costack (constrained by begin and max_length)
+                0x35 => {
+                    let begin = self.vm.external_get_reg(0) as usize;
+                    let max_length = self.vm.external_get_reg(1) as usize;
+
                     let key = match codata.pop_input_stack() {
                         Ok(d) => d,
                         Err(e) => {
@@ -181,8 +191,14 @@ impl NarmHypervisor {
                         }
                     };
 
+                    // Discard data before specified start position
+                    // TODO: Find solution that doesn't reallocate? Not super important though since read from start should be by far most common in calls
+                    if begin > 0 {
+                        data = data.split_off(begin);
+                    }
+
                     // Truncate the data if above provided max size
-                    data.truncate(max_size);
+                    data.truncate(max_length);
 
                     match codata.push_output_stack(&data) {
                         Ok(_) => {}
