@@ -9,66 +9,8 @@ use neutron_common::RecoverableError;
 use std::cmp;
 
 /*
-Service calls
-CoStack operations: --note: CoStack functions are limited to 4 u32 register parameters
 
-* SVC 0x10: push_costack (buffer, size)
-* SVC 0x11: pop_costack (buffer, max_size) -> actual_size: u32 -- note: if buffer and max_size is 0, then the item will be popped without copying the item to memory and only the actual_size will be returned
-* SVC 0x12: peek_costack (buffer, max_size, index) -> actual_size: u32 -- note: if buffer and max_size is 0, then this function can be used solely to read the length of the item.
-* SVC 0x13: dup_costack() -- will duplicate the top item on the stack
-* SVC 0x14: costack_clear() -- Will clear the stack completely, without giving any information about what was held on the stack
-* SVC 0x15: peek_partial_costack(buffer, begin, max_size) -> actual_amount_read: u32 -- will read only a partial amount of data from an SCCS item in the middle of the item's data (starting at 'begin')
-
-Call System Functions:
-
-* SVC 0x20: system_call(feature, function):variable -> error:u32 -- will call into the NeutronCallSystem
-* SVC 0x21: system_call_with_comap(feature, function):variable -> error:u32 -- will call into the NeutronCallSystem
-
-CoMap operations:
-
-* SVC 0x30: push_comap(key: [u8], abi_data: [u8], value: [u8])
-* SVC 0x31: push_raw_comap(key: [u8], raw_value: [u8])
-* SVC 0x32: peek_comap(key: [u8], begin: u32, max_length: u32) -> (abi_data: [u8], value: [u8]) --note max_length of 0 indicates no maximum length
-* SVC 0x33: peek_raw_comap(key: [u8], begin: u32, max_length: u32) -> (raw_value: [u8])
-* SVC 0x34: peek_result_comap(key: [u8], begin: u32, max_length: u32) -> (abi_data: [u8], value: [u8])
-* SVC 0x35: peek_raw_result_comap(key: [u8], begin: u32, max_length: u32) -> (raw_value: [u8])
-* SVC 0x36: clear_comap_key(key: [u8])
-* SVC 0x37: clear_comap_outputs()
-* SVC 0x38: clear_comap_inputs()
-* SVC 0x39: clear_comap_results()
-// TODO: Better names for these?
-* SVC 0x40: push_raw_output(key: stack [u8], data: stack [u8])
-* SVC 0x42: peek_raw_input(key: stack [u8], max_size: u32) -> data: stack [u8]
-* SVC 0x44: peek_raw_result(key: stack [u8], max_size: u32) -> data: stack [u8]
---todo: map copying operations
-
-Hypervisor Functions:
-
-* SVC 0x80: alloc_memory TBD
-
-Context Functions:
-
-* SVC 0x90: gas_remaining() -> limit:u64 -- Will get the total amount of gas available for the current execution
-* SVC 0x91: self_address() -- result on stack as NeutronAddress -- Will return the current address for the execution. For a "one-time" execution, this will return a null address
-* SVC 0x92: origin() -- result on stack as NeutronAddress -- Will return the original address which caused the current chain of executions
-* SVC 0x93: origin_long() -- result on stack as NeutronLongAddress
-* SVC 0x94: sender() -- result on stack as NeutronAddress -- Will return the address which caused the current execution (and not the entire chain)
-* SVC 0x95: sender_long() -- result on stack as NeutronLongAddress
-* SVC 0x96: execution_type() -> type:u32 -- The type of the current execution (see built-in types)
-* SVC 0x97: execution_permissions() -> permissions:u32 -- The current permissions of the execution (see built-in types)
-
-Contract Management Functions:
-
-* SVC 0xA0: upgrade_code_section(id: u8, bytecode: [u8], position: u32):mutable
-* SVC 0xA1: upgrade_data_section(id: u8, data: [u8], position: u32):mutable
-* SVC 0xA2: upgrades_allowed(): static -> bool
-* SVC 0xA4: get_data_section(id: u8, begin, max_size) -> data: [u8] --there is no code counter type provided because it can be read directly from memory. Data can as well, but may have been modified during execution
-
-
-System Functions:
-
-* SVC 0xFE: revert_execution(status) -> noreturn -- Will revert the current execution, moving up the chain of execution to return to the previous contract, and reverting all state changes which occured within the current execution
-* SVC 0xFF: exit_execution(status) -> noreturn -- Will exit the current execution, moving up the chain of execution to return to the previous contract. State changes will only be committed if the entire above chain of execution also exits without any reverting operations.
+For documentation see https://neutron.earlgrey.tech/spec/neutron-arm-vm
 
 */
 
@@ -115,11 +57,13 @@ impl NarmHypervisor {
                 0xFF => {
                     return Ok(HypervisorState::Ended);
                 }
+                
                 0xFE => {
                     return Ok(HypervisorState::Error(NeutronError::Recoverable(
                         RecoverableError::ContractRevertedExecution,
                     )));
                 }
+                
                 0x20 => {
                     return Ok(HypervisorState::ElementCall(
                         self.vm.external_get_reg(0),
@@ -140,6 +84,7 @@ impl NarmHypervisor {
                         }
                     }
                 }
+                
                 //SVC 0x11: pop_costack (buffer: pointer, max_size: u32) -> actual_size: u32 -- note: if buffer and max_size is 0, then the item will be popped without copying the item to memory and only the actual_size will be returned
                 0x11 => {
                     let address = self.vm.external_get_reg(0);
@@ -158,7 +103,8 @@ impl NarmHypervisor {
                         )?;
                     }
                 }
-                //SVC 0x14: costack_clear()
+                
+                //SVC 0x14: clear_costack()
                 0x14 => {
                     codata.clear_input_stack();
                 }
