@@ -29,7 +29,7 @@ fn comap_peek_subsets() {
     let value_subset_1 = "<value part 1!>";
     let value_subset_2 = "<value part 2!>";
     let value_subset_3 = "<value part 3!>";
-    
+
     // Construct a single String from the subsets
     let mut value = String::from(value_subset_1);
     value.push_str(value_subset_2);
@@ -41,7 +41,7 @@ fn comap_peek_subsets() {
     stack.push_str(key);
 
     map.push_key(key.as_bytes(), value.as_bytes()).unwrap();
-    
+
     // We expect the contract to split the comap value into the subsets
     expected_stack.push_str(value_subset_1, "value_subset_1");
     expected_stack.push_str(value_subset_2, "value_subset_2");
@@ -71,7 +71,7 @@ fn comap_peek_subsets_negtest_wrong_value() {
     let value_subset_2 = "<value part 2!>";
     let value_subset_3 = "<value part 3!>";
     let value_subset_wrong = "<WRONG subset!>";
-    
+
     // Construct a single String from the subsets, to be added to input codata
     let mut value = String::from(value_subset_1);
     value.push_str(value_subset_wrong);
@@ -83,7 +83,7 @@ fn comap_peek_subsets_negtest_wrong_value() {
     stack.push_str(key);
 
     map.push_key(key.as_bytes(), value.as_bytes()).unwrap();
-    
+
     // We expect the contract to split the comap value into the subsets
     expected_stack.push_str(value_subset_1, "value_subset_1");
     expected_stack.push_str(value_subset_2, "value_subset_2");

@@ -110,7 +110,7 @@ fn comap_peek_trucated() {
     let mut map = DebugCoMap::default();
 
     let key = "this is the key";
-    
+
     // This contract limits size of peeked comap value to 25 bytes
     let value_fitting = "this is a 25-byte value!!";
     let value_unfitting = "this is a 25-byte value!! Except for this part!";
@@ -118,7 +118,8 @@ fn comap_peek_trucated() {
     stack.push_str(key);
     expected_stack.push_str(value_fitting, "comap_value");
 
-    map.push_key(key.as_bytes(), value_unfitting.as_bytes()).unwrap();
+    map.push_key(key.as_bytes(), value_unfitting.as_bytes())
+        .unwrap();
 
     let mut harness = TestHarness::default();
     harness.debugdata = DebugDataInjector {
@@ -140,7 +141,7 @@ fn comap_peek_trucated_negtest() {
     let mut map = DebugCoMap::default();
 
     let key = "this is the key";
-    
+
     // This contract limits size of peeked comap value to 25 bytes
     let _value_fitting = "this is a 25-byte value!!";
     let value_unfitting = "this is a 25-byte value!! Except for this part!";
@@ -148,7 +149,8 @@ fn comap_peek_trucated_negtest() {
     stack.push_str(key);
     expected_stack.push_str(value_unfitting, "comap_value"); // We expect the un-truncated value, so assertion will fail
 
-    map.push_key(key.as_bytes(), value_unfitting.as_bytes()).unwrap();
+    map.push_key(key.as_bytes(), value_unfitting.as_bytes())
+        .unwrap();
 
     let mut harness = TestHarness::default();
     harness.debugdata = DebugDataInjector {
