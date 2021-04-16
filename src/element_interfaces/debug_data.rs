@@ -4,6 +4,7 @@ use crate::neutronerror::NeutronError::*;
 use crate::neutronerror::*;
 use core::mem::transmute;
 use neutron_common::RecoverableError;
+use std::collections::HashMap;
 use std::convert::TryInto;
 use std::str;
 
@@ -18,15 +19,32 @@ This file also contains some data structures that simplifies construction of thi
 Data structures:
 
 * injected_input_stack      - An initial input stack state that the testing smart contract can load
+
 * expected_output_stack     - An expected state for the output stack that the testing smart contract can asserted against,
                               along with debug information to make a failed assertion more informative than "bytes in stacks didn't match"
+
+* injected_result_map       - An initial result stack state that the testing smart contract can load
+
+* expected_output_map       - An expected state for the output map that the testing smart contract can asserted against
 
 functions:
 
 * [0]  Available()          - Check if API is available in current instance (standard function)
+
 * [1]  PushInputStack()     - Pushes the provided mock input stack to the current instance
+                              (Actually pushes to output stack, but it becomes input stack on return to contract)
+
 * [2]  AssertOutputStack()  - Asserts the provided expected output stack against the current instance
+                              (Actually asserts against input stack, but it was the output stack before entering this function)
+
+* [3]  PushResultMap()      - Pushes the provided mock result map to the current instance
+                              (Actually pushes to output map, but it becomes result map on return to contract)
+
+* [4]  AssertOutputMap()    - Asserts the provided expected output map against the current instance
+                             (Actually asserts against input map, but it was the output stack before entering this function)
+
 * [10] GetInputStackLen()   - Push length of provided mock input stack to the current instance
+
 * [11] ReverseInputStack()  - Reverse item order of provided mock input stack
 
 */
@@ -39,6 +57,8 @@ pub enum DebugDataFunctions {
     Available = 0, //reserved??
     PushInputStack = 1,
     AssertOutputStack = 2,
+    PushResultMap = 3,
+    AssertOutputMap = 4,
     GetInputStackLen = 10,
     ReverseInputStack = 11,
 }
@@ -47,6 +67,8 @@ pub enum DebugDataFunctions {
 pub struct DebugDataInjector {
     pub injected_input_stack: DebugCoStack,
     pub expected_output_stack: WrappedDebugCoStack,
+    pub injected_result_map: DebugCoMap,
+    pub expected_output_map: DebugCoMap,
 }
 
 impl ElementAPI for DebugDataInjector {
@@ -72,22 +94,36 @@ impl ElementAPI for DebugDataInjector {
             DebugDataFunctions::PushInputStack => {
                 println!("[DebugDataInjector] Called with function: 1 (PushInputStack)");
 
-                for i in 0..self.injected_input_stack.len() {
-                    println!(
-                        "    Pushing item {}/{} to CoData stack...",
-                        i + 1,
-                        self.injected_input_stack.len()
-                    );
-                    codata.push_output_stack(self.injected_input_stack.stack[i].as_slice())?;
-                }
-                println!("    Done pushing to CoData stack!");
+                println!("    Pushing provided stack to codata stack...");
+                self.injected_input_stack.push_to_codata(&mut codata);
+                println!("    Done!");
 
                 Ok(())
             }
             DebugDataFunctions::AssertOutputStack => {
                 println!("[DebugDataInjector] Called with function: 2 (AssertOutputStack)");
-                println!("    Asserting state of CoData stack against expected state: ");
+
+                println!("    Asserting state of CoData stack against expected state... ");
                 self.expected_output_stack.assert_eq(&mut codata);
+                println!("    Done!");
+
+                Ok(())
+            }
+            DebugDataFunctions::PushResultMap => {
+                println!("[DebugDataInjector] Called with function: 3 (PushResultMap)");
+
+                println!("    Pushing provided map to codata map...");
+                self.injected_result_map.push_to_codata(&mut codata);
+                println!("    Done!");
+
+                Ok(())
+            }
+            DebugDataFunctions::AssertOutputMap => {
+                println!("[DebugDataInjector] Called with function: 4 (AssertOutputMap)");
+
+                println!("    Asserting state of CoData map against expected state... ");
+                self.expected_output_map.assert_eq(&mut codata);
+                println!("    Done!");
 
                 Ok(())
             }
@@ -95,7 +131,8 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 10 (GetInputStackLen)");
 
                 println!("    Pushing length of provided input stack to CoData stack...");
-                codata.push_output_stack(&[self.injected_input_stack.stack.len() as u8])?;
+                self.injected_input_stack.push_len_to_codata(&mut codata);
+                println!("    Done!");
 
                 Ok(())
             }
@@ -104,6 +141,7 @@ impl ElementAPI for DebugDataInjector {
 
                 println!("    Reverse order in provided input stack (first item become last item and so forth)...");
                 self.injected_input_stack.reverse();
+                println!("    Done!");
 
                 Ok(())
             }
@@ -125,7 +163,8 @@ pub struct DebugCoStack {
 }
 
 impl DebugCoStack {
-    // The following functions are adapted from neutron-star/src/syscall.rs
+    // These functions mostly mirror codata stack behavior
+    // (adapted from neutron-star/src/syscall.rs)
 
     pub fn push_u64(&mut self, value: u64) {
         const SIZE: usize = 8;
@@ -172,6 +211,18 @@ impl DebugCoStack {
     pub fn reverse(&mut self) {
         self.stack.reverse();
     }
+
+    // Push to codata output stack (Will become input stack on return to contract)
+    pub fn push_to_codata(&mut self, codata: &mut CoData) {
+        for i in 0..self.len() {
+            codata.push_output_stack(self.stack[i].as_slice()).unwrap();
+        }
+    }
+
+    // Push length to codata output stack
+    pub fn push_len_to_codata(&mut self, codata: &mut CoData) {
+        codata.push_output_stack(&[self.stack.len() as u8]).unwrap();
+    }
 }
 
 // TODO: Make private?
@@ -193,6 +244,7 @@ pub struct WrappedDebugCoStack {
 }
 
 impl WrappedDebugCoStack {
+    // CoStack functions
     pub fn push_u64(&mut self, value: u64, name: &str) {
         self.output_stack.push_u64(value);
         self.push_debug_data(name, DebugDataType::U64);
@@ -245,30 +297,30 @@ impl WrappedDebugCoStack {
                 DebugDataType::U32 => assert_eq!(
                     self.to_u32(&expected_data),
                     self.to_u32(&actual_data),
-                    "\n\n[DebugCoData] Assertion failed for u32 named {}\n\n",
+                    "\n\n[DebugCoData] Assertion failed for u32 named '{}'\n\n",
                     name
                 ),
                 DebugDataType::U16 => assert_eq!(
                     self.to_u16(&expected_data),
                     self.to_u16(&actual_data),
-                    "\n\n[DebugCoData] Assertion failed for u16 named {}\n\n",
+                    "\n\n[DebugCoData] Assertion failed for u16 named '{}'\n\n",
                     name
                 ),
                 DebugDataType::U8 => assert_eq!(
                     self.to_u8(&expected_data),
                     self.to_u8(&actual_data),
-                    "\n\n[DebugCoData] Assertion failed for u8 named {}\n\n",
+                    "\n\n[DebugCoData] Assertion failed for u8 named '{}'\n\n",
                     name
                 ),
                 DebugDataType::BYTES => assert_eq!(
                     expected_data, actual_data,
-                    "\n\n[DebugCoData] Assertion failed for byte sequence named {}\n\n",
+                    "\n\n[DebugCoData] Assertion failed for byte sequence named '{}'\n\n",
                     name
                 ),
                 DebugDataType::STR => assert_eq!(
                     str::from_utf8(&expected_data).unwrap(),
                     str::from_utf8(&actual_data).unwrap(),
-                    "\n\n[DebugCoData] Assertion failed for str named {}\n\n",
+                    "\n\n[DebugCoData] Assertion failed for str named '{}'\n\n",
                     name
                 ),
             };
@@ -311,5 +363,76 @@ impl WrappedDebugCoStack {
             .try_into()
             .expect("to_u8: Slice was of incorrect length");
         unsafe { return transmute::<[u8; 1], u8>(array) };
+    }
+}
+
+// Wrapper for a key/value hashmap that represents a neutron codata map
+// Contains copies of internal ecosystem functions that normally manipulate the maps
+#[derive(Default)]
+pub struct DebugCoMap {
+    pub map: HashMap<Vec<u8>, Vec<u8>>,
+}
+
+// TODO: Currently it is assumed that every codata key/data value can be converted to a str for display,
+//       so if that turns out to not be the case this needs refactoring
+impl DebugCoMap {
+    // These functions mirror codata map behavior
+    pub fn push_key(&mut self, key: &[u8], value: &[u8]) -> Result<(), NeutronError> {
+        if key[0] == 0 {
+            return Err(NeutronError::Recoverable(
+                RecoverableError::InvalidCoMapAccess,
+            ));
+        }
+        self.map.insert(key.to_vec(), value.to_vec());
+        Ok(())
+    }
+
+    pub fn peek_key(&mut self, key: &[u8]) -> Result<Vec<u8>, NeutronError> {
+        if key[0] == 0 {
+            return Err(NeutronError::Recoverable(
+                RecoverableError::InvalidCoMapAccess,
+            ));
+        }
+        match self.map.get(key) {
+            Some(v) => Ok(v.to_vec()),
+            None => Err(Recoverable(RecoverableError::ItemDoesntExist)),
+        }
+    }
+
+    // Check contract output stack against expected state
+    pub fn assert_eq(&mut self, codata: &mut CoData) {
+        println!("[DebugCoData] Asserting expected CoMap values against actual output CoMap...");
+        for key in self.map.keys() {
+            let key_str = str::from_utf8(key).unwrap();
+
+            let expected_data = self.map.get(key).unwrap();
+            let actual_data = match codata.peek_input_key(key) {
+                Ok(v) => v,
+                Err(_e) => panic!(
+                    "\n\n    Assertion failed: Actual output map lacked entry for key '{}'\n\n",
+                    key_str
+                ),
+            };
+            let expected_data_str = str::from_utf8(expected_data).unwrap();
+            let actual_data_str = str::from_utf8(&actual_data).unwrap();
+
+            assert_eq!(
+                expected_data, &actual_data,
+                "\n\n    Assertion failed for codata entry with key '{}' and string values: \nExpected: '{}' \nActual:'{}' \n\n",
+                key_str,
+                expected_data_str,
+                actual_data_str
+            );
+            println!("    CoMap entry with key '{}' matched!", key_str);
+        }
+    }
+
+    // Push to codata output map (Will become result map on return to contract)
+    // There is no function to push to result map, because it would be discarded on return from ElemAPI anyway
+    pub fn push_to_codata(&mut self, codata: &mut CoData) {
+        for key in self.map.keys() {
+            let data = self.map.get(key).unwrap();
+            codata.push_output_key(&key, data).unwrap();
+        }
     }
 }
