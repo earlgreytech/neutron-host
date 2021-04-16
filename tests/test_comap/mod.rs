@@ -16,9 +16,9 @@ use std::cell::RefCell;
 use std::env;
 
 const DIR_NAME: &'static str = "test_comap";
-const CONTRACT_DIR_NAME_1: &'static str = "contract_stack_to_map";
 
-const CONTRACT_DIR_NAME_2: &'static str = "contract_map_to_stack";
+const CONTRACT_STACK_TO_MAP: &'static str = "contract_stack_to_map";
+const CONTRACT_MAP_TO_STACK: &'static str = "contract_map_to_stack";
 
 #[test]
 fn comap_push() {
@@ -26,13 +26,13 @@ fn comap_push() {
     let mut expected_map = DebugCoMap::default();
 
     let key = "this is the key";
-    let data = "this is the data";
+    let value = "this is the value";
 
     stack.push_str(key);
-    stack.push_str(data);
+    stack.push_str(value);
 
     expected_map
-        .push_key(key.as_bytes(), data.as_bytes())
+        .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 
     let mut harness = TestHarness::default();
@@ -42,7 +42,7 @@ fn comap_push() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME_1);
+    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_STACK_TO_MAP);
     initiateAndRun!(harness);
 }
 
@@ -54,13 +54,13 @@ fn comap_push_negtest_wrong_key() {
 
     let key = "this is the key";
     let wrong_key = "this is the WRONG key";
-    let data = "this is the data";
+    let value = "this is the value";
 
-    stack.push_str(key);
-    stack.push_str(data);
+    stack.push_str(wrong_key); // Push wrong key as contract input
+    stack.push_str(value);
 
     expected_map
-        .push_key(wrong_key.as_bytes(), data.as_bytes())
+        .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 
     let mut harness = TestHarness::default();
@@ -70,25 +70,25 @@ fn comap_push_negtest_wrong_key() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME_1);
+    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_STACK_TO_MAP);
     initiateAndRun!(harness);
 }
 
 #[test]
 #[should_panic]
-fn comap_push_negtest_wrong_data() {
+fn comap_push_negtest_wrong_value() {
     let mut stack = DebugCoStack::default();
     let mut expected_map = DebugCoMap::default();
 
     let key = "this is the key";
-    let data = "this is the data";
-    let wrong_data = "this is the WRONG data";
+    let value = "this is the value";
+    let wrong_value = "this is the WRONG value";
 
     stack.push_str(key);
-    stack.push_str(data);
+    stack.push_str(wrong_value); // Push wrong value as contract input
 
     expected_map
-        .push_key(key.as_bytes(), wrong_data.as_bytes())
+        .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 
     let mut harness = TestHarness::default();
@@ -98,7 +98,7 @@ fn comap_push_negtest_wrong_data() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME_1);
+    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_STACK_TO_MAP);
     initiateAndRun!(harness);
 }
 
@@ -109,12 +109,12 @@ fn comap_peek() {
     let mut map = DebugCoMap::default();
 
     let key = "this is the key";
-    let data = "this is the data";
+    let value = "this is the value";
 
     stack.push_str(key);
-    expected_stack.push_str(data, "comap_key");
+    expected_stack.push_str(value, "comap_key");
 
-    map.push_key(key.as_bytes(), data.as_bytes()).unwrap();
+    map.push_key(key.as_bytes(), value.as_bytes()).unwrap();
 
     let mut harness = TestHarness::default();
     harness.debugdata = DebugDataInjector {
@@ -124,6 +124,6 @@ fn comap_peek() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME_2);
+    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_MAP_TO_STACK);
     initiateAndRun!(harness);
 }

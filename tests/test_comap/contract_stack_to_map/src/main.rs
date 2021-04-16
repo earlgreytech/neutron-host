@@ -10,13 +10,13 @@ extern crate panic_halt;
 
 const DEBUG_DATA_FEATURE: u32 = 0x4000_0001;
 
-// This contract takes a key-data pair on the input costack and pushes it to the output comap
+// This contract takes a key-value pair on the input costack and pushes it to the output comap
 #[no_mangle]
 pub unsafe extern "C" fn main() -> ! {
     // Push provided input stack to codata input stack
     __system_call(DEBUG_DATA_FEATURE, 1); // DebugDataFunctions::PushInputStack
     
-    // Push key/data from costack to comap
+    // Push key/value from costack to comap
     __push_raw_comap();
     
     __system_call(DEBUG_DATA_FEATURE, 4); // DebugDataFunctions::AssertOutputMap

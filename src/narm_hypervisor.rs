@@ -112,8 +112,8 @@ impl NarmHypervisor {
                 //SVC 0x31: push_raw_comap(key: stack [u8], raw_value: stack [u8])
                 //Pop two values from costack and push as key and value to comap
                 0x31 => {
-                    // Since key and data is pushed in the "correct" order we pop the other way around
-                    let data = match codata.pop_input_stack() {
+                    // Since key and value is pushed in the "correct" order we pop the other way around
+                    let raw_value = match codata.pop_input_stack() {
                         Ok(d) => d,
                         Err(e) => {
                             return Ok(HypervisorState::Error(e));
@@ -126,7 +126,7 @@ impl NarmHypervisor {
                         }
                     };
 
-                    match codata.push_output_key(&key, &data) {
+                    match codata.push_output_key(&key, &raw_value) {
                         Ok(_) => {}
                         Err(e) => {
                             return Ok(HypervisorState::Error(e));
@@ -147,23 +147,23 @@ impl NarmHypervisor {
                         }
                     };
 
-                    let mut data = match codata.peek_input_key(&key) {
+                    let mut raw_value = match codata.peek_input_key(&key) {
                         Ok(d) => d,
                         Err(e) => {
                             return Ok(HypervisorState::Error(e));
                         }
                     };
 
-                    // Discard data before specified start position
+                    // Discard bytes before specified start position
                     // TODO: Find solution that doesn't reallocate? Not super important though since read from start should be by far most common in calls
                     if begin > 0 {
-                        data = data.split_off(begin);
+                        raw_value = raw_value.split_off(begin);
                     }
 
-                    // Truncate the data if above provided max size
-                    data.truncate(max_length);
+                    // Truncate value if larger than provided max size
+                    raw_value.truncate(max_length);
 
-                    match codata.push_output_stack(&data) {
+                    match codata.push_output_stack(&raw_value) {
                         Ok(_) => {}
                         Err(e) => {
                             return Ok(HypervisorState::Error(e));
@@ -184,23 +184,23 @@ impl NarmHypervisor {
                         }
                     };
 
-                    let mut data = match codata.peek_result_key(&key) {
+                    let mut raw_value = match codata.peek_result_key(&key) {
                         Ok(d) => d,
                         Err(e) => {
                             return Ok(HypervisorState::Error(e));
                         }
                     };
 
-                    // Discard data before specified start position
+                    // Discard bytes before specified start position
                     // TODO: Find solution that doesn't reallocate? Not super important though since read from start should be by far most common in calls
                     if begin > 0 {
-                        data = data.split_off(begin);
+                        raw_value = raw_value.split_off(begin);
                     }
 
-                    // Truncate the data if above provided max size
-                    data.truncate(max_length);
+                    // Truncate the value if above provided max size
+                    raw_value.truncate(max_length);
 
-                    match codata.push_output_stack(&data) {
+                    match codata.push_output_stack(&raw_value) {
                         Ok(_) => {}
                         Err(e) => {
                             return Ok(HypervisorState::Error(e));
