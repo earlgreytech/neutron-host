@@ -32,6 +32,7 @@ fn mirror_bytes() {
     harness.debugdata = DebugDataInjector {
         injected_input_stack: stack,
         expected_output_stack: assert_stack,
+        ..DebugDataInjector::default()
     };
 
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
@@ -54,6 +55,7 @@ fn mirror_negtest_wrong_content() {
     harness.debugdata = DebugDataInjector {
         injected_input_stack: stack,
         expected_output_stack: assert_stack,
+        ..DebugDataInjector::default()
     };
 
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
@@ -76,6 +78,7 @@ fn mirror_negtest_too_many() {
     harness.debugdata = DebugDataInjector {
         injected_input_stack: stack,
         expected_output_stack: assert_stack,
+        ..DebugDataInjector::default()
     };
 
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
@@ -98,6 +101,7 @@ fn mirror_negtest_too_few() {
     harness.debugdata = DebugDataInjector {
         injected_input_stack: stack,
         expected_output_stack: assert_stack,
+        ..DebugDataInjector::default()
     };
 
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
@@ -118,6 +122,7 @@ fn mirror_str() {
     harness.debugdata = DebugDataInjector {
         injected_input_stack: stack,
         expected_output_stack: assert_stack,
+        ..DebugDataInjector::default()
     };
 
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
@@ -150,6 +155,7 @@ fn mirror_unsigned() {
     harness.debugdata = DebugDataInjector {
         injected_input_stack: stack,
         expected_output_stack: assert_stack,
+        ..DebugDataInjector::default()
     };
 
     harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
