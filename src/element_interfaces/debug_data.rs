@@ -433,3 +433,160 @@ impl DebugCoMap {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // DebugCoStack::push_u64(u64)
+    #[test]
+    fn test_debugcostack_push_u64() {
+        let mut stack = DebugCoStack::default();
+        stack.push_u64(0x1122_3344_5566_7788 as u64);
+        let expected_bytes: Vec<u8> = vec![0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11];
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_u32(u32)
+    #[test]
+    fn test_debugcostack_push_u32() {
+        let mut stack = DebugCoStack::default();
+        stack.push_u32(0x1122_3344 as u32);
+        let expected_bytes: Vec<u8> = vec![0x44, 0x33, 0x22, 0x11];
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_u16(u16)
+    #[test]
+    fn test_debugcostack_push_u16() {
+        let mut stack = DebugCoStack::default();
+        stack.push_u16(0x1122 as u16);
+        let expected_bytes: Vec<u8> = vec![0x22, 0x11];
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_u8(u8)
+    #[test]
+    fn test_debugcostack_push_u8() {
+        let mut stack = DebugCoStack::default();
+        stack.push_u8(0x11 as u8);
+        let expected_bytes: Vec<u8> = vec![0x11];
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_bytes(&[u8])
+    #[test]
+    fn test_debugcostack_push_bytes() {
+        let bytes: Vec<u8> = vec![0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11];
+
+        let mut stack = DebugCoStack::default();
+        stack.push_bytes(&bytes);
+        assert_eq!(stack.stack[0], bytes);
+    }
+
+    // DebugCoStack::push_str(&str)
+    #[test]
+    fn test_debugcostack_push_str() {
+        let string = "This is a testing string!";
+
+        let mut stack = DebugCoStack::default();
+        stack.push_str(string);
+        assert_eq!(&stack.stack[0], string.as_bytes());
+    }
+
+    // WrappedDebugCoStack::to_u64(&[u8]) -> u64
+    #[test]
+    fn test_wrappeddebugcostack_to_u64() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11];
+        let result = stack.to_u64(bytes);
+        assert_eq!(result, 0x1122_3344_5566_7788 as u64);
+    }
+    #[test]
+    fn test_wrappeddebugcostack_to_u64_too_long() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0xFF];
+        let result = stack.to_u64(bytes);
+        assert_eq!(result, 0x1122_3344_5566_7788 as u64);
+    }
+    #[test]
+    #[should_panic]
+    fn negtest_wrappeddebugcostack_to_u64_too_short() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22];
+        let result = stack.to_u64(bytes);
+        assert_eq!(result, 0x1122_3344_5566_7788 as u64);
+    }
+
+    // WrappedDebugCoStack::to_u32(&[u8]) -> u32
+    #[test]
+    fn test_wrappeddebugcostack_to_u32() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[0x44, 0x33, 0x22, 0x11];
+        let result = stack.to_u32(bytes);
+        assert_eq!(result, 0x1122_3344 as u32);
+    }
+    #[test]
+    fn test_wrappeddebugcostack_to_u32_too_long() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[0x44, 0x33, 0x22, 0x11, 0xFF];
+        let result = stack.to_u32(bytes);
+        assert_eq!(result, 0x1122_3344 as u32);
+    }
+    #[test]
+    #[should_panic]
+    fn negtest_wrappeddebugcostack_to_u32_too_short() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[0x44, 0x33, 0x22];
+        let result = stack.to_u32(bytes);
+        assert_eq!(result, 0x1122_3344 as u32);
+    }
+
+    // WrappedDebugCoStack::to_u16(&[u8]) -> u16
+    #[test]
+    fn test_wrappeddebugcostack_to_u16() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[0x22, 0x11];
+        let result = stack.to_u16(bytes);
+        assert_eq!(result, 0x1122 as u16);
+    }
+    #[test]
+    fn test_wrappeddebugcostack_to_u16_too_long() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[0x22, 0x11, 0xFF];
+        let result = stack.to_u16(bytes);
+        assert_eq!(result, 0x1122 as u16);
+    }
+    #[test]
+    #[should_panic]
+    fn negtest_wrappeddebugcostack_to_u16_too_short() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[0x22];
+        let result = stack.to_u16(bytes);
+        assert_eq!(result, 0x1122 as u16);
+    }
+
+    // WrappedDebugCoStack::to_u8(&[u8]) -> u8
+    #[test]
+    fn test_wrappeddebugcostack_to_u8() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[0x11];
+        let result = stack.to_u8(bytes);
+        assert_eq!(result, 0x11 as u8);
+    }
+    #[test]
+    fn test_wrappeddebugcostack_to_u8_too_long() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[0x11, 0xFF];
+        let result = stack.to_u8(bytes);
+        assert_eq!(result, 0x11 as u8);
+    }
+    #[test]
+    #[should_panic]
+    fn negtest_wrappeddebugcostack_to_u8_too_short() {
+        let mut stack = WrappedDebugCoStack::default();
+        let bytes: &[u8] = &[];
+        let result = stack.to_u8(bytes);
+        assert_eq!(result, 0x11 as u8);
+    }
+}
