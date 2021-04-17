@@ -185,9 +185,7 @@ impl DebugCoStack {
     }
 
     pub fn push_u8(&mut self, value: u8) {
-        const SIZE: usize = 1;
-        let t = unsafe { transmute::<u8, [u8; SIZE]>(value) };
-        self.stack.push(t.to_vec());
+        self.stack.push([value].to_vec());
     }
 
     pub fn push_bytes(&mut self, value: &[u8]) {
@@ -340,29 +338,28 @@ impl WrappedDebugCoStack {
     }
 
     // Transmute byte slices from the stacks to values
+    // NOTE: Expected behavior for too long inputs is that extra bytes are ignored,
+    // while too short inputs will result in an index out of bounds error (No error checking for efficiency reasons, these are internal functions after all)
     fn to_u64(&mut self, value: &[u8]) -> u64 {
         let array: [u8; 8] = value[0..8]
             .try_into()
-            .expect("to_u64: Slice was of incorrect length");
+            .expect("to_u64: Error in try_into function (This should never happen?)");
         unsafe { return transmute::<[u8; 8], u64>(array) };
     }
     fn to_u32(&mut self, value: &[u8]) -> u32 {
         let array: [u8; 4] = value[0..4]
             .try_into()
-            .expect("to_u32: Slice was of incorrect length");
+            .expect("to_u32: Error in try_into function (This should never happen?)");
         unsafe { return transmute::<[u8; 4], u32>(array) };
     }
     fn to_u16(&mut self, value: &[u8]) -> u16 {
         let array: [u8; 2] = value[0..2]
             .try_into()
-            .expect("to_u16: Slice was of incorrect length");
+            .expect("to_u16: Error in try_into function (This should never happen?)");
         unsafe { return transmute::<[u8; 2], u16>(array) };
     }
     fn to_u8(&mut self, value: &[u8]) -> u8 {
-        let array: [u8; 1] = value[0..1]
-            .try_into()
-            .expect("to_u8: Slice was of incorrect length");
-        unsafe { return transmute::<[u8; 1], u8>(array) };
+        return value[0];
     }
 }
 
