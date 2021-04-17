@@ -18,11 +18,11 @@ pub struct CoData{
     context_stack: Vec<ExecutionContext>,
     stacks: [Vec<Vec<u8>>; 2],
     maps: Vec<HashMap<Vec<u8>, Vec<u8>>>,
-    input_stack: usize,
-    output_stack: usize,
-    top_input_map: usize,
-    top_output_map: usize,
-    top_result_map: usize,
+    input_stack_index: usize,
+    output_stack_index: usize,
+    top_input_map_index: usize,
+    top_output_map_index: usize,
+    top_result_map_index: usize,
     
     //various fields that aren't really CoData, but are most convenient to track here
     pub gas_remaining: u64,
@@ -40,11 +40,11 @@ impl CoData{
         let mut manager = CoData::default();
         manager.maps.push(HashMap::<Vec<u8>, Vec<u8>>::default()); //add output map (note: this is flipped when context is pushed)
         manager.maps.push(HashMap::<Vec<u8>, Vec<u8>>::default()); //add input map
-        manager.top_input_map = 1;
-        manager.top_output_map = 0;
-        manager.top_result_map = 1;
-        manager.input_stack = 0;
-        manager.output_stack = 1;
+        manager.top_input_map_index = 1;
+        manager.top_output_map_index = 0;
+        manager.top_result_map_index = 1;
+        manager.input_stack_index = 0;
+        manager.output_stack_index = 1;
         manager
     }
     pub fn permissions(&self) -> ContextPermissions{
@@ -55,11 +55,11 @@ impl CoData{
         }
     }
     pub fn push_output_stack(&mut self, data: &[u8]) -> Result<(), NeutronError>{
-        self.stacks[self.output_stack].push(data.to_vec());
+        self.stacks[self.output_stack_index].push(data.to_vec());
         Ok(())
     }
 	pub fn pop_input_stack(&mut self) -> Result<Vec<u8>, NeutronError>{
-        match self.stacks[self.input_stack].pop(){
+        match self.stacks[self.input_stack_index].pop(){
             None => {
                 return Err(Recoverable(RecoverableError::ItemDoesntExist));
             },
@@ -69,10 +69,10 @@ impl CoData{
         }
     }
     pub fn clear_input_stack(&mut self){
-        self.stacks[self.input_stack].clear();
+        self.stacks[self.input_stack_index].clear();
     }
 	pub fn drop_input_stack(&mut self) -> Result<(), NeutronError>{
-        match self.stacks[self.input_stack].pop(){
+        match self.stacks[self.input_stack_index].pop(){
             None => {
                 return Err(Recoverable(RecoverableError::ItemDoesntExist));
             },
@@ -82,7 +82,7 @@ impl CoData{
         }
     }
 	pub fn peek_input_stack(&self, index: u32) -> Result<Vec<u8>, NeutronError>{
-        let stack = &self.stacks[self.input_stack];
+        let stack = &self.stacks[self.input_stack_index];
         let i = (stack.len() as isize - 1) - index as isize;
         if i < 0{
             return Err(Recoverable(RecoverableError::ItemDoesntExist));
@@ -101,14 +101,14 @@ impl CoData{
         if key[0] == 0{
             return Err(NeutronError::Recoverable(RecoverableError::InvalidCoMapAccess));
         }
-        self.maps.get_mut(self.top_output_map).unwrap().insert(key.to_vec(), value.to_vec());
+        self.maps.get_mut(self.top_output_map_index).unwrap().insert(key.to_vec(), value.to_vec());
         Ok(())
     }
     pub fn push_input_key(&mut self, key: &[u8], value: &[u8]) -> Result<(), NeutronError>{
         if key[0] == 0{
             return Err(NeutronError::Recoverable(RecoverableError::InvalidCoMapAccess));
         }
-        self.maps.get_mut(self.top_input_map).unwrap().insert(key.to_vec(), value.to_vec());
+        self.maps.get_mut(self.top_input_map_index).unwrap().insert(key.to_vec(), value.to_vec());
         Ok(())
     }
     /* should this be allowed?
@@ -127,7 +127,7 @@ impl CoData{
         if key[0] == 0{
             return Err(NeutronError::Recoverable(RecoverableError::InvalidCoMapAccess));
         }
-        match self.maps[self.top_input_map].get(key){
+        match self.maps[self.top_input_map_index].get(key){
             Some(v) => {
                 Ok(v.to_vec())
             },
@@ -140,7 +140,7 @@ impl CoData{
         if key[0] == 0{
             return Err(NeutronError::Recoverable(RecoverableError::InvalidCoMapAccess));
         }
-        match self.maps[self.top_result_map].get(key){
+        match self.maps[self.top_result_map_index].get(key){
             Some(v) => {
                 Ok(v.to_vec())
             },
@@ -210,10 +210,10 @@ impl CoData{
     /// Should only be used by Element APIs. Flip stacks once when entering an Element API and once more when leaving and returning to a contract.
     /// Used so that contract outputs become Element inputs at first, then so that Element outputs becomes contract inputs
     fn flip_stacks(&mut self){
-        let tmp = self.input_stack;
-        self.input_stack = self.output_stack;
-        self.output_stack = tmp;
-        self.stacks[self.output_stack].clear(); //outputs are cleared with each flipping (clears caller's outputs on entry, then callers inputs upon exit)
+        let tmp = self.input_stack_index;
+        self.input_stack_index = self.output_stack_index;
+        self.output_stack_index = tmp;
+        self.stacks[self.output_stack_index].clear(); //outputs are cleared with each flipping (clears caller's outputs on entry, then callers inputs upon exit)
     }
 
     /*
@@ -229,14 +229,14 @@ impl CoData{
     /// Pushes a new execution context into the stack
     pub fn push_context(&mut self, context: ExecutionContext) -> Result<(), NeutronError>{
         let mut c = context;
-        self.top_input_map = self.top_output_map; //one below top of stack
-        self.top_output_map = self.top_result_map; //top of stack
-        self.top_result_map = self.top_result_map + 1; //new (temporary) map
+        self.top_input_map_index = self.top_output_map_index; //one below top of stack
+        self.top_output_map_index = self.top_result_map_index; //top of stack
+        self.top_result_map_index = self.top_result_map_index + 1; //new (temporary) map
 
-        c.input_map = self.top_input_map;
-        c.output_map = self.top_output_map;
-        c.result_map = self.top_result_map;
-        self.maps.get_mut(self.top_output_map).unwrap().clear(); //clear what is now the new result map (which can go on to become the next call's output map)
+        c.input_map = self.top_input_map_index;
+        c.output_map = self.top_output_map_index;
+        c.result_map = self.top_result_map_index;
+        self.maps.get_mut(self.top_output_map_index).unwrap().clear(); //clear what is now the new result map (which can go on to become the next call's output map)
         self.maps.push(HashMap::<Vec<u8>, Vec<u8>>::new()); //push new result map
         self.context_stack.push(c);
         //begin execution???
@@ -247,15 +247,16 @@ impl CoData{
     /// enter and exit functions should both be used before pushing the context and starting the call (and beginning execution),
     /// and then both again used after popping the context and exiting the call (returning execution to caller)
     pub fn enter_element(&mut self){
-        self.top_input_map = self.top_output_map; //one below top of stack
-        self.top_output_map = self.top_result_map; //top of stack
+        self.top_input_map_index = self.top_output_map_index; //one below top of stack
+        self.top_input_map_index = self.top_output_map_index; //one below top of stack
+        self.top_output_map_index = self.top_result_map_index; //top of stack
         self.flip_stacks();
         //note: elements can not access result map 
     }
     pub fn exit_element(&mut self){
         let c = self.context_stack.last().unwrap();
-        self.top_output_map = c.output_map;
-        self.top_input_map = c.input_map;
+        self.top_output_map_index = c.output_map;
+        self.top_input_map_index = c.input_map;
         self.flip_stacks();
     }
     /// Removes the top execution context from the stack
@@ -269,17 +270,17 @@ impl CoData{
         let c = match self.context_stack.last(){
             None => {
                 //no more contexts, so set to transaction level behavior
-                self.top_input_map = 1;
-                self.top_output_map = 0;
-                self.top_result_map = 1;
+                self.top_input_map_index = 1;
+                self.top_output_map_index = 0;
+                self.top_result_map_index = 1;
                 return Ok(());
             },
             Some(v) => {v}
         };
         self.maps.pop().unwrap(); //result map of caller is destroyed
-        self.top_input_map = c.input_map;
-        self.top_output_map = c.output_map;
-        self.top_result_map = c.result_map;
+        self.top_input_map_index = c.input_map;
+        self.top_output_map_index = c.output_map;
+        self.top_result_map_index = c.result_map;
         Ok(())
     }
     /// Peeks information from the execution context stack without modifying it

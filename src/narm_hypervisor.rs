@@ -6,6 +6,7 @@ use crate::vmmanager::*;
 use crate::callsystem::*;
 use crate::interface::*;
 use neutron_common::RecoverableError;
+use std::cmp;
 
 /*
 Service calls
@@ -142,7 +143,7 @@ impl NarmHypervisor{
                     };
                     self.vm.external_set_reg(0, data.len() as u32);
                     if max_size != 0{
-                        self.vm.copy_into_memory(address, &data[0..(max_size as usize)])?;
+                        self.vm.copy_into_memory(address, &data[0..(cmp::min(data.len(), max_size as usize))])?;
                     }
                 },
                 //SVC 0x14: costack_clear() 
