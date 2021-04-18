@@ -28,25 +28,34 @@ Currently very basic functionality:
 
 #[derive(Default)]
 pub struct TestHarness {
-    pub manager: Manager,
-    pub codata: CoData,
-
+    pub instance: NeutronInstance,
     pub db: MemoryGlobalState,
     pub logger: StdoutLogger,
     pub debugdata: DebugDataInjector,
 }
+#[derive(Default)]
+pub struct NeutronInstance{
+    pub manager: Manager,
+    pub codata: CoData,
+}
 
-impl TestHarness {
-    // Neater function based on the default folder setup
-    pub fn execute_debug_path_binary_using_default_callsystem(&mut self, test_dir: &str, contract_dir: &str, context: ExecutionContext) {
-        let path_str = &format!(
-            "./tests/{}/{}/target/thumbv6m-none-eabi/debug/contract-binary",
-            test_dir, contract_dir
-        );
-        self.execute_binary_using_default_callsystem(path_str, context);
+impl NeutronInstance{
+    pub fn execute_binary(&mut self, path_str: &str, callsystem: &CallSystem, mut context: ExecutionContext) -> NeutronResult{
+        self.prepare_execute(path_str, &mut context);
+        let mut vmm = VMManager::default();
+        let narm = || -> Box<dyn VMHypervisor> { Box::from(NarmHypervisor::default()) };
+        vmm.vm_builders.insert(2, narm);
+
+        let result = self.manager.execute(
+            &mut self.codata,
+            &callsystem,
+            &vmm,
+            )
+            .unwrap();
+        NeutronInstance::print_results(&result);
+        result
     }
-
-    pub fn execute_binary_using_default_callsystem(&mut self, path_str: &str, mut context: ExecutionContext){
+    fn prepare_execute(&mut self, path_str: &str, context: &mut ExecutionContext){
         let path = PathBuf::from(path_str);
         let binary = elf::File::open_path(path).unwrap();
 
@@ -64,7 +73,7 @@ impl TestHarness {
 
         self
             .codata
-            .push_context(context)
+            .push_context(context.clone())
             .unwrap();
         self
             .codata
@@ -74,30 +83,55 @@ impl TestHarness {
             .codata
             .push_input_key("!.d".as_bytes(), &[0])
             .unwrap();
-        
-        let mut vmm = VMManager::default();
+    }
+    fn print_results(result: &NeutronResult){
+        println!("Contract executed successfully!");
+        println!("Gas used: {}", result.gas_used);
+        println!("Status code: {:x}", result.status); 
+    }
+}
 
+impl TestHarness {
+    // Neater function based on the default folder setup
+    pub fn execute_debug_path_binary_using_default_callsystem(&mut self, test_dir: &str, contract_dir: &str, context: ExecutionContext) -> NeutronResult {
+        self.execute_binary_using_default_callsystem(
+            &TestHarness::get_debug_binary_path(test_dir, contract_dir),
+            context
+        )
+    }
+
+    pub fn get_debug_binary_path(test_dir: &str, contract_dir: &str) -> String{
+        let path_str = &format!(
+            "./tests/{}/{}/target/thumbv6m-none-eabi/debug/contract-binary",
+            test_dir, contract_dir
+        );
+        path_str.to_string()
+    }
+
+
+
+    pub fn execute_binary_using_default_callsystem(&mut self, path_str: &str, mut context: ExecutionContext) -> NeutronResult{
+        self.instance.prepare_execute(path_str, &mut context);
+        let mut vmm = VMManager::default();
         let narm = || -> Box<dyn VMHypervisor> { Box::from(NarmHypervisor::default()) };
         vmm.vm_builders.insert(2, narm);
+
         self.db.checkpoint().unwrap();
         let mut cs = CallSystem::default();
         cs.global_storage = Some(RefCell::new(&mut self.db));
         cs.logging = Some(RefCell::new(&mut self.logger));
-        cs.add_call(DEBUG_DATA_FEATURE, &mut self.debugdata).unwrap();  
+        cs.add_call(DEBUG_DATA_FEATURE, &mut self.debugdata).unwrap();
 
-        println!("Beginning contract execution");
-        let result = self
-            .manager
-            .execute(
-                &mut self.codata,
-                &cs,
-                &vmm,
+        let result = self.instance.manager.execute(
+            &mut self.instance.codata,
+            &cs,
+            &vmm,
             )
             .unwrap();
+        NeutronInstance::print_results(&result);
 
-        println!("Contract executed successfully!");
-        println!("Gas used: {}", result.gas_used);
-        println!("Status code: {:x}", result.status); 
         self.db.commit().unwrap();
+        result
     }
+
 }
