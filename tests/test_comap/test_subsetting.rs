@@ -55,8 +55,8 @@ fn comap_peek_subsets() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }
 
 #[test]
@@ -97,6 +97,6 @@ fn comap_peek_subsets_negtest_wrong_value() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }

@@ -19,6 +19,6 @@ use std::env;
 #[test]
 fn test_smoke() {
     let mut harness = TestHarness::default();
-    harness.load_contract_binary_default_path("test_smoke", "contract_smoke");
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem("test_smoke", "contract_smoke", context);
 }

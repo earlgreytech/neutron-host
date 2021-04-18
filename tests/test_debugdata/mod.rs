@@ -34,9 +34,8 @@ fn mirror_bytes() {
         expected_output_stack: assert_stack,
         ..DebugDataInjector::default()
     };
-
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }
 
 #[test]
@@ -58,8 +57,8 @@ fn mirror_negtest_wrong_content() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }
 
 #[test]
@@ -80,9 +79,9 @@ fn mirror_negtest_too_many() {
         expected_output_stack: assert_stack,
         ..DebugDataInjector::default()
     };
+    let context = ExecutionContext::create_default_random_context();
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }
 
 #[test]
@@ -104,8 +103,8 @@ fn mirror_negtest_too_few() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }
 
 #[test]
@@ -125,8 +124,8 @@ fn mirror_str() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }
 
 #[test]
@@ -158,6 +157,6 @@ fn mirror_unsigned() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }

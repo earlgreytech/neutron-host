@@ -11,8 +11,7 @@ use neutron_host::manager::*;
 use neutron_host::narm_hypervisor::*;
 use neutron_host::vmmanager::*;
 
-use std::cell::RefCell;
-use std::env;
+use std::{cell::RefCell, char::MAX};
 use std::path::PathBuf;
 
 pub const MAX_GAS: u64 = 10000;
@@ -27,112 +26,78 @@ Currently very basic functionality:
 
 */
 
-pub struct TestHarness<'a> {
+#[derive(Default)]
+pub struct TestHarness {
     pub manager: Manager,
     pub codata: CoData,
 
-    pub callsystem: CallSystem<'a>,
     pub db: MemoryGlobalState,
     pub logger: StdoutLogger,
     pub debugdata: DebugDataInjector,
-
-    pub vmm: VMManager,
-    pub context: ExecutionContext,
-
-    pub contract: Option<elf::File>,
 }
 
-impl<'a> Default for TestHarness<'a> {
-    fn default() -> Self {
-        TestHarness {
-            manager: Manager::default(),
-            codata: CoData::new(),
-
-            callsystem: CallSystem::default(),
-            db: MemoryGlobalState::default(),
-            logger: StdoutLogger {},
-            debugdata: DebugDataInjector::default(),
-
-            vmm: VMManager::default(),
-            context: ExecutionContext::default(),
-
-            contract: None,
-        }
-    }
-}
-
-impl<'a> TestHarness<'a> {
-    // Currently only supports a single contract binary
-    pub fn load_contract_binary(&mut self, path_str: &str) {
-        let path = PathBuf::from(path_str);
-        self.contract = Some(elf::File::open_path(path).unwrap());
-    }
-
+impl TestHarness {
     // Neater function based on the default folder setup
-    pub fn load_contract_binary_default_path(&mut self, test_dir: &str, contract_dir: &str) {
+    pub fn execute_debug_path_binary_using_default_callsystem(&mut self, test_dir: &str, contract_dir: &str, context: ExecutionContext) {
         let path_str = &format!(
             "./tests/{}/{}/target/thumbv6m-none-eabi/debug/contract-binary",
             test_dir, contract_dir
         );
-        self.load_contract_binary(path_str);
+        self.execute_binary_using_default_callsystem(path_str, context);
     }
-}
 
-// Does all initialization that passes references around (aka lifetime hell) runs the VM, all in one swoop
-// Splitting this up into neat functions is a later concern
-#[macro_export]
-macro_rules! initiateAndRun {
-    ( $test_setup_ident:ident ) => {
-        //setup mandatory storage and logging elements
-        $test_setup_ident.db.checkpoint().unwrap();
-        $test_setup_ident.callsystem.global_storage = Some(RefCell::new(&mut $test_setup_ident.db));
-        $test_setup_ident.callsystem.logging = Some(RefCell::new(&mut $test_setup_ident.logger));
-        $test_setup_ident
-            .callsystem
-            .add_call(DEBUG_DATA_FEATURE, &mut $test_setup_ident.debugdata)
-            .unwrap();
-        //todo, setup other ElementAPIs here
+    pub fn execute_binary_using_default_callsystem(&mut self, path_str: &str, mut context: ExecutionContext){
+        let path = PathBuf::from(path_str);
+        let binary = elf::File::open_path(path).unwrap();
 
-        //Add NARM as #2 VM
-        let narm = || -> Box<dyn VMHypervisor> { Box::from(NarmHypervisor::default()) };
-        $test_setup_ident.vmm.vm_builders.insert(2, narm);
-
-        //Setup execution context
-        $test_setup_ident.codata.gas_remaining = MAX_GAS;
-        neutron_host::reset_to_random_address(&mut $test_setup_ident.context.self_address);
-        $test_setup_ident.context.self_address.version = 2; //to match NARM VM number
-        $test_setup_ident.context.execution_type = ExecutionType::BareExecution;
-
-        let contract = $test_setup_ident.contract.unwrap();
-        let text_scn = contract.get_section(".text").unwrap();
+        let text_scn = binary.get_section(".text").unwrap();
         assert!(text_scn.shdr.addr == 0x10000);
 
-        //Push contract bytecode into Neutron from ELF file
-        $test_setup_ident
+        if context.gas_limit == 0{
+            context.gas_limit = MAX_GAS;
+        }
+        self.codata.gas_remaining = context.gas_limit;
+        
+        context.permissions = ContextPermissions::mutable_call();
+        context.execution_type = ExecutionType::BareExecution;
+        //self.codata.gas_remaining = MAX_GAS;
+
+        self
             .codata
-            .push_context($test_setup_ident.context)
+            .push_context(context)
             .unwrap();
-        $test_setup_ident
+        self
             .codata
             .push_input_key("!.c".as_bytes(), &text_scn.data)
             .unwrap();
-        $test_setup_ident
+        self
             .codata
             .push_input_key("!.d".as_bytes(), &[0])
             .unwrap();
+        
+        let mut vmm = VMManager::default();
+
+        let narm = || -> Box<dyn VMHypervisor> { Box::from(NarmHypervisor::default()) };
+        vmm.vm_builders.insert(2, narm);
+        self.db.checkpoint().unwrap();
+        let mut cs = CallSystem::default();
+        cs.global_storage = Some(RefCell::new(&mut self.db));
+        cs.logging = Some(RefCell::new(&mut self.logger));
+        cs.add_call(DEBUG_DATA_FEATURE, &mut self.debugdata).unwrap();  
 
         println!("Beginning contract execution");
-        let result = $test_setup_ident
+        let result = self
             .manager
             .execute(
-                &mut $test_setup_ident.codata,
-                &$test_setup_ident.callsystem,
-                &$test_setup_ident.vmm,
+                &mut self.codata,
+                &cs,
+                &vmm,
             )
             .unwrap();
 
         println!("Contract executed successfully!");
         println!("Gas used: {}", result.gas_used);
-        println!("Status code: {:x}", result.status);
-    };
+        println!("Status code: {:x}", result.status); 
+        self.db.commit().unwrap();
+    }
 }
