@@ -21,21 +21,23 @@ use std::env;
 // Test that basic smart contract execution doesn't throw an error
 #[test]
 fn test_example_new_element() {
-    let mut harness = TestHarness::default();
-    let context = ExecutionContext::create_default_random_context();
-    harness.db.checkpoint().unwrap();
-    let mut cs = CallSystem::default();
-    cs.global_storage = Some(RefCell::new(&mut harness.db));
-    cs.logging = Some(RefCell::new(&mut harness.logger));
-    let mut file_element = FileElement{};
-    cs.add_call(FILE_ELEMENT_ID, &mut file_element).unwrap();
-    let result = harness.instance.execute_binary(
-        &TestHarness::get_debug_binary_path("example_new_element", "contract_new_element"),
-        &cs, 
-        context
-    );
-    harness.db.commit().unwrap();
-    assert_eq!(result.status, 0);
+    for target in vec!["debug", "release"]{
+        let mut harness = TestHarness::default();
+        let context = ExecutionContext::create_default_random_context();
+        harness.db.checkpoint().unwrap();
+        let mut cs = CallSystem::default();
+        cs.global_storage = Some(RefCell::new(&mut harness.db));
+        cs.logging = Some(RefCell::new(&mut harness.logger));
+        let mut file_element = FileElement{};
+        cs.add_call(FILE_ELEMENT_ID, &mut file_element).unwrap();
+        let result = harness.instance.execute_binary(
+            &TestHarness::get_binary_path("example_new_element", "contract_new_element", target),
+            &cs, 
+            context
+        );
+        harness.db.commit().unwrap();
+        assert_eq!(result.status, 0);
+    }
 }
 
 const FILE_ELEMENT_ID:u32 = 0x8000_0001;

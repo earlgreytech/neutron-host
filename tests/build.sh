@@ -5,6 +5,7 @@ for dir in */ ; do
     for subdir in */ ; do
         cd ./$subdir
         cargo build --target thumbv6m-none-eabi
+        cargo build --target thumbv6m-none-eabi --release
         cd ../
     done
     cd ../

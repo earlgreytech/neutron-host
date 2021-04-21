@@ -124,15 +124,15 @@ impl TestHarness {
     // Neater function based on the default folder setup
     pub fn execute_debug_path_binary_using_default_callsystem(&mut self, test_dir: &str, contract_dir: &str, context: ExecutionContext) -> NeutronResult {
         self.execute_binary_using_default_callsystem(
-            &TestHarness::get_debug_binary_path(test_dir, contract_dir),
+            &TestHarness::get_binary_path(test_dir, contract_dir, "debug"),
             context
         )
     }
 
-    pub fn get_debug_binary_path(test_dir: &str, contract_dir: &str) -> String{
+    pub fn get_binary_path(test_dir: &str, contract_dir: &str, build_type: &str) -> String{
         let path_str = &format!(
-            "./tests/{}/{}/target/thumbv6m-none-eabi/debug/contract-binary",
-            test_dir, contract_dir
+            "./tests/{}/{}/target/thumbv6m-none-eabi/{}/contract-binary",
+            test_dir, contract_dir, build_type
         );
         path_str.to_string()
     }
