@@ -3,3 +3,4 @@
 rustfmt ./tests/*.rs
 rustfmt ./src/element_interfaces/debug_data.rs
 rustfmt ./src/narm_hypervisor.rs
+rustfmt ./src/comap_abi_decoder.rs
