@@ -1,19 +1,6 @@
-use crate::harness::*;
-use crate::*;
-
-// These will throw lots of unused import warnings because some are only used in macros
-use neutron_host::callsystem::*;
-use neutron_host::codata::*;
-use neutron_host::db::MemoryGlobalState;
 use neutron_host::element_interfaces::debug_data::*;
-use neutron_host::element_interfaces::logging::StdoutLogger;
 use neutron_host::interface::*;
-use neutron_host::manager::*;
-use neutron_host::narm_hypervisor::*;
-use neutron_host::vmmanager::*;
-
-use std::cell::RefCell;
-use std::env;
+use neutron_host::harness::*;
 
 const DIR_NAME: &'static str = "test_debugdata";
 const CONTRACT_DIR_NAME: &'static str = "contract_mirror";
@@ -34,9 +21,8 @@ fn mirror_bytes() {
         expected_output_stack: assert_stack,
         ..DebugDataInjector::default()
     };
-
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }
 
 #[test]
@@ -58,8 +44,8 @@ fn mirror_negtest_wrong_content() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }
 
 #[test]
@@ -80,9 +66,9 @@ fn mirror_negtest_too_many() {
         expected_output_stack: assert_stack,
         ..DebugDataInjector::default()
     };
+    let context = ExecutionContext::create_default_random_context();
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }
 
 #[test]
@@ -104,8 +90,8 @@ fn mirror_negtest_too_few() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }
 
 #[test]
@@ -125,8 +111,8 @@ fn mirror_str() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }
 
 #[test]
@@ -158,6 +144,6 @@ fn mirror_unsigned() {
         ..DebugDataInjector::default()
     };
 
-    harness.load_contract_binary_default_path(DIR_NAME, CONTRACT_DIR_NAME);
-    initiateAndRun!(harness);
+    let context = ExecutionContext::create_default_random_context();
+    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
 }

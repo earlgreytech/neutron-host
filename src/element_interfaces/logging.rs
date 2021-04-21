@@ -81,6 +81,7 @@ pub trait LoggingInterface{
     fn log_error(&mut self, stack: &mut CoData, message: String) -> Result<(), NeutronError>;
 }
 
+#[derive(Default)]
 pub struct StdoutLogger{
 }
 impl LoggingInterface for StdoutLogger{

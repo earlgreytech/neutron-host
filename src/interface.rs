@@ -145,6 +145,12 @@ pub struct ExecutionContext{
 }
 
 impl ExecutionContext{
+    pub fn create_default_random_context() -> ExecutionContext{
+        let mut c = ExecutionContext::default();
+        crate::reset_to_random_address(&mut c.self_address);
+        c.self_address.version = 2; //to match NARM VM number
+        c
+    }
 }
 
 

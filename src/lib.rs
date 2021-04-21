@@ -8,6 +8,7 @@ pub mod narm_hypervisor;
 pub mod callsystem;
 pub mod vmmanager;
 pub mod manager;
+pub mod harness;
 pub extern crate neutron_common as addressing;
 
 extern crate num;

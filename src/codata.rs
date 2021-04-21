@@ -13,7 +13,6 @@ pub struct GasSchedule{
     pub element_costs: HashMap<u32, HashMap<u32, Vec<u64>>>
 }
 
-#[derive(Default)]
 pub struct CoData{
     context_stack: Vec<ExecutionContext>,
     stacks: [Vec<Vec<u8>>; 2],
@@ -35,17 +34,32 @@ pub struct CoData{
     pub ignore_permissions: bool
 }
 
+impl Default for CoData{
+    fn default() -> CoData{
+        let mut c = CoData{
+            gas_remaining: 0,
+            vm_writeable_memory: 0,
+            vm_read_only_memory: 0,
+            gas_schedule: GasSchedule::default(),
+            ignore_permissions: false,
+            context_stack: vec![],
+            stacks: [vec![], vec![]],
+            top_input_map_index: 1,
+            top_output_map_index: 0,
+            top_result_map_index: 1,
+            input_stack_index: 0,
+            output_stack_index: 1,
+            maps: vec![]
+        };
+        c.maps.push(HashMap::<Vec<u8>, Vec<u8>>::default()); //add output map (note: this is flipped when context is pushed)
+        c.maps.push(HashMap::<Vec<u8>, Vec<u8>>::default()); //add input map
+        c
+    }
+}
+
 impl CoData{
     pub fn new() -> CoData{
-        let mut manager = CoData::default();
-        manager.maps.push(HashMap::<Vec<u8>, Vec<u8>>::default()); //add output map (note: this is flipped when context is pushed)
-        manager.maps.push(HashMap::<Vec<u8>, Vec<u8>>::default()); //add input map
-        manager.top_input_map_index = 1;
-        manager.top_output_map_index = 0;
-        manager.top_result_map_index = 1;
-        manager.input_stack_index = 0;
-        manager.output_stack_index = 1;
-        manager
+        CoData::default()
     }
     pub fn permissions(&self) -> ContextPermissions{
         if self.ignore_permissions{
