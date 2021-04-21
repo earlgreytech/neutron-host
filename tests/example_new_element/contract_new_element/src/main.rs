@@ -29,9 +29,9 @@ pub unsafe extern "C" fn main() -> ! {
     println!("expected: {}", expected);
     let actual = core::str::from_utf8_unchecked(&data[0..len]);
     println!("actual: {}", actual);
-    if actual != expected{
-        __exit(3);
-    }else{
+    if expected == actual{
         __exit(0);
+    }else{
+        __exit(3);
     }
 }

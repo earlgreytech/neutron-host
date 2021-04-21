@@ -84,6 +84,35 @@ impl NeutronInstance{
             .push_input_key("!.d".as_bytes(), &[0])
             .unwrap();
     }
+    fn prepare_deploy(&mut self, path_str: &str, context: &mut ExecutionContext){
+        let path = PathBuf::from(path_str);
+        let binary = elf::File::open_path(path).unwrap();
+
+        let text_scn = binary.get_section(".text").unwrap();
+        assert!(text_scn.shdr.addr == 0x10000);
+
+        if context.gas_limit == 0{
+            context.gas_limit = MAX_GAS;
+        }
+        self.codata.gas_remaining = context.gas_limit;
+        
+        context.permissions = ContextPermissions::mutable_call();
+        context.execution_type = ExecutionType::Deploy;
+        //self.codata.gas_remaining = MAX_GAS;
+
+        self
+            .codata
+            .push_context(context.clone())
+            .unwrap();
+        self
+            .codata
+            .push_input_key("!.c".as_bytes(), &text_scn.data)
+            .unwrap();
+        self
+            .codata
+            .push_input_key("!.d".as_bytes(), &[0])
+            .unwrap();
+    }
     fn print_results(result: &NeutronResult){
         println!("Contract executed successfully!");
         println!("Gas used: {}", result.gas_used);
@@ -112,6 +141,59 @@ impl TestHarness {
 
     pub fn execute_binary_using_default_callsystem(&mut self, path_str: &str, mut context: ExecutionContext) -> NeutronResult{
         self.instance.prepare_execute(path_str, &mut context);
+        let mut vmm = VMManager::default();
+        let narm = || -> Box<dyn VMHypervisor> { Box::from(NarmHypervisor::default()) };
+        vmm.vm_builders.insert(2, narm);
+
+        self.db.checkpoint().unwrap();
+        let mut cs = CallSystem::default();
+        cs.global_storage = Some(RefCell::new(&mut self.db));
+        cs.logging = Some(RefCell::new(&mut self.logger));
+        cs.add_call(DEBUG_DATA_FEATURE, &mut self.debugdata).unwrap();
+
+        let result = self.instance.manager.execute(
+            &mut self.instance.codata,
+            &cs,
+            &vmm,
+            )
+            .unwrap();
+        NeutronInstance::print_results(&result);
+
+        self.db.commit().unwrap();
+        result
+    }
+    pub fn deploy_binary_using_default_callsystem(&mut self, path_str: &str, mut context: ExecutionContext) -> NeutronResult{
+        self.instance.prepare_deploy(path_str, &mut context);
+        let mut vmm = VMManager::default();
+        let narm = || -> Box<dyn VMHypervisor> { Box::from(NarmHypervisor::default()) };
+        vmm.vm_builders.insert(2, narm);
+
+        self.db.checkpoint().unwrap();
+        let mut cs = CallSystem::default();
+        cs.global_storage = Some(RefCell::new(&mut self.db));
+        cs.logging = Some(RefCell::new(&mut self.logger));
+        cs.add_call(DEBUG_DATA_FEATURE, &mut self.debugdata).unwrap();
+
+        let result = self.instance.manager.execute(
+            &mut self.instance.codata,
+            &cs,
+            &vmm,
+            )
+            .unwrap();
+        NeutronInstance::print_results(&result);
+
+        self.db.commit().unwrap();
+        result
+    }
+    pub fn call_using_default_callsystem(&mut self, mut context: ExecutionContext) -> NeutronResult{
+        if context.gas_limit == 0{
+            context.gas_limit = MAX_GAS;
+        }
+        self.instance.codata.gas_remaining = context.gas_limit;
+        
+        context.permissions = ContextPermissions::mutable_call();
+        context.execution_type = ExecutionType::Call;
+        self.instance.codata.push_context(context.clone()).unwrap();
         let mut vmm = VMManager::default();
         let narm = || -> Box<dyn VMHypervisor> { Box::from(NarmHypervisor::default()) };
         vmm.vm_builders.insert(2, narm);
