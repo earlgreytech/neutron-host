@@ -11,11 +11,11 @@ TODO: Move to neutron-common, will at least be used in neutron-star too down the
 */
 
 // A long list of constants isn't pretty, the important thing is that it gets inlined by the compiler.
-const HEADER_SIZE_MASK: u8 = 0b11000000;
-const HEADER_SIZE_1: u8 = 0b00000000;
-const HEADER_SIZE_2: u8 = 0b01000000;
-const HEADER_SIZE_4: u8 = 0b10000000;
-const HEADER_SIZE_RESERVED: u8 = 0b11000000;
+pub const HEADER_SIZE_MASK: u8 = 0b11000000;
+pub const HEADER_SIZE_1: u8 = 0b00000000;
+pub const HEADER_SIZE_2: u8 = 0b01000000;
+pub const HEADER_SIZE_4: u8 = 0b10000000;
+pub const HEADER_SIZE_RESERVED: u8 = 0b11000000;
 
 // These following will be used in the full decoder
 
