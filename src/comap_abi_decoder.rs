@@ -1,7 +1,14 @@
-// Functions to efficiently decode neutron comap headers
-// General note: Whenever it matters little-endian byte order is used, unless explicitly stated otherwise
+/*
 
-// TODO: Move to neutron-common, will at least be used in neutron-star too down the line
+Functions to efficiently decode neutron comap headers
+
+For docs see https://neutron.earlgrey.tech/spec/neutronabi
+
+General note: Whenever it matters little-endian byte order is used, unless explicitly stated otherwise
+
+TODO: Move to neutron-common, will at least be used in neutron-star too down the line
+
+*/
 
 // A long list of constants isn't pretty, the important thing is that it gets inlined by the compiler.
 const HEADER_SIZE_MASK: u8 = 0b11000000;
