@@ -1,4 +1,3 @@
-use crate::harness::*;
 use crate::*;
 
 use elf::File;
@@ -14,6 +13,7 @@ use neutron_host::manager::*;
 use neutron_host::narm_hypervisor::*;
 use neutron_host::vmmanager::*;
 use neutron_host::neutronerror::*;
+use neutron_host::harness::*;
 
 use std::cell::RefCell;
 use std::env;

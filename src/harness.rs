@@ -1,15 +1,15 @@
 extern crate elf;
 
 // These will throw lots of unused import warnings because some are only used in macros
-use neutron_host::callsystem::*;
-use neutron_host::codata::*;
-use neutron_host::db::MemoryGlobalState;
-use neutron_host::element_interfaces::debug_data::*;
-use neutron_host::element_interfaces::logging::StdoutLogger;
-use neutron_host::interface::*;
-use neutron_host::manager::*;
-use neutron_host::narm_hypervisor::*;
-use neutron_host::vmmanager::*;
+use crate::callsystem::*;
+use crate::codata::*;
+use crate::db::MemoryGlobalState;
+use crate::element_interfaces::debug_data::*;
+use crate::element_interfaces::logging::StdoutLogger;
+use crate::interface::*;
+use crate::manager::*;
+use crate::narm_hypervisor::*;
+use crate::vmmanager::*;
 
 use std::{cell::RefCell, char::MAX};
 use std::path::PathBuf;

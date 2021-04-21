@@ -1,4 +1,3 @@
-use crate::harness::*;
 use crate::*;
 
 // These will throw lots of unused import warnings because some are only used in macros
@@ -11,6 +10,7 @@ use neutron_host::interface::*;
 use neutron_host::manager::*;
 use neutron_host::narm_hypervisor::*;
 use neutron_host::vmmanager::*;
+use neutron_host::harness::*;
 
 use std::cell::RefCell;
 use std::env;
