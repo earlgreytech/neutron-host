@@ -1,6 +1,7 @@
+//! The harness module contains a series of methods and structures for more easily using Neutron for various testing purposes
+
 extern crate elf;
 
-// These will throw lots of unused import warnings because some are only used in macros
 use crate::callsystem::*;
 use crate::codata::*;
 use crate::db::MemoryGlobalState;
@@ -16,16 +17,7 @@ use std::path::PathBuf;
 
 pub const DEFAULT_TEST_GAS: u64 = 10000;
 
-/*
-Harness for Neutron stack integration testing
-
-Currently very basic functionality:
-* Load and run a smart contract
-* Output stream from execution context to the testing function
-* Inject debug data into the execution context to push an initial input stack and/or assert state of output stack
-
-*/
-
+/// TestHarness contains a NeutronInstance and test versions of "mandatory" Elements, plus the optional DebugDataInjector Element
 #[derive(Default)]
 pub struct TestHarness {
     pub instance: NeutronInstance,
@@ -33,6 +25,7 @@ pub struct TestHarness {
     pub logger: StdoutLogger,
     pub debugdata: DebugDataInjector,
 }
+/// Contains the execution state data needed to run Neutron which is also likely to be interacted with through test code
 #[derive(Default)]
 pub struct NeutronInstance{
     pub manager: Manager,
@@ -40,6 +33,7 @@ pub struct NeutronInstance{
 }
 
 impl NeutronInstance{
+    /// Loads the given binary at `path_str` and loads it for a "use once" execution using the given CallSystem and Context
     pub fn execute_binary(&mut self, path_str: &str, callsystem: &CallSystem, mut context: ExecutionContext) -> NeutronResult{
         self.prepare_execute(path_str, &mut context);
         let mut vmm = VMManager::default();
@@ -121,14 +115,14 @@ impl NeutronInstance{
 }
 
 impl TestHarness {
-    // Neater function based on the default folder setup
+    /// Loads and does "use once" execution on a "debug" compiled Rust smart contract
     pub fn execute_debug_path_binary_using_default_callsystem(&mut self, test_dir: &str, contract_dir: &str, context: ExecutionContext) -> NeutronResult {
         self.execute_binary_using_default_callsystem(
             &TestHarness::get_binary_path(test_dir, contract_dir, "debug"),
             context
         )
     }
-
+    /// A helper method to compute the path to a Rust smart contract
     pub fn get_binary_path(test_dir: &str, contract_dir: &str, build_type: &str) -> String{
         let path_str = &format!(
             "./tests/{}/{}/target/thumbv6m-none-eabi/{}/contract-binary",
@@ -138,7 +132,7 @@ impl TestHarness {
     }
 
 
-
+    /// Uses the default test CallSystem to "use once" execute the given smart contract binary
     pub fn execute_binary_using_default_callsystem(&mut self, path_str: &str, mut context: ExecutionContext) -> NeutronResult{
         self.instance.prepare_execute(path_str, &mut context);
         let mut vmm = VMManager::default();
@@ -162,6 +156,7 @@ impl TestHarness {
         self.db.commit().unwrap();
         result
     }
+    /// Loads the given smart contract binary and deploys it for multiple uses with the default test CallSystem
     pub fn deploy_binary_using_default_callsystem(&mut self, path_str: &str, mut context: ExecutionContext) -> NeutronResult{
         self.instance.prepare_deploy(path_str, &mut context);
         let mut vmm = VMManager::default();
@@ -185,6 +180,7 @@ impl TestHarness {
         self.db.commit().unwrap();
         result
     }
+    /// Executes a previously deployed smart contract using the default test CallSystem
     pub fn call_using_default_callsystem(&mut self, mut context: ExecutionContext) -> NeutronResult{
         if context.gas_limit == 0{
             context.gas_limit = DEFAULT_TEST_GAS;
