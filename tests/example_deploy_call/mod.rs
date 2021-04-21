@@ -1,22 +1,6 @@
-use crate::*;
-
-use elf::File;
-use neutron_common::RecoverableError;
-// These will throw lots of unused import warnings because some are only used in macros
-use neutron_host::callsystem::*;
-use neutron_host::codata::*;
-use neutron_host::db::MemoryGlobalState;
-use neutron_host::element_interfaces::debug_data::*;
-use neutron_host::element_interfaces::logging::StdoutLogger;
 use neutron_host::interface::*;
-use neutron_host::manager::*;
-use neutron_host::narm_hypervisor::*;
-use neutron_host::vmmanager::*;
-use neutron_host::neutronerror::*;
 use neutron_host::harness::*;
 
-use std::cell::RefCell;
-use std::env;
 
 // Test that deploying a contract, then calling it again actually works
 #[test]

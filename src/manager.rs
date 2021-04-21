@@ -145,7 +145,7 @@ impl Manager{
 mod tests {
     use super::*;
     use std::cell::RefCell;
-    use crate::{addressing::*, codata, interface::ContextPermissions};
+    use crate::{addressing::*, interface::ContextPermissions};
 
     #[derive(Default)]
     struct TestVM{
@@ -299,7 +299,7 @@ mod tests {
         let mut vmm = VMManager::default();
         vmm.vm_builders.insert(1, testvm);
 
-        let mut manager = Manager::default();
+        let mut _manager = Manager::default();
         let mut context = crate::interface::ExecutionContext::default();
         context.permissions = ContextPermissions::mutable_call();
         context.self_address.version = 1;

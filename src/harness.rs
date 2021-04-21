@@ -11,10 +11,10 @@ use crate::manager::*;
 use crate::narm_hypervisor::*;
 use crate::vmmanager::*;
 
-use std::{cell::RefCell, char::MAX};
+use std::{cell::RefCell};
 use std::path::PathBuf;
 
-pub const MAX_GAS: u64 = 10000;
+pub const DEFAULT_TEST_GAS: u64 = 10000;
 
 /*
 Harness for Neutron stack integration testing
@@ -63,7 +63,7 @@ impl NeutronInstance{
         assert!(text_scn.shdr.addr == 0x10000);
 
         if context.gas_limit == 0{
-            context.gas_limit = MAX_GAS;
+            context.gas_limit = DEFAULT_TEST_GAS;
         }
         self.codata.gas_remaining = context.gas_limit;
         
@@ -92,7 +92,7 @@ impl NeutronInstance{
         assert!(text_scn.shdr.addr == 0x10000);
 
         if context.gas_limit == 0{
-            context.gas_limit = MAX_GAS;
+            context.gas_limit = DEFAULT_TEST_GAS;
         }
         self.codata.gas_remaining = context.gas_limit;
         
@@ -187,7 +187,7 @@ impl TestHarness {
     }
     pub fn call_using_default_callsystem(&mut self, mut context: ExecutionContext) -> NeutronResult{
         if context.gas_limit == 0{
-            context.gas_limit = MAX_GAS;
+            context.gas_limit = DEFAULT_TEST_GAS;
         }
         self.instance.codata.gas_remaining = context.gas_limit;
         
