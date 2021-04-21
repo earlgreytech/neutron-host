@@ -54,22 +54,9 @@ impl NarmHypervisor {
             let syscall = self.vm.execute()?;
             codata.gas_remaining = self.vm.gas_remaining;
             match syscall {
-                0xFF => {
-                    return Ok(HypervisorState::Ended);
-                }
-
-                0xFE => {
-                    return Ok(HypervisorState::Error(NeutronError::Recoverable(
-                        RecoverableError::ContractRevertedExecution,
-                    )));
-                }
-
-                0x20 => {
-                    return Ok(HypervisorState::ElementCall(
-                        self.vm.external_get_reg(0),
-                        self.vm.external_get_reg(1),
-                    ));
-                }
+                //***************************//
+                //**   Costack operators   **//
+                //***************************//
 
                 //SVC 0x10: push_costack (buffer: pointer, size: u32)
                 0x10 => {
@@ -108,6 +95,10 @@ impl NarmHypervisor {
                 0x14 => {
                     codata.clear_input_stack();
                 }
+
+                //*************************//
+                //**   Comap operators   **//
+                //*************************//
 
                 //SVC 0x31: push_raw_comap(key: stack [u8], raw_value: stack [u8])
                 //Pop two values from costack and push as key and value to comap
@@ -206,6 +197,30 @@ impl NarmHypervisor {
                             return Ok(HypervisorState::Error(e));
                         }
                     }
+                }
+
+                //************************//
+                //**   Misc operators   **//
+                //************************//
+
+                //SVC 0xFF: Reached end of execution without error
+                0xFF => {
+                    return Ok(HypervisorState::Ended);
+                }
+
+                //SVC 0xFE: Execution reverted
+                0xFE => {
+                    return Ok(HypervisorState::Error(NeutronError::Recoverable(
+                        RecoverableError::ContractRevertedExecution,
+                    )));
+                }
+
+                //SVC 0x20: Element call
+                0x20 => {
+                    return Ok(HypervisorState::ElementCall(
+                        self.vm.external_get_reg(0),
+                        self.vm.external_get_reg(1),
+                    ));
                 }
 
                 0 => {
