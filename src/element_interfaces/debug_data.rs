@@ -1,5 +1,6 @@
 use crate::callsystem::*;
 use crate::codata::*;
+use crate::comap_abi_decoder::*;
 use crate::neutronerror::NeutronError::*;
 use crate::neutronerror::*;
 use core::mem::transmute;
@@ -382,6 +383,20 @@ impl DebugCoMap {
         }
         self.map.insert(key.to_vec(), value.to_vec());
         Ok(())
+    }
+
+    // For u32 ABI header
+    pub fn push_key_abi(
+        &mut self,
+        key: &[u8],
+        value: &[u8],
+        abi_data: u32,
+    ) -> Result<(), NeutronError> {
+        let (header_size, header_bytes) = comap_abi_header_from_u32(abi_data);
+        let mut full_value = vec![];
+        full_value.extend_from_slice(&header_bytes[0..header_size]);
+        full_value.extend_from_slice(&value);
+        self.push_key(key, &full_value)
     }
 
     pub fn peek_key(&mut self, key: &[u8]) -> Result<Vec<u8>, NeutronError> {

@@ -19,12 +19,8 @@ fn test_comap_push_header_size_1() {
     stack.push_str(raw_value);
     stack.push_u32(abi_data);
 
-    let mut expected_value = vec![];
-    expected_value.extend_from_slice(&[HEADER_SIZE_1]);
-    expected_value.extend_from_slice(&raw_value.as_bytes());
-
     expected_map
-        .push_key(key.as_bytes(), &expected_value)
+        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
     let mut harness = TestHarness::default();
@@ -55,12 +51,8 @@ fn test_comap_push_header_size_2() {
     stack.push_str(raw_value);
     stack.push_u32(abi_data);
 
-    let mut expected_value = vec![];
-    expected_value.extend_from_slice(&[HEADER_SIZE_2, 0x42 as u8]);
-    expected_value.extend_from_slice(&raw_value.as_bytes());
-
     expected_map
-        .push_key(key.as_bytes(), &expected_value)
+        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
     let mut harness = TestHarness::default();
@@ -91,12 +83,8 @@ fn test_comap_push_header_size_4() {
     stack.push_str(raw_value);
     stack.push_u32(abi_data);
 
-    let mut expected_value = vec![];
-    expected_value.extend_from_slice(&[HEADER_SIZE_4, 0x42 as u8, 0x37 as u8, 0x13 as u8]);
-    expected_value.extend_from_slice(&raw_value.as_bytes());
-
     expected_map
-        .push_key(key.as_bytes(), &expected_value)
+        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
     let mut harness = TestHarness::default();
@@ -129,12 +117,8 @@ fn negtest_comap_push_header_wrong_key() {
     stack.push_str(raw_value);
     stack.push_u32(abi_data);
 
-    let mut expected_value = vec![];
-    expected_value.extend_from_slice(&[HEADER_SIZE_1]);
-    expected_value.extend_from_slice(&raw_value.as_bytes());
-
     expected_map
-        .push_key(key.as_bytes(), &expected_value)
+        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
     let mut harness = TestHarness::default();
@@ -167,12 +151,8 @@ fn negtest_comap_push_header_wrong_value() {
     stack.push_str(wrong_raw_value);
     stack.push_u32(abi_data);
 
-    let mut expected_value = vec![];
-    expected_value.extend_from_slice(&[HEADER_SIZE_1]);
-    expected_value.extend_from_slice(&raw_value.as_bytes());
-
     expected_map
-        .push_key(key.as_bytes(), &expected_value)
+        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
     let mut harness = TestHarness::default();
@@ -198,18 +178,15 @@ fn negtest_comap_push_header_wrong_size() {
 
     let key = "this is the key";
     let raw_value = "this is the value";
+    let abi_data = HEADER_SIZE_1 as u32;
     let wrong_abi_data = HEADER_SIZE_2 as u32;
 
     stack.push_str(key);
     stack.push_str(raw_value);
     stack.push_u32(wrong_abi_data);
 
-    let mut expected_value = vec![];
-    expected_value.extend_from_slice(&[HEADER_SIZE_1]);
-    expected_value.extend_from_slice(&raw_value.as_bytes());
-
     expected_map
-        .push_key(key.as_bytes(), &expected_value)
+        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
     let mut harness = TestHarness::default();
