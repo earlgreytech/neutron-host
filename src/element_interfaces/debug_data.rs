@@ -396,11 +396,11 @@ impl DebugCoMap {
         }
     }
 
-    // Check contract output stack against expected state
+    // Check contract output map against expected state
     pub fn assert_eq(&mut self, codata: &mut CoData) {
         println!("[DebugCoData] Asserting expected CoMap values against actual output CoMap...");
         for key in self.map.keys() {
-            let key_str = str::from_utf8(key).unwrap();
+            let key_str = String::from_utf8_lossy(key);
 
             let expected_data = self.map.get(key).unwrap();
             let actual_data = match codata.peek_input_key(key) {
@@ -410,8 +410,8 @@ impl DebugCoMap {
                     key_str
                 ),
             };
-            let expected_data_str = str::from_utf8(expected_data).unwrap();
-            let actual_data_str = str::from_utf8(&actual_data).unwrap();
+            let expected_data_str = String::from_utf8_lossy(expected_data);
+            let actual_data_str = String::from_utf8_lossy(&actual_data);
 
             assert_eq!(
                 expected_data, &actual_data,
