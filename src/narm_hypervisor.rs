@@ -160,6 +160,44 @@ impl NarmHypervisor {
                     }
                 }
 
+                //SVC 0x32: peek_comap(key: stack [u8], begin: u32, max_length: u32) -> (abi_data: u32, value: stack [u8])
+                //Pop one value from costack and use as key to get input comap value, which is then pushed to costack (constrained by begin and max_length) after separation of ABI header
+                0x32 => {
+                    let mut begin = self.vm.external_get_reg(0) as usize;
+                    let max_length = self.vm.external_get_reg(1) as usize;
+
+                    let key = match codata.pop_input_stack() {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+
+                    let value = match codata.peek_input_key(&key) {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+
+                    // Get ABI length and u32 representation, and increase begin to exclude header data
+                    // TODO: Investigate more efficient option for slice concaternation
+                    let (header_size, abi_data) = comap_abi_header_to_u32(&value);
+                    begin += header_size;
+
+                    // We will from begin read either max_length bytes or until end of data, whichever comes first
+                    let read_to = cmp::min(begin + max_length, value.len());
+
+                    match codata.push_output_stack(&value[begin..read_to]) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    }
+
+                    self.vm.external_set_reg(0, abi_data);
+                }
+
                 //SVC 0x33: peek_raw_comap(key: stack [u8], begin: u32, max_length: u32) -> (raw_value: stack [u8])
                 //Pop one value from costack and use as key to get input comap value, which is then pushed to costack (constrained by begin and max_length)
                 0x33 => {
@@ -189,6 +227,44 @@ impl NarmHypervisor {
                             return Ok(HypervisorState::Error(e));
                         }
                     }
+                }
+
+                //SVC 0x34: peek_result_comap(key: stack [u8], begin: u32, max_length: u32) -> (abi_data: u32, value: stack [u8])
+                //Pop one value from costack and use as key to get result comap value, which is then pushed to costack (constrained by begin and max_length) after separation of ABI header
+                0x34 => {
+                    let mut begin = self.vm.external_get_reg(0) as usize;
+                    let max_length = self.vm.external_get_reg(1) as usize;
+
+                    let key = match codata.pop_input_stack() {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+
+                    let value = match codata.peek_result_key(&key) {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+
+                    // Get ABI length and u32 representation, and increase begin to exclude header data
+                    // TODO: Investigate more efficient option for slice concaternation
+                    let (header_size, abi_data) = comap_abi_header_to_u32(&value);
+                    begin += header_size;
+
+                    // We will from begin read either max_length bytes or until end of data, whichever comes first
+                    let read_to = cmp::min(begin + max_length, value.len());
+
+                    match codata.push_output_stack(&value[begin..read_to]) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    }
+
+                    self.vm.external_set_reg(0, abi_data);
                 }
 
                 //SVC 0x35: peek_raw_result_comap(key: stack [u8], begin: u32, max_length: u32) -> (raw_value: stack [u8])
