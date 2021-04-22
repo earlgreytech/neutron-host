@@ -121,6 +121,7 @@ impl NarmHypervisor {
                     };
 
                     // Get ABI length and byte representation, then assemble final value
+                    // TODO: Investigate more efficient option for slice concaternation
                     let (header_size, header_bytes) = comap_abi_header_from_u32(abi_data);
                     let mut value = vec![];
                     value.extend_from_slice(&header_bytes[0..header_size]);
