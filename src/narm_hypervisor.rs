@@ -173,23 +173,17 @@ impl NarmHypervisor {
                         }
                     };
 
-                    let mut raw_value = match codata.peek_input_key(&key) {
+                    let raw_value = match codata.peek_input_key(&key) {
                         Ok(d) => d,
                         Err(e) => {
                             return Ok(HypervisorState::Error(e));
                         }
                     };
 
-                    // Discard bytes before specified start position
-                    // TODO: Find solution that doesn't reallocate? Not super important though since read from start should be by far most common in calls
-                    if begin > 0 {
-                        raw_value = raw_value.split_off(begin);
-                    }
+                    // We will from begin read either max_length bytes or until end of data, whichever comes first
+                    let read_to = cmp::min(begin + max_length, raw_value.len());
 
-                    // Truncate value if larger than provided max size
-                    raw_value.truncate(max_length);
-
-                    match codata.push_output_stack(&raw_value) {
+                    match codata.push_output_stack(&raw_value[begin..read_to]) {
                         Ok(_) => {}
                         Err(e) => {
                             return Ok(HypervisorState::Error(e));
@@ -210,23 +204,17 @@ impl NarmHypervisor {
                         }
                     };
 
-                    let mut raw_value = match codata.peek_result_key(&key) {
+                    let raw_value = match codata.peek_result_key(&key) {
                         Ok(d) => d,
                         Err(e) => {
                             return Ok(HypervisorState::Error(e));
                         }
                     };
 
-                    // Discard bytes before specified start position
-                    // TODO: Find solution that doesn't reallocate? Not super important though since read from start should be by far most common in calls
-                    if begin > 0 {
-                        raw_value = raw_value.split_off(begin);
-                    }
+                    // We will from begin read either max_length bytes or until end of data, whichever comes first
+                    let read_to = cmp::min(begin + max_length, raw_value.len());
 
-                    // Truncate the value if above provided max size
-                    raw_value.truncate(max_length);
-
-                    match codata.push_output_stack(&raw_value) {
+                    match codata.push_output_stack(&raw_value[begin..read_to]) {
                         Ok(_) => {}
                         Err(e) => {
                             return Ok(HypervisorState::Error(e));
