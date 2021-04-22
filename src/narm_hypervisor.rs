@@ -1,5 +1,6 @@
 use crate::callsystem::*;
 use crate::codata::*;
+use crate::comap_abi_decoder::*;
 use crate::interface::*;
 use crate::narm::narmvm::*;
 use crate::narm::*;
@@ -99,6 +100,39 @@ impl NarmHypervisor {
                 //*************************//
                 //**   Comap operators   **//
                 //*************************//
+
+                //SVC 0x30: push_comap(key: stack [u8], abi_data: u32, value: stack [u8])
+                //Pop two values from costack and push as key and value to comap using abi_data
+                0x30 => {
+                    let abi_data = self.vm.external_get_reg(0);
+
+                    // Since key and value is pushed in the "correct" order we pop the other way around
+                    let raw_value = match codata.pop_input_stack() {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+                    let key = match codata.pop_input_stack() {
+                        Ok(d) => d,
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    };
+
+                    // Get ABI length and byte representation, then assemble final value
+                    let (header_size, header_bytes) = comap_abi_header_from_u32(abi_data);
+                    let mut value = vec![];
+                    value.extend_from_slice(&header_bytes[0..header_size]);
+                    value.extend_from_slice(&raw_value);
+
+                    match codata.push_output_key(&key, &value) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    }
+                }
 
                 //SVC 0x31: push_raw_comap(key: stack [u8], raw_value: stack [u8])
                 //Pop two values from costack and push as key and value to comap
