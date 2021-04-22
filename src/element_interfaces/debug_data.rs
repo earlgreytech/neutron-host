@@ -604,4 +604,6 @@ mod tests {
         let result = stack.to_u8(bytes);
         assert_eq!(result, 0x11 as u8);
     }
+    
+    // TODO: Tests for debug comap functionality
 }
