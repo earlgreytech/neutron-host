@@ -9,6 +9,7 @@ pub mod callsystem;
 pub mod vmmanager;
 pub mod manager;
 pub mod harness;
+pub mod comap_abi_decoder;
 pub extern crate neutron_common as addressing;
 
 extern crate num;
