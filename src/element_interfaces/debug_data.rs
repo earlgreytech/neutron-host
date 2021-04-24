@@ -3,7 +3,6 @@ use crate::codata::*;
 use crate::comap_abi_decoder::*;
 use crate::neutronerror::NeutronError::*;
 use crate::neutronerror::*;
-use core::mem::transmute;
 use neutron_common::RecoverableError;
 use std::collections::HashMap;
 use std::convert::TryInto;
@@ -168,21 +167,15 @@ impl DebugCoStack {
     // (adapted from neutron-star/src/syscall.rs)
 
     pub fn push_u64(&mut self, value: u64) {
-        const SIZE: usize = 8;
-        let t = unsafe { transmute::<u64, [u8; SIZE]>(value) };
-        self.stack.push(t.to_vec());
+        self.stack.push(value.to_le_bytes().to_vec());
     }
 
     pub fn push_u32(&mut self, value: u32) {
-        const SIZE: usize = 4;
-        let t = unsafe { transmute::<u32, [u8; SIZE]>(value) };
-        self.stack.push(t.to_vec());
+        self.stack.push(value.to_le_bytes().to_vec());
     }
 
     pub fn push_u16(&mut self, value: u16) {
-        const SIZE: usize = 2;
-        let t = unsafe { transmute::<u16, [u8; SIZE]>(value) };
-        self.stack.push(t.to_vec());
+        self.stack.push(value.to_le_bytes().to_vec());
     }
 
     pub fn push_u8(&mut self, value: u8) {
