@@ -1,6 +1,6 @@
 use neutron_host::element_interfaces::debug_data::*;
-use neutron_host::interface::*;
 use neutron_host::harness::*;
+use neutron_host::interface::*;
 
 const DIR_NAME: &'static str = "test_debugdata";
 const CONTRACT_DIR_NAME: &'static str = "contract_mirror";
@@ -22,7 +22,11 @@ fn mirror_bytes() {
         ..DebugDataInjector::default()
     };
     let context = ExecutionContext::create_default_random_context();
-    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
+    harness.execute_debug_path_binary_using_default_callsystem(
+        DIR_NAME,
+        CONTRACT_DIR_NAME,
+        context,
+    );
 }
 
 #[test]
@@ -45,7 +49,11 @@ fn mirror_negtest_wrong_content() {
     };
 
     let context = ExecutionContext::create_default_random_context();
-    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
+    harness.execute_debug_path_binary_using_default_callsystem(
+        DIR_NAME,
+        CONTRACT_DIR_NAME,
+        context,
+    );
 }
 
 #[test]
@@ -68,7 +76,11 @@ fn mirror_negtest_too_many() {
     };
     let context = ExecutionContext::create_default_random_context();
 
-    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
+    harness.execute_debug_path_binary_using_default_callsystem(
+        DIR_NAME,
+        CONTRACT_DIR_NAME,
+        context,
+    );
 }
 
 #[test]
@@ -91,7 +103,11 @@ fn mirror_negtest_too_few() {
     };
 
     let context = ExecutionContext::create_default_random_context();
-    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
+    harness.execute_debug_path_binary_using_default_callsystem(
+        DIR_NAME,
+        CONTRACT_DIR_NAME,
+        context,
+    );
 }
 
 #[test]
@@ -112,7 +128,11 @@ fn mirror_str() {
     };
 
     let context = ExecutionContext::create_default_random_context();
-    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
+    harness.execute_debug_path_binary_using_default_callsystem(
+        DIR_NAME,
+        CONTRACT_DIR_NAME,
+        context,
+    );
 }
 
 #[test]
@@ -145,5 +165,9 @@ fn mirror_unsigned() {
     };
 
     let context = ExecutionContext::create_default_random_context();
-    harness.execute_debug_path_binary_using_default_callsystem(DIR_NAME, CONTRACT_DIR_NAME, context);
+    harness.execute_debug_path_binary_using_default_callsystem(
+        DIR_NAME,
+        CONTRACT_DIR_NAME,
+        context,
+    );
 }
