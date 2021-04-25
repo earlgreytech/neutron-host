@@ -2,15 +2,15 @@ use neutron_host::element_interfaces::debug_data::*;
 use neutron_host::harness::*;
 use neutron_host::interface::*;
 
-const DIR_NAME: &'static str = "test_comap";
+use crate::common::*;
+use crate::*;
 
+const DIR_NAME: &'static str = "test_comap";
 const CONTRACT_DIR_NAME: &'static str = "contract_subsetting";
 
 #[test]
 fn comap_peek_subsets() {
-    let mut stack = DebugCoStack::default();
-    let mut expected_stack = WrappedDebugCoStack::default();
-    let mut map = DebugCoMap::default();
+    let mut debugdata = DebugDataInjector::default();
 
     let key = "this is the key";
     let value_subset_1 = "<value part 1!>";
@@ -23,39 +23,33 @@ fn comap_peek_subsets() {
     value.push_str(value_subset_3);
 
     // This will be used by contract to peek the comap value (one push for each subset, since a peek consumes the key it uses)
-    stack.push_str(key);
-    stack.push_str(key);
-    stack.push_str(key);
+    debugdata.injected_input_stack.push_str(key);
+    debugdata.injected_input_stack.push_str(key);
+    debugdata.injected_input_stack.push_str(key);
 
-    map.push_key(key.as_bytes(), value.as_bytes()).unwrap();
+    debugdata
+        .injected_result_map
+        .push_key(key.as_bytes(), value.as_bytes())
+        .unwrap();
 
     // We expect the contract to split the comap value into the subsets
-    expected_stack.push_str(value_subset_1, "value_subset_1");
-    expected_stack.push_str(value_subset_2, "value_subset_2");
-    expected_stack.push_str(value_subset_3, "value_subset_3");
+    debugdata
+        .expected_output_stack
+        .push_str(value_subset_1, "value_subset_1");
+    debugdata
+        .expected_output_stack
+        .push_str(value_subset_2, "value_subset_2");
+    debugdata
+        .expected_output_stack
+        .push_str(value_subset_3, "value_subset_3");
 
-    let mut harness = TestHarness::default();
-    harness.debugdata = DebugDataInjector {
-        injected_input_stack: stack,
-        expected_output_stack: expected_stack,
-        injected_result_map: map,
-        ..DebugDataInjector::default()
-    };
-
-    let context = ExecutionContext::create_default_random_context();
-    harness.execute_debug_path_binary_using_default_callsystem(
-        DIR_NAME,
-        CONTRACT_DIR_NAME,
-        context,
-    );
+    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
 }
 
 #[test]
 #[should_panic]
 fn comap_peek_subsets_negtest_wrong_value() {
-    let mut stack = DebugCoStack::default();
-    let mut expected_stack = WrappedDebugCoStack::default();
-    let mut map = DebugCoMap::default();
+    let mut debugdata = DebugDataInjector::default();
 
     let key = "this is the key";
     let value_subset_1 = "<value part 1!>";
@@ -69,29 +63,25 @@ fn comap_peek_subsets_negtest_wrong_value() {
     value.push_str(value_subset_3);
 
     // This will be used by contract to peek the comap value (one push for each subset, since a peek consumes the key it uses)
-    stack.push_str(key);
-    stack.push_str(key);
-    stack.push_str(key);
+    debugdata.injected_input_stack.push_str(key);
+    debugdata.injected_input_stack.push_str(key);
+    debugdata.injected_input_stack.push_str(key);
 
-    map.push_key(key.as_bytes(), value.as_bytes()).unwrap();
+    debugdata
+        .injected_result_map
+        .push_key(key.as_bytes(), value.as_bytes())
+        .unwrap();
 
     // We expect the contract to split the comap value into the subsets
-    expected_stack.push_str(value_subset_1, "value_subset_1");
-    expected_stack.push_str(value_subset_2, "value_subset_2");
-    expected_stack.push_str(value_subset_3, "value_subset_3");
+    debugdata
+        .expected_output_stack
+        .push_str(value_subset_1, "value_subset_1");
+    debugdata
+        .expected_output_stack
+        .push_str(value_subset_2, "value_subset_2");
+    debugdata
+        .expected_output_stack
+        .push_str(value_subset_3, "value_subset_3");
 
-    let mut harness = TestHarness::default();
-    harness.debugdata = DebugDataInjector {
-        injected_input_stack: stack,
-        expected_output_stack: expected_stack,
-        injected_result_map: map,
-        ..DebugDataInjector::default()
-    };
-
-    let context = ExecutionContext::create_default_random_context();
-    harness.execute_debug_path_binary_using_default_callsystem(
-        DIR_NAME,
-        CONTRACT_DIR_NAME,
-        context,
-    );
+    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
 }

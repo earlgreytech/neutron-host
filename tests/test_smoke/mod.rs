@@ -1,14 +1,14 @@
 use neutron_host::harness::*;
 use neutron_host::interface::*;
 
+use crate::common::*;
+use crate::*;
+
+const DIR_NAME: &'static str = "test_smoke";
+const CONTRACT_DIR_NAME: &'static str = "contract_smoke";
+
 // Test that basic smart contract execution doesn't throw an error
 #[test]
 fn test_smoke() {
-    let mut harness = TestHarness::default();
-    let context = ExecutionContext::create_default_random_context();
-    harness.execute_debug_path_binary_using_default_callsystem(
-        "test_smoke",
-        "contract_smoke",
-        context,
-    );
+    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME);
 }
