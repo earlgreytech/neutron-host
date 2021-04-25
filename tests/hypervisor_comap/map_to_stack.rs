@@ -5,11 +5,11 @@ use neutron_host::interface::*;
 use crate::common::*;
 use crate::*;
 
-const DIR_NAME: &'static str = "test_comap";
+const DIR_NAME: &'static str = "hypervisor_comap";
 const CONTRACT_DIR_NAME: &'static str = "contract_map_to_stack";
 
 #[test]
-fn comap_peek() {
+fn test_peek() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = "this is the key";
@@ -28,7 +28,7 @@ fn comap_peek() {
 
 #[test]
 #[should_panic]
-fn comap_peek_negtest_wrong_key() {
+fn negtest_peek_wrong_key() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = "this is the key";
@@ -48,7 +48,7 @@ fn comap_peek_negtest_wrong_key() {
 
 #[test]
 #[should_panic]
-fn comap_peek_negtest_wrong_value() {
+fn negtest_peek_wrong_value() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = "this is the key";
@@ -67,7 +67,7 @@ fn comap_peek_negtest_wrong_value() {
 }
 
 #[test]
-fn comap_peek_trucated() {
+fn test_peek_trucated() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = "this is the key";
@@ -91,7 +91,7 @@ fn comap_peek_trucated() {
 
 #[test]
 #[should_panic]
-fn comap_peek_trucated_negtest() {
+fn negtest_peek_trucated() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = "this is the key";

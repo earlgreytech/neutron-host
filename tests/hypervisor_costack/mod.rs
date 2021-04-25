@@ -5,12 +5,12 @@ use neutron_host::interface::*;
 use crate::common::*;
 use crate::*;
 
-const DIR_NAME: &'static str = "test_debugdata";
+const DIR_NAME: &'static str = "hypervisor_costack";
 const CONTRACT_DIR_NAME: &'static str = "contract_mirror";
 
 #[test]
 // Push a byte slice to contract
-fn mirror_bytes() {
+fn test_mirror_bytes() {
     let mut debugdata = DebugDataInjector::default();
 
     let var_bytes = "testbytes";
@@ -25,7 +25,7 @@ fn mirror_bytes() {
 #[test]
 #[should_panic]
 // Expect the wrong content
-fn mirror_negtest_wrong_content() {
+fn negtest_mirror_wrong_bytes() {
     let mut debugdata = DebugDataInjector::default();
 
     let var_bytes = "testbytes";
@@ -43,7 +43,7 @@ fn mirror_negtest_wrong_content() {
 #[test]
 #[should_panic]
 // Expect fewer stack items than we get
-fn mirror_negtest_too_many() {
+fn negtest_mirror_too_many_bytes() {
     let mut debugdata = DebugDataInjector::default();
 
     let var_bytes = "testbytes";
@@ -59,7 +59,7 @@ fn mirror_negtest_too_many() {
 #[test]
 #[should_panic]
 // Expect more stack items than we get
-fn mirror_negtest_too_few() {
+fn negtest_mirror_too_few_bytes() {
     let mut debugdata = DebugDataInjector::default();
 
     let var_bytes = "testbytes";
@@ -76,7 +76,7 @@ fn mirror_negtest_too_few() {
 
 #[test]
 // Push a str to contract
-fn mirror_str() {
+fn test_mirror_str() {
     let mut debugdata = DebugDataInjector::default();
 
     let var_str = "teststr";
@@ -88,7 +88,7 @@ fn mirror_str() {
 
 #[test]
 // Push some unsigned values to contract
-fn mirror_unsigned() {
+fn test_mirror_unsigned() {
     let mut debugdata = DebugDataInjector::default();
 
     let var_u64 = u64::MAX;

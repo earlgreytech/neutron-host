@@ -5,11 +5,11 @@ use neutron_host::interface::*;
 use crate::common::*;
 use crate::*;
 
-const DIR_NAME: &'static str = "test_comap";
+const DIR_NAME: &'static str = "hypervisor_comap";
 const CONTRACT_DIR_NAME: &'static str = "contract_stack_to_map";
 
 #[test]
-fn comap_push() {
+fn test_push() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = "this is the key";
@@ -28,7 +28,7 @@ fn comap_push() {
 
 #[test]
 #[should_panic]
-fn comap_push_negtest_wrong_key() {
+fn negtest_push_wrong_key() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = "this is the key";
@@ -48,7 +48,7 @@ fn comap_push_negtest_wrong_key() {
 
 #[test]
 #[should_panic]
-fn comap_push_negtest_wrong_value() {
+fn negtest_push_wrong_value() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = "this is the key";

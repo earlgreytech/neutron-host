@@ -4,7 +4,7 @@ use neutron_host::interface::*;
 use crate::common::*;
 use crate::*;
 
-const DIR_NAME: &'static str = "test_smoke";
+const DIR_NAME: &'static str = "general_smoke";
 const CONTRACT_DIR_NAME: &'static str = "contract_smoke";
 
 // Test that basic smart contract execution doesn't throw an error

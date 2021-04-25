@@ -2,10 +2,10 @@
 mod common;
 mod example_deploy_call;
 mod example_new_element;
-mod test_comap;
-mod test_comap_abi;
-mod test_debugdata;
-mod test_smoke;
+mod general_smoke;
+mod hypervisor_comap;
+mod hypervisor_comap_abi;
+mod hypervisor_costack;
 
 extern crate num;
 #[macro_use]
