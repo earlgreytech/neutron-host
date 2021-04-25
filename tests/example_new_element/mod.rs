@@ -6,8 +6,9 @@ use neutron_host::codata::*;
 use neutron_host::harness::*;
 use neutron_host::interface::*;
 use neutron_host::neutronerror::*;
-
 use std::cell::RefCell;
+
+use crate::common::*;
 
 // Test that basic smart contract execution doesn't throw an error
 #[test]
@@ -22,7 +23,7 @@ fn test_example_new_element() {
         let mut file_element = FileElement {};
         cs.add_call(FILE_ELEMENT_ID, &mut file_element).unwrap();
         let result = harness.instance.execute_binary(
-            &TestHarness::get_binary_path("example_new_element", "contract_new_element", target),
+            &get_contract_path_target("example_new_element", "contract_new_element", target),
             &cs,
             context,
         );

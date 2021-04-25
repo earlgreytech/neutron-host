@@ -25,6 +25,7 @@ pub struct TestHarness {
     pub logger: StdoutLogger,
     pub debugdata: DebugDataInjector,
 }
+
 /// Contains the execution state data needed to run Neutron which is also likely to be interacted with through test code
 #[derive(Default)]
 pub struct NeutronInstance {
@@ -52,6 +53,7 @@ impl NeutronInstance {
         NeutronInstance::print_results(&result);
         result
     }
+
     fn prepare_execute(&mut self, path_str: &str, context: &mut ExecutionContext) {
         let path = PathBuf::from(path_str);
         let binary = elf::File::open_path(path).unwrap();
@@ -74,6 +76,7 @@ impl NeutronInstance {
             .unwrap();
         self.codata.push_input_key("!.d".as_bytes(), &[0]).unwrap();
     }
+
     fn prepare_deploy(&mut self, path_str: &str, context: &mut ExecutionContext) {
         let path = PathBuf::from(path_str);
         let binary = elf::File::open_path(path).unwrap();
@@ -96,6 +99,7 @@ impl NeutronInstance {
             .unwrap();
         self.codata.push_input_key("!.d".as_bytes(), &[0]).unwrap();
     }
+
     fn print_results(result: &NeutronResult) {
         println!("Contract executed successfully!");
         println!("Gas used: {}", result.gas_used);
@@ -104,27 +108,6 @@ impl NeutronInstance {
 }
 
 impl TestHarness {
-    /// Loads and does "use once" execution on a "debug" compiled Rust smart contract
-    pub fn execute_debug_path_binary_using_default_callsystem(
-        &mut self,
-        test_dir: &str,
-        contract_dir: &str,
-        context: ExecutionContext,
-    ) -> NeutronResult {
-        self.execute_binary_using_default_callsystem(
-            &TestHarness::get_binary_path(test_dir, contract_dir, "debug"),
-            context,
-        )
-    }
-    /// A helper method to compute the path to a Rust smart contract
-    pub fn get_binary_path(test_dir: &str, contract_dir: &str, build_type: &str) -> String {
-        let path_str = &format!(
-            "./tests/{}/{}/target/thumbv6m-none-eabi/{}/contract-binary",
-            test_dir, contract_dir, build_type
-        );
-        path_str.to_string()
-    }
-
     /// Uses the default test CallSystem to "use once" execute the given smart contract binary
     pub fn execute_binary_using_default_callsystem(
         &mut self,
@@ -153,6 +136,7 @@ impl TestHarness {
         self.db.commit().unwrap();
         result
     }
+
     /// Loads the given smart contract binary and deploys it for multiple uses with the default test CallSystem
     pub fn deploy_binary_using_default_callsystem(
         &mut self,
@@ -181,6 +165,7 @@ impl TestHarness {
         self.db.commit().unwrap();
         result
     }
+
     /// Executes a previously deployed smart contract using the default test CallSystem
     pub fn call_using_default_callsystem(
         &mut self,
