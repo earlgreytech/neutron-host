@@ -15,11 +15,11 @@ fn comap_push() {
     let key = "this is the key";
     let value = "this is the value";
 
-    debugdata.injected_input_stack.push_str(key);
-    debugdata.injected_input_stack.push_str(value);
+    debugdata.inject_stack.push_str(key);
+    debugdata.inject_stack.push_str(value);
 
     debugdata
-        .expected_output_map
+        .expect_map
         .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 
@@ -35,11 +35,11 @@ fn comap_push_negtest_wrong_key() {
     let wrong_key = "this is the WRONG key";
     let value = "this is the value";
 
-    debugdata.injected_input_stack.push_str(wrong_key); // Push wrong key as contract input
-    debugdata.injected_input_stack.push_str(value);
+    debugdata.inject_stack.push_str(wrong_key); // Push wrong key as contract input
+    debugdata.inject_stack.push_str(value);
 
     debugdata
-        .expected_output_map
+        .expect_map
         .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 
@@ -55,11 +55,11 @@ fn comap_push_negtest_wrong_value() {
     let value = "this is the value";
     let wrong_value = "this is the WRONG value";
 
-    debugdata.injected_input_stack.push_str(key);
-    debugdata.injected_input_stack.push_str(wrong_value); // Push wrong value as contract input
+    debugdata.inject_stack.push_str(key);
+    debugdata.inject_stack.push_str(wrong_value); // Push wrong value as contract input
 
     debugdata
-        .expected_output_map
+        .expect_map
         .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 

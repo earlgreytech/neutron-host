@@ -18,14 +18,14 @@ This file also contains some data structures that simplifies construction of thi
 
 Data structures:
 
-* injected_input_stack      - An initial input stack state that the testing smart contract can load
+* inject_stack              - An initial input stack state that the testing smart contract can load
 
-* expected_output_stack     - An expected state for the output stack that the testing smart contract can asserted against,
+* expect_stack              - An expected state for the output stack that the testing smart contract can asserted against,
                               along with debug information to make a failed assertion more informative than "bytes in stacks didn't match"
 
-* injected_result_map       - An initial result stack state that the testing smart contract can load
+* inject_map                - An initial result stack state that the testing smart contract can load
 
-* expected_output_map       - An expected state for the output map that the testing smart contract can asserted against
+* expect_map                - An expected state for the output map that the testing smart contract can asserted against
 
 functions:
 
@@ -65,10 +65,10 @@ pub enum DebugDataFunctions {
 
 #[derive(Default)]
 pub struct DebugDataInjector {
-    pub injected_input_stack: DebugCoStack,
-    pub expected_output_stack: WrappedDebugCoStack,
-    pub injected_result_map: DebugCoMap,
-    pub expected_output_map: DebugCoMap,
+    pub inject_stack: DebugCoStack,
+    pub expect_stack: WrappedDebugCoStack,
+    pub inject_map: DebugCoMap,
+    pub expect_map: DebugCoMap,
 }
 
 impl ElementAPI for DebugDataInjector {
@@ -95,7 +95,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 1 (PushInputStack)");
 
                 println!("    Pushing provided stack to codata stack...");
-                self.injected_input_stack.push_to_codata(&mut codata);
+                self.inject_stack.push_to_codata(&mut codata);
                 println!("    Done!");
 
                 Ok(())
@@ -104,7 +104,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 2 (AssertOutputStack)");
 
                 println!("    Asserting state of CoData stack against expected state... ");
-                self.expected_output_stack.assert_eq(&mut codata);
+                self.expect_stack.assert_eq(&mut codata);
                 println!("    Done!");
 
                 Ok(())
@@ -113,7 +113,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 3 (PushResultMap)");
 
                 println!("    Pushing provided map to codata map...");
-                self.injected_result_map.push_to_codata(&mut codata);
+                self.inject_map.push_to_codata(&mut codata);
                 println!("    Done!");
 
                 Ok(())
@@ -122,7 +122,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 4 (AssertOutputMap)");
 
                 println!("    Asserting state of CoData map against expected state... ");
-                self.expected_output_map.assert_eq(&mut codata);
+                self.expect_map.assert_eq(&mut codata);
                 println!("    Done!");
 
                 Ok(())
@@ -131,7 +131,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 10 (GetInputStackLen)");
 
                 println!("    Pushing length of provided input stack to CoData stack...");
-                self.injected_input_stack.push_len_to_codata(&mut codata);
+                self.inject_stack.push_len_to_codata(&mut codata);
                 println!("    Done!");
 
                 Ok(())
@@ -140,7 +140,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 11 (ReverseInputStack)");
 
                 println!("    Reverse order in provided input stack (first item become last item and so forth)...");
-                self.injected_input_stack.reverse();
+                self.inject_stack.reverse();
                 println!("    Done!");
 
                 Ok(())

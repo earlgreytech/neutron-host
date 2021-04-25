@@ -25,34 +25,28 @@ fn test_comap_peek_header_subsets() {
     value.push_str(value_subset_3);
 
     // This will be used by contract to peek the comap value (one push for each subset, since a peek consumes the key it uses)
-    debugdata.injected_input_stack.push_str(key);
-    debugdata.injected_input_stack.push_str(key);
-    debugdata.injected_input_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
 
     debugdata
-        .injected_result_map
+        .inject_map
         .push_key_abi(key.as_bytes(), value.as_bytes(), abi_data)
         .unwrap();
 
     // We expect the contract to split the comap value into the subsets
     debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_1, "value_subset_1");
+    debugdata.expect_stack.push_u32(abi_data, "abi_data");
     debugdata
-        .expected_output_stack
-        .push_u32(abi_data, "abi_data");
-    debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_2, "value_subset_2");
+    debugdata.expect_stack.push_u32(abi_data, "abi_data");
     debugdata
-        .expected_output_stack
-        .push_u32(abi_data, "abi_data");
-    debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_3, "value_subset_3");
-    debugdata
-        .expected_output_stack
-        .push_u32(abi_data, "abi_data");
+    debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
     single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
 }
@@ -75,34 +69,28 @@ fn negtest_comap_peek_header_subsets_wrong_value() {
     value.push_str(value_subset_3);
 
     // This will be used by contract to peek the comap value (one push for each subset, since a peek consumes the key it uses)
-    debugdata.injected_input_stack.push_str(key);
-    debugdata.injected_input_stack.push_str(key);
-    debugdata.injected_input_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
 
     debugdata
-        .injected_result_map
+        .inject_map
         .push_key_abi(key.as_bytes(), value.as_bytes(), abi_data)
         .unwrap();
 
     // We expect the contract to split the comap value into the subsets
     debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_1, "value_subset_1");
+    debugdata.expect_stack.push_u32(abi_data, "abi_data");
     debugdata
-        .expected_output_stack
-        .push_u32(abi_data, "abi_data");
-    debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_2, "value_subset_2");
+    debugdata.expect_stack.push_u32(abi_data, "abi_data");
     debugdata
-        .expected_output_stack
-        .push_u32(abi_data, "abi_data");
-    debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_3, "value_subset_3");
-    debugdata
-        .expected_output_stack
-        .push_u32(abi_data, "abi_data");
+    debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
     single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
 }

@@ -23,24 +23,24 @@ fn comap_peek_subsets() {
     value.push_str(value_subset_3);
 
     // This will be used by contract to peek the comap value (one push for each subset, since a peek consumes the key it uses)
-    debugdata.injected_input_stack.push_str(key);
-    debugdata.injected_input_stack.push_str(key);
-    debugdata.injected_input_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
 
     debugdata
-        .injected_result_map
+        .inject_map
         .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 
     // We expect the contract to split the comap value into the subsets
     debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_1, "value_subset_1");
     debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_2, "value_subset_2");
     debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_3, "value_subset_3");
 
     single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
@@ -63,24 +63,24 @@ fn comap_peek_subsets_negtest_wrong_value() {
     value.push_str(value_subset_3);
 
     // This will be used by contract to peek the comap value (one push for each subset, since a peek consumes the key it uses)
-    debugdata.injected_input_stack.push_str(key);
-    debugdata.injected_input_stack.push_str(key);
-    debugdata.injected_input_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
+    debugdata.inject_stack.push_str(key);
 
     debugdata
-        .injected_result_map
+        .inject_map
         .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 
     // We expect the contract to split the comap value into the subsets
     debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_1, "value_subset_1");
     debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_2, "value_subset_2");
     debugdata
-        .expected_output_stack
+        .expect_stack
         .push_str(value_subset_3, "value_subset_3");
 
     single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
