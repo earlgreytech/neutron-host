@@ -198,7 +198,7 @@ impl NarmHypervisor {
                     self.vm.external_set_reg(0, abi_data);
                 }
 
-                //SVC 0x33: peek_raw_comap(key: stack [u8], begin: u32, max_length: u32) -> (raw_value: stack [u8])
+                //SVC 0x33: peek_raw_comap(key: stack [u8], begin: u32, max_length: u32) -> raw_value: stack [u8]
                 //Pop one value from costack and use as key to get input comap value, which is then pushed to costack (constrained by begin and max_length)
                 0x33 => {
                     let begin = self.vm.external_get_reg(0) as usize;
@@ -267,7 +267,7 @@ impl NarmHypervisor {
                     self.vm.external_set_reg(0, abi_data);
                 }
 
-                //SVC 0x35: peek_raw_result_comap(key: stack [u8], begin: u32, max_length: u32) -> (raw_value: stack [u8])
+                //SVC 0x35: peek_raw_result_comap(key: stack [u8], begin: u32, max_length: u32) -> raw_value: stack [u8]
                 //Pop one value from costack and use as key to get result comap value, which is then pushed to costack (constrained by begin and max_length)
                 0x35 => {
                     let begin = self.vm.external_get_reg(0) as usize;
@@ -296,6 +296,80 @@ impl NarmHypervisor {
                             return Ok(HypervisorState::Error(e));
                         }
                     }
+                }
+
+                //********************************//
+                //**   Context info operators   **//
+                //********************************//
+
+                //SVC 0x90: gas_remaining() -> limit: u64
+                //Get the amount of gas left and return
+                0x90 => {
+                    let limit = codata.gas_remaining;
+
+                    let limit_little_end = (limit & 0x0000_0000_FFFF_FFFF) as u32;
+                    let limit_big_end = ((limit & 0xFFFF_FFFF_0000_0000) >> 32) as u32;
+
+                    // VM is little endian, so we put them in that order
+                    // TODO: Does this even work?
+                    self.vm.external_set_reg(0, limit_big_end);
+                    self.vm.external_set_reg(1, limit_little_end);
+                }
+
+                //SVC 0x91: self_address() -> address: stack NeutronAddress
+                //Get the address of the current execution and push to stack
+                0x91 => {
+                    // TODO: replace with something more efficient
+                    let address = &codata.current_context().self_address;
+                    let mut bytes = address.version.to_le_bytes().to_vec();
+                    bytes.append(&mut address.data.to_vec());
+
+                    match codata.push_output_stack(&bytes) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    }
+                }
+
+                //SVC 0x92: origin() -> address: stack NeutronAddress
+                //Get the address that caused the current chain of executions and push to stack
+                0x92 => {
+                    // TODO: replace with something more efficient
+                    let address = &codata.current_context().origin;
+                    let mut bytes = address.version.to_le_bytes().to_vec();
+                    bytes.append(&mut address.data.to_vec());
+
+                    match codata.push_output_stack(&bytes) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    }
+                }
+
+                //SVC 0x94: sender() -> address: stack NeutronAddress
+                //Get the address that caused the current execution and push to stack
+                0x94 => {
+                    // TODO: replace with something more efficient
+                    let address = &codata.current_context().sender;
+                    let mut bytes = address.version.to_le_bytes().to_vec();
+                    bytes.append(&mut address.data.to_vec());
+
+                    match codata.push_output_stack(&bytes) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Ok(HypervisorState::Error(e));
+                        }
+                    }
+                }
+
+                //SVC 0x96: execution_type() -> type: u32
+                //Get execution type and return
+                0x96 => {
+                    let execution_type = codata.current_context().execution_type as u32;
+
+                    self.vm.external_set_reg(0, execution_type);
                 }
 
                 //************************//
