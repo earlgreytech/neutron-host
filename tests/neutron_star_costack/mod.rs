@@ -10,6 +10,8 @@ const DIR_NAME: &'static str = "neutron_star_costack";
 const CONTRACT_DIR_NAME: &'static str = "contract_mirror_batch";
 
 #[test]
+// Should ideally be split into separate tests to be more helpful if things actually break, 
+// but given the current non-optimizied testing setup this will suffice. 
 fn test_mirror_batch() {
     let mut debugdata = DebugDataInjector::default();
 
