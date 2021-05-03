@@ -7,9 +7,9 @@ use neutron_host::interface::*;
 
 use common::*;
 
-const CONTRACT_MAP_TO_STACK: &'static str   = "hypervisor_comap_abi_map_to_stack";
-const CONTRACT_STACK_TO_MAP: &'static str   = "hypervisor_comap_abi_stack_to_map";
-const CONTRACT_SUBSETTING: &'static str     = "hypervisor_comap_abi_subsetting";
+const CONTRACT_MAP_TO_STACK: &'static str = "hypervisor_comap_abi_map_to_stack";
+const CONTRACT_STACK_TO_MAP: &'static str = "hypervisor_comap_abi_stack_to_map";
+const CONTRACT_SUBSETTING: &'static str = "hypervisor_comap_abi_subsetting";
 
 // Map to stack contract
 
@@ -267,7 +267,7 @@ fn negtest_push_header_wrong_size() {
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
 
-// Subsetting contract 
+// Subsetting contract
 
 #[test]
 fn test_peek_header_subsets() {

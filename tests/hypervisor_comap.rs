@@ -6,9 +6,9 @@ use neutron_host::interface::*;
 
 use common::*;
 
-const CONTRACT_MAP_TO_STACK: &'static str   = "hypervisor_comap_map_to_stack";
-const CONTRACT_STACK_TO_MAP: &'static str   = "hypervisor_comap_stack_to_map";
-const CONTRACT_SUBSETTING: &'static str     = "hypervisor_comap_subsetting";
+const CONTRACT_MAP_TO_STACK: &'static str = "hypervisor_comap_map_to_stack";
+const CONTRACT_STACK_TO_MAP: &'static str = "hypervisor_comap_stack_to_map";
+const CONTRACT_SUBSETTING: &'static str = "hypervisor_comap_subsetting";
 
 // Map to stack contract
 
