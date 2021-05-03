@@ -1,8 +1,9 @@
+mod common;
+
 use neutron_host::harness::*;
 use neutron_host::interface::*;
 
-use crate::common::*;
-use crate::*;
+use common::*;
 
 const CONTRACT_NAME: &'static str = "general_smoke_test";
 

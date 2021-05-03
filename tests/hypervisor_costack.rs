@@ -1,9 +1,10 @@
+mod common;
+
 use neutron_host::element_interfaces::debug_data::*;
 use neutron_host::harness::*;
 use neutron_host::interface::*;
 
-use crate::common::*;
-use crate::*;
+use common::*;
 
 const CONTRACT_NAME: &'static str = "hypervisor_costack_mirror";
 

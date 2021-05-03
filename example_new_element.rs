@@ -1,3 +1,9 @@
+mod common;
+
+extern crate num;
+#[macro_use]
+extern crate num_derive;
+
 use neutron_common::RecoverableError;
 use neutron_host::callsystem::*;
 use neutron_host::codata::*;
@@ -6,8 +12,7 @@ use neutron_host::interface::*;
 use neutron_host::neutronerror::*;
 use std::cell::RefCell;
 
-use crate::common::*;
-use crate::*;
+use common::*;
 
 const CONTRACT_NAME: &'static str = "example_new_element_contract";
 

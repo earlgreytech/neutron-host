@@ -1,4 +1,7 @@
+#![allow(dead_code)] // Stuff used only in/by the macros generate warnings otherwise
+
 /// Compute the path to a smart contract binary in this testing folder
+#[cfg(test)]
 pub fn get_contract_path_target(name: &str, target: &str) -> String {
     let path_str = &format!(
         "./tests/contracts/default_env/target/thumbv6m-none-eabi/{}/{}",
@@ -8,11 +11,13 @@ pub fn get_contract_path_target(name: &str, target: &str) -> String {
 }
 
 /// Same as above except debug target is assumed
+#[cfg(test)]
 pub fn get_contract_path(name: &str) -> String {
     get_contract_path_target(name, "debug")
 }
 
 // Does a one-off execution of a single smart contract (debug target assumed)
+#[cfg(test)]
 #[macro_export]
 macro_rules! single_default_execution {
     // Handles both string litterals and constant string variables (becasue they resolve to the former)

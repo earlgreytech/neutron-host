@@ -1,8 +1,9 @@
+mod common;
+
 use neutron_host::harness::*;
 use neutron_host::interface::*;
 
-use crate::common::*;
-use crate::*;
+use common::*;
 
 const CONTRACT_NAME: &'static str = "example_deploy_call_contract";
 
