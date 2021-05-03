@@ -1,17 +1,17 @@
+mod common;
+
 use neutron_common::*;
 use neutron_host::element_interfaces::debug_data::*;
 use neutron_host::harness::*;
 use neutron_host::interface::*;
 
-use crate::common::*;
-use crate::*;
+use common::*;
 
-const DIR_NAME: &'static str = "neutron_star_costack";
-const CONTRACT_DIR_NAME: &'static str = "contract_mirror_batch";
+const CONTRACT_NAME: &'static str = "neutron_star_costack_mirror_batch";
 
 #[test]
-// Should ideally be split into separate tests to be more helpful if things actually break, 
-// but given the current non-optimizied testing setup this will suffice. 
+// Should ideally be split into separate tests to be more helpful if things actually break,
+// but given the current non-optimizied testing setup this will suffice.
 fn test_mirror_batch() {
     let mut debugdata = DebugDataInjector::default();
 
@@ -53,5 +53,5 @@ fn test_mirror_batch() {
         .expect_stack
         .push_address(var_address, "var_address");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }

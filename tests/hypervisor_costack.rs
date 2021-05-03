@@ -131,7 +131,7 @@ fn negtest_mirror_unsigned_wrong_value() {
     debugdata.inject_stack.push_u8(var_u8);
     debugdata.expect_stack.push_u8(var_u8, "var_u8");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -155,7 +155,7 @@ fn test_mirror_signed() {
     debugdata.inject_stack.push_i8(var_i8);
     debugdata.expect_stack.push_i8(var_i8, "var_i8");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -180,5 +180,5 @@ fn negtest_mirror_signed_wrong_value() {
     debugdata.inject_stack.push_i8(var_i8);
     debugdata.expect_stack.push_i8(var_i8, "var_i8");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
