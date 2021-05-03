@@ -14,11 +14,11 @@ use std::cell::RefCell;
 
 use common::*;
 
-const CONTRACT_NAME: &'static str = "example_new_element_contract";
+const CONTRACT_NAME: &'static str = "smoke_test_new_element";
 
 // Test that basic smart contract execution doesn't throw an error
 #[test]
-fn test_example_new_element() {
+fn test_new_element() {
     for target in vec!["debug", "release"] {
         let mut harness = TestHarness::default();
         let context = ExecutionContext::create_default_random_context();

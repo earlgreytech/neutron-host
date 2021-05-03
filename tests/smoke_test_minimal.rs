@@ -5,7 +5,7 @@ use neutron_host::interface::*;
 
 use common::*;
 
-const CONTRACT_NAME: &'static str = "general_smoke_test";
+const CONTRACT_NAME: &'static str = "smoke_test_minimal";
 
 // Test that basic smart contract execution doesn't throw an error
 #[test]

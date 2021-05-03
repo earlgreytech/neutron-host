@@ -11,7 +11,7 @@ extern crate panic_halt;
 
 #[no_mangle]
 pub unsafe extern "C" fn main() -> ! {
-    let filename = "tests/example_new_element_file.txt";
+    let filename = "tests/smoke_test_new_element_file.txt";
     println!("Loading file: {}", filename);
     //NOTE: doing println! will clear costack, so make sure to not do any in between stack operations!
     __push_costack(filename.as_ptr(), filename.len());

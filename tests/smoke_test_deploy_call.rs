@@ -5,11 +5,11 @@ use neutron_host::interface::*;
 
 use common::*;
 
-const CONTRACT_NAME: &'static str = "example_deploy_call_contract";
+const CONTRACT_NAME: &'static str = "smoke_test_deploy_call";
 
 // Test that deploying a contract, then calling it again actually works
 #[test]
-fn test_example_deploy_call() {
+fn test_deploy_call() {
     for target in vec!["debug", "release"] {
         let mut harness = TestHarness::default();
         let context = ExecutionContext::create_default_random_context();
