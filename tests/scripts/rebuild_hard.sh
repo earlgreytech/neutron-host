@@ -11,4 +11,4 @@ for dir in */ ; do
 done
 cd ../
 
-./build.sh
+./scripts/build.sh
