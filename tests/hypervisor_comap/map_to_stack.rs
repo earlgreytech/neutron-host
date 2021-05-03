@@ -5,8 +5,7 @@ use neutron_host::interface::*;
 use crate::common::*;
 use crate::*;
 
-const DIR_NAME: &'static str = "hypervisor_comap";
-const CONTRACT_DIR_NAME: &'static str = "contract_map_to_stack";
+const CONTRACT_NAME: &'static str = "hypervisor_comap_map_to_stack";
 
 #[test]
 fn test_peek() {
@@ -23,7 +22,7 @@ fn test_peek() {
         .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -43,7 +42,7 @@ fn negtest_peek_wrong_key() {
         .push_key(wrong_key.as_bytes(), value.as_bytes())
         .unwrap(); // Push wrong key as contract input
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -63,7 +62,7 @@ fn negtest_peek_wrong_value() {
         .push_key(key.as_bytes(), wrong_value.as_bytes())
         .unwrap(); // Push wrong value as contract input
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -86,7 +85,7 @@ fn test_peek_trucated() {
         .push_key(key.as_bytes(), value_unfitting.as_bytes())
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -110,5 +109,5 @@ fn negtest_peek_trucated() {
         .push_key(key.as_bytes(), value_unfitting.as_bytes())
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }

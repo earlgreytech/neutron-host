@@ -2,6 +2,9 @@ use neutron_host::harness::*;
 use neutron_host::interface::*;
 
 use crate::common::*;
+use crate::*;
+
+const CONTRACT_NAME: &'static str = "example_deploy_call_contract";
 
 // Test that deploying a contract, then calling it again actually works
 #[test]
@@ -10,7 +13,7 @@ fn test_example_deploy_call() {
         let mut harness = TestHarness::default();
         let context = ExecutionContext::create_default_random_context();
         let result = harness.deploy_binary_using_default_callsystem(
-            &get_contract_path_target("example_deploy_call", "contract_deploy_call", target),
+            &get_contract_path_target(CONTRACT_NAME, target),
             context.clone(),
         );
         assert_eq!(result.status, 1);

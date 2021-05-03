@@ -5,8 +5,7 @@ use neutron_host::interface::*;
 use crate::common::*;
 use crate::*;
 
-const DIR_NAME: &'static str = "hypervisor_costack";
-const CONTRACT_DIR_NAME: &'static str = "contract_mirror";
+const CONTRACT_NAME: &'static str = "hypervisor_costack_mirror";
 
 #[test]
 // Push a byte slice to contract
@@ -19,7 +18,7 @@ fn test_mirror_bytes() {
         .expect_stack
         .push_bytes(var_bytes.as_bytes(), "var_bytes");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -37,7 +36,7 @@ fn negtest_mirror_wrong_bytes() {
         .expect_stack
         .push_bytes(var_bytes.as_bytes(), "var_bytes");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -53,7 +52,7 @@ fn negtest_mirror_too_many_bytes() {
         .expect_stack
         .push_bytes(var_bytes.as_bytes(), "var_bytes");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -71,7 +70,7 @@ fn negtest_mirror_too_few_bytes() {
         .expect_stack
         .push_bytes(var_bytes.as_bytes(), "var_bytes");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -83,7 +82,7 @@ fn test_mirror_str() {
     debugdata.inject_stack.push_str(var_str);
     debugdata.expect_stack.push_str(var_str, "var_str");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -107,5 +106,5 @@ fn test_mirror_unsigned() {
     debugdata.inject_stack.push_u8(var_u8);
     debugdata.expect_stack.push_u8(var_u8, "var_u8");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }

@@ -6,8 +6,7 @@ use neutron_host::interface::*;
 use crate::common::*;
 use crate::*;
 
-const DIR_NAME: &'static str = "hypervisor_comap_abi";
-const CONTRACT_DIR_NAME: &'static str = "contract_subsetting";
+const CONTRACT_NAME: &'static str = "hypervisor_comap_abi_subsetting";
 
 #[test]
 fn test_peek_header_subsets() {
@@ -48,7 +47,7 @@ fn test_peek_header_subsets() {
         .push_str(value_subset_3, "value_subset_3");
     debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -92,5 +91,5 @@ fn negtest_peek_header_subsets_wrong_value() {
         .push_str(value_subset_3, "value_subset_3");
     debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }

@@ -1,12 +1,11 @@
-# Build all smart contract cargo projects structured two folder levels below this file. 
+# Build all smart contract cargo projects located in subrepos under the contracts folder
 
+cd ./contracts
 for dir in */ ; do
     cd ./$dir
-    for subdir in */ ; do
-        cd ./$subdir
-        cargo build --target thumbv6m-none-eabi
-        cargo build --target thumbv6m-none-eabi --release
-        cd ../
-    done
+    echo "Building contracts in /contracts/$dir..."
+    cargo build --target thumbv6m-none-eabi
+    cargo build --target thumbv6m-none-eabi --release
     cd ../
 done
+cd ../

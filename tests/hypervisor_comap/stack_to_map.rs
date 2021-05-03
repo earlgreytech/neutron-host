@@ -5,8 +5,7 @@ use neutron_host::interface::*;
 use crate::common::*;
 use crate::*;
 
-const DIR_NAME: &'static str = "hypervisor_comap";
-const CONTRACT_DIR_NAME: &'static str = "contract_stack_to_map";
+const CONTRACT_NAME: &'static str = "hypervisor_comap_stack_to_map";
 
 #[test]
 fn test_push() {
@@ -23,7 +22,7 @@ fn test_push() {
         .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -43,7 +42,7 @@ fn negtest_push_wrong_key() {
         .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -63,5 +62,5 @@ fn negtest_push_wrong_value() {
         .push_key(key.as_bytes(), value.as_bytes())
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }

@@ -1,5 +1,3 @@
-use crate::*;
-
 use neutron_common::RecoverableError;
 use neutron_host::callsystem::*;
 use neutron_host::codata::*;
@@ -9,6 +7,9 @@ use neutron_host::neutronerror::*;
 use std::cell::RefCell;
 
 use crate::common::*;
+use crate::*;
+
+const CONTRACT_NAME: &'static str = "example_new_element_contract";
 
 // Test that basic smart contract execution doesn't throw an error
 #[test]
@@ -23,7 +24,7 @@ fn test_example_new_element() {
         let mut file_element = FileElement {};
         cs.add_call(FILE_ELEMENT_ID, &mut file_element).unwrap();
         let result = harness.instance.execute_binary(
-            &get_contract_path_target("example_new_element", "contract_new_element", target),
+            &get_contract_path_target(CONTRACT_NAME, target),
             &cs,
             context,
         );

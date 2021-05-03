@@ -6,8 +6,7 @@ use neutron_host::interface::*;
 use crate::common::*;
 use crate::*;
 
-const DIR_NAME: &'static str = "hypervisor_comap_abi";
-const CONTRACT_DIR_NAME: &'static str = "contract_stack_to_map";
+const CONTRACT_NAME: &'static str = "hypervisor_comap_abi_stack_to_map";
 
 #[test]
 fn test_push_header_size_1() {
@@ -26,7 +25,7 @@ fn test_push_header_size_1() {
         .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -46,7 +45,7 @@ fn test_push_header_size_2() {
         .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -66,7 +65,7 @@ fn test_push_header_size_4() {
         .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -88,7 +87,7 @@ fn negtest_push_header_wrong_key() {
         .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -110,7 +109,7 @@ fn negtest_push_header_wrong_value() {
         .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
 
 #[test]
@@ -132,5 +131,5 @@ fn negtest_push_header_wrong_size() {
         .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
         .unwrap();
 
-    single_default_execution!(DIR_NAME, CONTRACT_DIR_NAME, debugdata);
+    single_default_execution!(CONTRACT_NAME, debugdata);
 }
