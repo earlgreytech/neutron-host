@@ -307,13 +307,12 @@ impl NarmHypervisor {
                 0x90 => {
                     let limit = codata.gas_remaining;
 
-                    let limit_little_end = (limit & 0x0000_0000_FFFF_FFFF) as u32;
-                    let limit_big_end = ((limit & 0xFFFF_FFFF_0000_0000) >> 32) as u32;
+                    let limit_least_significant = (limit & 0x0000_0000_FFFF_FFFF) as u32;
+                    let limit_most_significant = ((limit & 0xFFFF_FFFF_0000_0000) >> 32) as u32;
 
                     // VM is little endian, so we put them in that order
-                    // TODO: Does this even work?
-                    self.vm.external_set_reg(0, limit_big_end);
-                    self.vm.external_set_reg(1, limit_little_end);
+                    self.vm.external_set_reg(0, limit_least_significant);
+                    self.vm.external_set_reg(1, limit_most_significant);
                 }
 
                 //SVC 0x91: self_address() -> address: stack NeutronAddress
