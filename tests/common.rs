@@ -17,22 +17,23 @@ pub fn get_contract_path(name: &str) -> String {
 }
 
 // Does a one-off execution of a single smart contract (debug target assumed)
+// Can be assigned to a variable to produce a "NeutronResult" with execution status code and gas remaining
+// Note: CONTRACT_NAME can be either a string literal or a constant string variable
 #[cfg(test)]
 #[macro_export]
 macro_rules! single_default_execution {
-    // Handles both string litterals and constant string variables (becasue they resolve to the former)
-    ($CONTRACT_NAME:expr) => {
+    ($CONTRACT_NAME:expr) => {{
         let mut harness = TestHarness::default();
         let context = ExecutionContext::create_default_random_context();
         let contract_path = get_contract_path($CONTRACT_NAME);
-        harness.execute_binary_using_default_callsystem(&contract_path, context);
-    };
+        harness.execute_binary_using_default_callsystem(&contract_path, context)
+    }};
 
-    ($CONTRACT_NAME:expr, $DEBUGDATA:ident) => {
+    ($CONTRACT_NAME:expr, $DEBUGDATA:ident) => {{
         let mut harness = TestHarness::default();
         harness.debugdata = $DEBUGDATA;
         let context = ExecutionContext::create_default_random_context();
         let contract_path = get_contract_path($CONTRACT_NAME);
-        harness.execute_binary_using_default_callsystem(&contract_path, context);
-    };
+        harness.execute_binary_using_default_callsystem(&contract_path, context)
+    }};
 }
