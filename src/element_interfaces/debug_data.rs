@@ -3,7 +3,6 @@ use crate::codata::*;
 use crate::comap_abi_decoder::*;
 use crate::neutronerror::NeutronError::*;
 use crate::neutronerror::*;
-use core::mem::transmute;
 use neutron_common::RecoverableError;
 use std::collections::HashMap;
 use std::convert::TryInto;
@@ -19,14 +18,14 @@ This file also contains some data structures that simplifies construction of thi
 
 Data structures:
 
-* injected_input_stack      - An initial input stack state that the testing smart contract can load
+* inject_stack              - An initial input stack state that the testing smart contract can load
 
-* expected_output_stack     - An expected state for the output stack that the testing smart contract can asserted against,
+* expect_stack              - An expected state for the output stack that the testing smart contract can asserted against,
                               along with debug information to make a failed assertion more informative than "bytes in stacks didn't match"
 
-* injected_result_map       - An initial result stack state that the testing smart contract can load
+* inject_map                - An initial result stack state that the testing smart contract can load
 
-* expected_output_map       - An expected state for the output map that the testing smart contract can asserted against
+* expect_map                - An expected state for the output map that the testing smart contract can asserted against
 
 functions:
 
@@ -66,10 +65,10 @@ pub enum DebugDataFunctions {
 
 #[derive(Default)]
 pub struct DebugDataInjector {
-    pub injected_input_stack: DebugCoStack,
-    pub expected_output_stack: WrappedDebugCoStack,
-    pub injected_result_map: DebugCoMap,
-    pub expected_output_map: DebugCoMap,
+    pub inject_stack: DebugCoStack,
+    pub expect_stack: WrappedDebugCoStack,
+    pub inject_map: DebugCoMap,
+    pub expect_map: DebugCoMap,
 }
 
 impl ElementAPI for DebugDataInjector {
@@ -96,7 +95,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 1 (PushInputStack)");
 
                 println!("    Pushing provided stack to codata stack...");
-                self.injected_input_stack.push_to_codata(&mut codata);
+                self.inject_stack.push_to_codata(&mut codata);
                 println!("    Done!");
 
                 Ok(())
@@ -105,7 +104,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 2 (AssertOutputStack)");
 
                 println!("    Asserting state of CoData stack against expected state... ");
-                self.expected_output_stack.assert_eq(&mut codata);
+                self.expect_stack.assert_eq(&mut codata);
                 println!("    Done!");
 
                 Ok(())
@@ -114,7 +113,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 3 (PushResultMap)");
 
                 println!("    Pushing provided map to codata map...");
-                self.injected_result_map.push_to_codata(&mut codata);
+                self.inject_map.push_to_codata(&mut codata);
                 println!("    Done!");
 
                 Ok(())
@@ -123,7 +122,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 4 (AssertOutputMap)");
 
                 println!("    Asserting state of CoData map against expected state... ");
-                self.expected_output_map.assert_eq(&mut codata);
+                self.expect_map.assert_eq(&mut codata);
                 println!("    Done!");
 
                 Ok(())
@@ -132,7 +131,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 10 (GetInputStackLen)");
 
                 println!("    Pushing length of provided input stack to CoData stack...");
-                self.injected_input_stack.push_len_to_codata(&mut codata);
+                self.inject_stack.push_len_to_codata(&mut codata);
                 println!("    Done!");
 
                 Ok(())
@@ -141,7 +140,7 @@ impl ElementAPI for DebugDataInjector {
                 println!("[DebugDataInjector] Called with function: 11 (ReverseInputStack)");
 
                 println!("    Reverse order in provided input stack (first item become last item and so forth)...");
-                self.injected_input_stack.reverse();
+                self.inject_stack.reverse();
                 println!("    Done!");
 
                 Ok(())
@@ -168,21 +167,15 @@ impl DebugCoStack {
     // (adapted from neutron-star/src/syscall.rs)
 
     pub fn push_u64(&mut self, value: u64) {
-        const SIZE: usize = 8;
-        let t = unsafe { transmute::<u64, [u8; SIZE]>(value) };
-        self.stack.push(t.to_vec());
+        self.stack.push(value.to_le_bytes().to_vec());
     }
 
     pub fn push_u32(&mut self, value: u32) {
-        const SIZE: usize = 4;
-        let t = unsafe { transmute::<u32, [u8; SIZE]>(value) };
-        self.stack.push(t.to_vec());
+        self.stack.push(value.to_le_bytes().to_vec());
     }
 
     pub fn push_u16(&mut self, value: u16) {
-        const SIZE: usize = 2;
-        let t = unsafe { transmute::<u16, [u8; SIZE]>(value) };
-        self.stack.push(t.to_vec());
+        self.stack.push(value.to_le_bytes().to_vec());
     }
 
     pub fn push_u8(&mut self, value: u8) {
@@ -242,6 +235,19 @@ pub struct WrappedDebugCoStack {
     pub variable_types: Vec<DebugDataType>,
 }
 
+// Cast bytes to integer without error chacking
+// Accepts both slices and slice-able types like vectors
+// Expected behavior:
+// * Too many input bytes -> Extra bytes ignored
+// * Too few input bytes -> Index out of bounds error
+macro_rules! bytes_to_integer {
+    ($VALUE:ident, $TYPE:tt) => {{
+        const SIZE: usize = core::mem::size_of::<$TYPE>();
+        let array: [u8; SIZE] = $VALUE[0..SIZE].try_into().unwrap();
+        $TYPE::from_le_bytes(array)
+    }};
+}
+
 impl WrappedDebugCoStack {
     // CoStack functions
     pub fn push_u64(&mut self, value: u64, name: &str) {
@@ -288,26 +294,25 @@ impl WrappedDebugCoStack {
 
             match data_type {
                 DebugDataType::U64 => assert_eq!(
-                    self.to_u64(&expected_data),
-                    self.to_u64(&actual_data),
+                    bytes_to_integer!(expected_data, u64),
+                    bytes_to_integer!(actual_data, u64),
                     "\n\n[DebugCoData] Assertion failed for u64 named {}\n\n",
                     name
                 ),
                 DebugDataType::U32 => assert_eq!(
-                    self.to_u32(&expected_data),
-                    self.to_u32(&actual_data),
+                    bytes_to_integer!(expected_data, u32),
+                    bytes_to_integer!(actual_data, u32),
                     "\n\n[DebugCoData] Assertion failed for u32 named '{}'\n\n",
                     name
                 ),
                 DebugDataType::U16 => assert_eq!(
-                    self.to_u16(&expected_data),
-                    self.to_u16(&actual_data),
+                    bytes_to_integer!(expected_data, u16),
+                    bytes_to_integer!(actual_data, u16),
                     "\n\n[DebugCoData] Assertion failed for u16 named '{}'\n\n",
                     name
                 ),
                 DebugDataType::U8 => assert_eq!(
-                    self.to_u8(&expected_data),
-                    self.to_u8(&actual_data),
+                    expected_data[0], actual_data[0],
                     "\n\n[DebugCoData] Assertion failed for u8 named '{}'\n\n",
                     name
                 ),
@@ -336,31 +341,6 @@ impl WrappedDebugCoStack {
     fn push_debug_data(&mut self, name: &str, type_enum: DebugDataType) {
         self.variable_names.push(String::from(name));
         self.variable_types.push(type_enum);
-    }
-
-    // Transmute byte slices from the stacks to values
-    // NOTE: Expected behavior for too long inputs is that extra bytes are ignored,
-    // while too short inputs will result in an index out of bounds error (No error checking for efficiency reasons, these are internal functions after all)
-    fn to_u64(&mut self, value: &[u8]) -> u64 {
-        let array: [u8; 8] = value[0..8]
-            .try_into()
-            .expect("to_u64: Error in try_into function (This should never happen?)");
-        unsafe { return transmute::<[u8; 8], u64>(array) };
-    }
-    fn to_u32(&mut self, value: &[u8]) -> u32 {
-        let array: [u8; 4] = value[0..4]
-            .try_into()
-            .expect("to_u32: Error in try_into function (This should never happen?)");
-        unsafe { return transmute::<[u8; 4], u32>(array) };
-    }
-    fn to_u16(&mut self, value: &[u8]) -> u16 {
-        let array: [u8; 2] = value[0..2]
-            .try_into()
-            .expect("to_u16: Error in try_into function (This should never happen?)");
-        unsafe { return transmute::<[u8; 2], u16>(array) };
-    }
-    fn to_u8(&mut self, value: &[u8]) -> u8 {
-        return value[0];
     }
 }
 
@@ -509,101 +489,25 @@ mod tests {
         assert_eq!(&stack.stack[0], string.as_bytes());
     }
 
-    // WrappedDebugCoStack::to_u64(&[u8]) -> u64
     #[test]
-    fn test_wrappeddebugcostack_to_u64() {
-        let mut stack = WrappedDebugCoStack::default();
+    fn test_bytes_to_integer_macro() {
         let bytes: &[u8] = &[0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11];
-        let result = stack.to_u64(bytes);
+        let result = bytes_to_integer!(bytes, u64);
         assert_eq!(result, 0x1122_3344_5566_7788 as u64);
     }
     #[test]
-    fn test_wrappeddebugcostack_to_u64_too_long() {
-        let mut stack = WrappedDebugCoStack::default();
+    fn test_bytes_to_integer_macro_too_long() {
         let bytes: &[u8] = &[0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0xFF];
-        let result = stack.to_u64(bytes);
+        let result = bytes_to_integer!(bytes, u64);
         assert_eq!(result, 0x1122_3344_5566_7788 as u64);
     }
     #[test]
     #[should_panic]
-    fn negtest_wrappeddebugcostack_to_u64_too_short() {
-        let mut stack = WrappedDebugCoStack::default();
+    fn negtest_bytes_to_integer_macro_too_short() {
         let bytes: &[u8] = &[0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22];
-        let result = stack.to_u64(bytes);
+        let result = bytes_to_integer!(bytes, u64);
         assert_eq!(result, 0x1122_3344_5566_7788 as u64);
     }
 
-    // WrappedDebugCoStack::to_u32(&[u8]) -> u32
-    #[test]
-    fn test_wrappeddebugcostack_to_u32() {
-        let mut stack = WrappedDebugCoStack::default();
-        let bytes: &[u8] = &[0x44, 0x33, 0x22, 0x11];
-        let result = stack.to_u32(bytes);
-        assert_eq!(result, 0x1122_3344 as u32);
-    }
-    #[test]
-    fn test_wrappeddebugcostack_to_u32_too_long() {
-        let mut stack = WrappedDebugCoStack::default();
-        let bytes: &[u8] = &[0x44, 0x33, 0x22, 0x11, 0xFF];
-        let result = stack.to_u32(bytes);
-        assert_eq!(result, 0x1122_3344 as u32);
-    }
-    #[test]
-    #[should_panic]
-    fn negtest_wrappeddebugcostack_to_u32_too_short() {
-        let mut stack = WrappedDebugCoStack::default();
-        let bytes: &[u8] = &[0x44, 0x33, 0x22];
-        let result = stack.to_u32(bytes);
-        assert_eq!(result, 0x1122_3344 as u32);
-    }
-
-    // WrappedDebugCoStack::to_u16(&[u8]) -> u16
-    #[test]
-    fn test_wrappeddebugcostack_to_u16() {
-        let mut stack = WrappedDebugCoStack::default();
-        let bytes: &[u8] = &[0x22, 0x11];
-        let result = stack.to_u16(bytes);
-        assert_eq!(result, 0x1122 as u16);
-    }
-    #[test]
-    fn test_wrappeddebugcostack_to_u16_too_long() {
-        let mut stack = WrappedDebugCoStack::default();
-        let bytes: &[u8] = &[0x22, 0x11, 0xFF];
-        let result = stack.to_u16(bytes);
-        assert_eq!(result, 0x1122 as u16);
-    }
-    #[test]
-    #[should_panic]
-    fn negtest_wrappeddebugcostack_to_u16_too_short() {
-        let mut stack = WrappedDebugCoStack::default();
-        let bytes: &[u8] = &[0x22];
-        let result = stack.to_u16(bytes);
-        assert_eq!(result, 0x1122 as u16);
-    }
-
-    // WrappedDebugCoStack::to_u8(&[u8]) -> u8
-    #[test]
-    fn test_wrappeddebugcostack_to_u8() {
-        let mut stack = WrappedDebugCoStack::default();
-        let bytes: &[u8] = &[0x11];
-        let result = stack.to_u8(bytes);
-        assert_eq!(result, 0x11 as u8);
-    }
-    #[test]
-    fn test_wrappeddebugcostack_to_u8_too_long() {
-        let mut stack = WrappedDebugCoStack::default();
-        let bytes: &[u8] = &[0x11, 0xFF];
-        let result = stack.to_u8(bytes);
-        assert_eq!(result, 0x11 as u8);
-    }
-    #[test]
-    #[should_panic]
-    fn negtest_wrappeddebugcostack_to_u8_too_short() {
-        let mut stack = WrappedDebugCoStack::default();
-        let bytes: &[u8] = &[];
-        let result = stack.to_u8(bytes);
-        assert_eq!(result, 0x11 as u8);
-    }
-    
     // TODO: Tests for debug comap functionality
 }
