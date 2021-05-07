@@ -9,9 +9,9 @@ use common::*;
 
 const CONTRACT_NAME: &'static str = "neutron_star_costack_mirror_batch";
 
+// TODO: Add more granulate tests?
+
 #[test]
-// Should ideally be split into separate tests to be more helpful if things actually break,
-// but given the current non-optimizied testing setup this will suffice.
 fn test_mirror_batch() {
     let mut debugdata = DebugDataInjector::default();
 
