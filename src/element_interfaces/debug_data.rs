@@ -3,7 +3,7 @@ use crate::codata::*;
 use crate::comap_abi_decoder::*;
 use crate::neutronerror::NeutronError::*;
 use crate::neutronerror::*;
-use neutron_common::RecoverableError;
+use neutron_common::*;
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::str;
@@ -182,6 +182,28 @@ impl DebugCoStack {
         self.stack.push([value].to_vec());
     }
 
+    pub fn push_i64(&mut self, value: i64) {
+        self.stack.push(value.to_le_bytes().to_vec());
+    }
+
+    pub fn push_i32(&mut self, value: i32) {
+        self.stack.push(value.to_le_bytes().to_vec());
+    }
+
+    pub fn push_i16(&mut self, value: i16) {
+        self.stack.push(value.to_le_bytes().to_vec());
+    }
+
+    pub fn push_i8(&mut self, value: i8) {
+        self.stack.push(value.to_le_bytes().to_vec());
+    }
+
+    pub fn push_address(&mut self, value: NeutronAddress) {
+        let mut bytes = value.version.to_le_bytes().to_vec();
+        bytes.append(&mut value.data.to_vec());
+        self.stack.push(bytes);
+    }
+
     pub fn push_bytes(&mut self, value: &[u8]) {
         self.stack.push(value.to_vec());
     }
@@ -223,6 +245,11 @@ pub enum DebugDataType {
     U32,
     U16,
     U8,
+    I64,
+    I32,
+    I16,
+    I8,
+    ADDRESS,
     BYTES,
     STR,
 }
@@ -270,6 +297,31 @@ impl WrappedDebugCoStack {
         self.push_debug_data(name, DebugDataType::U8);
     }
 
+    pub fn push_i64(&mut self, value: i64, name: &str) {
+        self.output_stack.push_i64(value);
+        self.push_debug_data(name, DebugDataType::I64);
+    }
+
+    pub fn push_i32(&mut self, value: i32, name: &str) {
+        self.output_stack.push_i32(value);
+        self.push_debug_data(name, DebugDataType::I32);
+    }
+
+    pub fn push_i16(&mut self, value: i16, name: &str) {
+        self.output_stack.push_i16(value);
+        self.push_debug_data(name, DebugDataType::I16);
+    }
+
+    pub fn push_i8(&mut self, value: i8, name: &str) {
+        self.output_stack.push_i8(value);
+        self.push_debug_data(name, DebugDataType::I8);
+    }
+
+    pub fn push_address(&mut self, value: NeutronAddress, name: &str) {
+        self.output_stack.push_address(value);
+        self.push_debug_data(name, DebugDataType::ADDRESS);
+    }
+
     pub fn push_bytes(&mut self, value: &[u8], name: &str) {
         self.output_stack.push_bytes(value);
         self.push_debug_data(name, DebugDataType::BYTES);
@@ -312,8 +364,39 @@ impl WrappedDebugCoStack {
                     name
                 ),
                 DebugDataType::U8 => assert_eq!(
-                    expected_data[0], actual_data[0],
+                    bytes_to_integer!(expected_data, u8),
+                    bytes_to_integer!(actual_data, u8),
                     "\n\n[DebugCoData] Assertion failed for u8 named '{}'\n\n",
+                    name
+                ),
+                DebugDataType::I64 => assert_eq!(
+                    bytes_to_integer!(expected_data, i64),
+                    bytes_to_integer!(actual_data, i64),
+                    "\n\n[DebugCoData] Assertion failed for i64 named {}\n\n",
+                    name
+                ),
+                DebugDataType::I32 => assert_eq!(
+                    bytes_to_integer!(expected_data, i32),
+                    bytes_to_integer!(actual_data, i32),
+                    "\n\n[DebugCoData] Assertion failed for i32 named '{}'\n\n",
+                    name
+                ),
+                DebugDataType::I16 => assert_eq!(
+                    bytes_to_integer!(expected_data, i16),
+                    bytes_to_integer!(actual_data, i16),
+                    "\n\n[DebugCoData] Assertion failed for i16 named '{}'\n\n",
+                    name
+                ),
+                DebugDataType::I8 => assert_eq!(
+                    bytes_to_integer!(expected_data, i8),
+                    bytes_to_integer!(actual_data, i8),
+                    "\n\n[DebugCoData] Assertion failed for i8 named '{}'\n\n",
+                    name
+                ),
+                DebugDataType::ADDRESS => assert_eq!(
+                    NeutronAddress::from_data(&expected_data),
+                    NeutronAddress::from_data(&actual_data),
+                    "\n\n[DebugCoData] Assertion failed for NeutronAddress named '{}'\n\n",
                     name
                 ),
                 DebugDataType::BYTES => assert_eq!(
@@ -467,6 +550,62 @@ mod tests {
         stack.push_u8(0x11 as u8);
         let expected_bytes: Vec<u8> = vec![0x11];
         assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_i64(i64)
+    #[test]
+    fn test_debugcostack_push_i64() {
+        let mut stack = DebugCoStack::default();
+        let num: i64 = i64::MIN / 2;
+        stack.push_i64(num);
+        let expected_bytes: Vec<u8> = num.to_le_bytes().to_vec();
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_i32(i32)
+    #[test]
+    fn test_debugcostack_push_i32() {
+        let mut stack = DebugCoStack::default();
+        let num: i32 = i32::MIN / 2;
+        stack.push_i32(num);
+        let expected_bytes: Vec<u8> = num.to_le_bytes().to_vec();
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_i16(i16)
+    #[test]
+    fn test_debugcostack_push_i16() {
+        let mut stack = DebugCoStack::default();
+        let num: i16 = i16::MIN / 2;
+        stack.push_i16(num);
+        let expected_bytes: Vec<u8> = num.to_le_bytes().to_vec();
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_i8(i8)
+    #[test]
+    fn test_debugcostack_push_i8() {
+        let mut stack = DebugCoStack::default();
+        let num: i8 = i8::MIN / 2;
+        stack.push_i8(num);
+        let expected_bytes: Vec<u8> = num.to_le_bytes().to_vec();
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_address(NeutronAddress)
+    #[test]
+    fn test_debugcostack_push_address() {
+        let mut stack = DebugCoStack::default();
+
+        let version: u32 = 123456789;
+        let data: [u8; 20] = [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        ];
+
+        let mut bytes = version.to_le_bytes().to_vec();
+        bytes.append(&mut data.to_vec());
+        stack.push_address(NeutronAddress::from_data(&bytes));
+        assert_eq!(stack.stack[0], bytes);
     }
 
     // DebugCoStack::push_bytes(&[u8])
