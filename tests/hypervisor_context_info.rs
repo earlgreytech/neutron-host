@@ -79,7 +79,7 @@ fn test_self_address() {
     let mut harness = TestHarness::default();
 
     // Create a context with random self address
-    let mut context = ExecutionContext::create_default_random_context();
+    let context = ExecutionContext::create_default_random_context();
 
     debugdata
         .expect_stack
