@@ -5,7 +5,6 @@
 #![no_std]
 
 use neutron_star_rt::*;
-use neutron_star::*;
 extern crate panic_halt;
 
 // TODO: Import directly from testing harness!
