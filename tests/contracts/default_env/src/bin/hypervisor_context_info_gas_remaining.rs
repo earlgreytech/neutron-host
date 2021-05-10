@@ -17,8 +17,6 @@ pub unsafe extern "C" fn main() -> ! {
     let gas_remaining_2 = __gas_remaining();
     let gas_remaining_3 = __gas_remaining();
     
-    println!("Gas: {}", gas_remaining_1);
-    
     // Error: One of the recieved gas remaining values was larger than the testing gas limit! 
     if gas_remaining_1 >= DEFAULT_TEST_GAS || gas_remaining_2 >= DEFAULT_TEST_GAS || gas_remaining_3 >= DEFAULT_TEST_GAS {
         __exit(2);
