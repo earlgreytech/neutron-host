@@ -223,7 +223,7 @@ impl CoData{
 
     /// Should only be used by hypervisor ops that utilize costack arguments. Flip stacks once when entering the op and once more before leaving. 
     /// Used so that ops can actually read its inputs, and so the calling contract can read its outputs. 
-    fn flip_stacks(&mut self){
+    pub fn flip_stacks(&mut self){
         let tmp = self.input_stack_index;
         self.input_stack_index = self.output_stack_index;
         self.output_stack_index = tmp;
