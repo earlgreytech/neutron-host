@@ -1,16 +1,13 @@
 mod common;
 
-//use neutron_host::element_interfaces::debug_data::*;
 use neutron_host::harness::*;
 use neutron_host::interface::*;
 
 use common::*;
 
-const CONTRACT_NAME: &'static str = "hypervisor_context_info_gas";
-
 #[test]
-fn test_gas() {
-    let result = single_default_execution!(CONTRACT_NAME);
+fn test_gas_remaining() {
+    let result = single_default_execution!("hypervisor_context_info_gas_remaining");
 
     match result.status {
         2 => {
