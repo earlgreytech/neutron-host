@@ -1,0 +1,15 @@
+binop_separator = "Back"
+combine_control_expr = false
+comment_width = 120
+enum_discrim_align_threshold = 60
+format_strings = true
+match_block_trailing_comma = true
+max_width = 140 # Bikeshed warning! 
+normalize_doc_attributes = true
+overflow_delimited_expr = true
+remove_nested_parens = false
+group_imports = "StdExternalCrate"
+reorder_modules = false
+
+
+
