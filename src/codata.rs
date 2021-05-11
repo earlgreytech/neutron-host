@@ -4,6 +4,7 @@ use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
 use std::collections::HashMap;
 use std::convert::*;
+use std::mem;
 
 #[derive(Default)]
 pub struct GasSchedule{
@@ -235,6 +236,13 @@ impl CoData{
     fn flip_stacks_clear_output(&mut self){
         self.flip_stacks();
         self.stacks[self.output_stack_index].clear(); //outputs are cleared with each flipping (clears caller's outputs on entry, then callers inputs upon exit)
+    }
+
+    /// Used only by forward_input_costack() to efficiently overwrite the output stack with a copy of the input stack
+    /// This operation is meant to streamline the process of passing the current context's input forward to a new call
+    /// TODO: Evaluate if a destructive move is the best approach
+    pub fn copy_input_onto_output_stack(&mut self){
+        self.stacks[self.output_stack_index] = mem::replace(&mut self.stacks[self.input_stack_index], vec![]);
     }
 
     /*
