@@ -15,6 +15,7 @@ const DEBUG_DATA_FEATURE: u32 = 0x4000_0001;
 pub unsafe extern "C" fn main() -> ! {
     // Push provided input stack to codata input stack
     __system_call(DEBUG_DATA_FEATURE, 1); // DebugDataFunctions::PushInputStack
+    __forward_input_costack(); // Injected input stack -> Input for push_raw_comap
     
     // Push key/value from costack to comap
     __push_raw_comap();

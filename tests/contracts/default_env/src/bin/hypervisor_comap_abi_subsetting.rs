@@ -21,12 +21,18 @@ pub unsafe extern "C" fn main() -> ! {
     
     // Push keys to costack
     __system_call(DEBUG_DATA_FEATURE, 1); // DebugDataFunctions::PushInputStack
+    __forward_input_costack(); // Injected input stack -> input for peek_result_comap in loop
     
     // Peek all the subsets of the comap value to the costack
+    let mut abi_data: [u32; SUBSET_COUNT] = [0; SUBSET_COUNT];
     for i in 0..SUBSET_COUNT {
-        let abi_data = __peek_result_comap(SUBSET_SIZE * i, SUBSET_SIZE);
-        // Push ABI data to stack 
-        let abi_data_buf = u32::to_ne_bytes(abi_data);
+        abi_data[i] = __peek_result_comap(SUBSET_SIZE * i, SUBSET_SIZE);
+    }
+    __forward_input_costack(); // Result input from peek_result_comap in loop -> Output stack for assertion
+    
+    // Push ABI data to stack
+    for i in 0..SUBSET_COUNT {
+        let abi_data_buf = u32::to_ne_bytes(abi_data[i]);
         __push_costack(abi_data_buf.as_ptr(), 4);
     }
 

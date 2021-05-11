@@ -109,6 +109,8 @@ impl NarmHypervisor {
                 //SVC 0x30: push_comap(key: stack [u8], abi_data: u32, value: stack [u8])
                 //Pop two values from costack and push as key and value to comap using abi_data
                 0x30 => {
+                    codata.flip_stacks();
+
                     let abi_data = self.vm.external_get_reg(0);
 
                     // Since key and value is pushed in the "correct" order we pop the other way around
@@ -138,11 +140,15 @@ impl NarmHypervisor {
                             return Ok(HypervisorState::Error(e));
                         }
                     }
+
+                    codata.flip_stacks();
                 }
 
                 //SVC 0x31: push_raw_comap(key: stack [u8], raw_value: stack [u8])
                 //Pop two values from costack and push as key and value to comap
                 0x31 => {
+                    codata.flip_stacks();
+
                     // Since key and value is pushed in the "correct" order we pop the other way around
                     let raw_value = match codata.pop_input_stack() {
                         Ok(d) => d,
@@ -163,11 +169,15 @@ impl NarmHypervisor {
                             return Ok(HypervisorState::Error(e));
                         }
                     }
+
+                    codata.flip_stacks();
                 }
 
                 //SVC 0x32: peek_comap(key: stack [u8], begin: u32, max_length: u32) -> (abi_data: u32, value: stack [u8])
                 //Pop one value from costack and use as key to get input comap value, which is then pushed to costack (constrained by begin and max_length) after separation of ABI header
                 0x32 => {
+                    codata.flip_stacks();
+
                     let mut begin = self.vm.external_get_reg(0) as usize;
                     let max_length = self.vm.external_get_reg(1) as usize;
 
@@ -201,11 +211,15 @@ impl NarmHypervisor {
                     }
 
                     self.vm.external_set_reg(0, abi_data);
+
+                    codata.flip_stacks();
                 }
 
                 //SVC 0x33: peek_raw_comap(key: stack [u8], begin: u32, max_length: u32) -> raw_value: stack [u8]
                 //Pop one value from costack and use as key to get input comap value, which is then pushed to costack (constrained by begin and max_length)
                 0x33 => {
+                    codata.flip_stacks();
+
                     let begin = self.vm.external_get_reg(0) as usize;
                     let max_length = self.vm.external_get_reg(1) as usize;
 
@@ -232,11 +246,15 @@ impl NarmHypervisor {
                             return Ok(HypervisorState::Error(e));
                         }
                     }
+
+                    codata.flip_stacks();
                 }
 
                 //SVC 0x34: peek_result_comap(key: stack [u8], begin: u32, max_length: u32) -> (abi_data: u32, value: stack [u8])
                 //Pop one value from costack and use as key to get result comap value, which is then pushed to costack (constrained by begin and max_length) after separation of ABI header
                 0x34 => {
+                    codata.flip_stacks();
+
                     let mut begin = self.vm.external_get_reg(0) as usize;
                     let max_length = self.vm.external_get_reg(1) as usize;
 
@@ -270,11 +288,15 @@ impl NarmHypervisor {
                     }
 
                     self.vm.external_set_reg(0, abi_data);
+
+                    codata.flip_stacks();
                 }
 
                 //SVC 0x35: peek_raw_result_comap(key: stack [u8], begin: u32, max_length: u32) -> raw_value: stack [u8]
                 //Pop one value from costack and use as key to get result comap value, which is then pushed to costack (constrained by begin and max_length)
                 0x35 => {
+                    codata.flip_stacks();
+
                     let begin = self.vm.external_get_reg(0) as usize;
                     let max_length = self.vm.external_get_reg(1) as usize;
 
@@ -301,6 +323,8 @@ impl NarmHypervisor {
                             return Ok(HypervisorState::Error(e));
                         }
                     }
+
+                    codata.flip_stacks();
                 }
 
                 //********************************//

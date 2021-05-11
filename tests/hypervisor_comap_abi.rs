@@ -295,17 +295,19 @@ fn test_peek_header_subsets() {
         .unwrap();
 
     // We expect the contract to split the comap value into the subsets
+    // Note: Values and ABI data are separated to avoid costack conflicts in the contract!
     debugdata
         .expect_stack
         .push_str(value_subset_1, "value_subset_1");
-    debugdata.expect_stack.push_u32(abi_data, "abi_data");
     debugdata
         .expect_stack
         .push_str(value_subset_2, "value_subset_2");
-    debugdata.expect_stack.push_u32(abi_data, "abi_data");
     debugdata
         .expect_stack
         .push_str(value_subset_3, "value_subset_3");
+
+    debugdata.expect_stack.push_u32(abi_data, "abi_data");
+    debugdata.expect_stack.push_u32(abi_data, "abi_data");
     debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
     single_default_execution!(CONTRACT_SUBSETTING, debugdata);
@@ -339,17 +341,19 @@ fn negtest_peek_header_subsets_wrong_value() {
         .unwrap();
 
     // We expect the contract to split the comap value into the subsets
+    // Note: Values and ABI data are separated to avoid costack conflicts in the contract!
     debugdata
         .expect_stack
         .push_str(value_subset_1, "value_subset_1");
-    debugdata.expect_stack.push_u32(abi_data, "abi_data");
     debugdata
         .expect_stack
         .push_str(value_subset_2, "value_subset_2");
-    debugdata.expect_stack.push_u32(abi_data, "abi_data");
     debugdata
         .expect_stack
         .push_str(value_subset_3, "value_subset_3");
+
+    debugdata.expect_stack.push_u32(abi_data, "abi_data");
+    debugdata.expect_stack.push_u32(abi_data, "abi_data");
     debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
     single_default_execution!(CONTRACT_SUBSETTING, debugdata);

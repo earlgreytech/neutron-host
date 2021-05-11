@@ -21,7 +21,10 @@ pub unsafe extern "C" fn main() -> ! {
     
     // Load key into costack and use it as parameter for comap lookup
     __system_call(DEBUG_DATA_FEATURE, 1); // DebugDataFunctions::PushInputStack
+    __forward_input_costack(); // Injected input stack -> Input for peek_result_comap
+    
     let abi_data = __peek_result_comap(DATA_READ_START, MAX_RESULT_SIZE);
+    __forward_input_costack(); // Result input from peek_result_comap -> Output stack for assertion
     
     // Push ABI data to stack 
     let abi_data_buf = u32::to_ne_bytes(abi_data);
