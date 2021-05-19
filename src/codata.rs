@@ -238,10 +238,11 @@ impl CoData{
         self.stacks[self.output_stack_index].clear(); //outputs are cleared with each flipping (clears caller's outputs on entry, then callers inputs upon exit)
     }
 
-    /// Used only by forward_input_costack() to efficiently overwrite the output stack with a copy of the input stack
-    /// This operation is meant to streamline the process of passing the current context's input forward to a new call
-    /// TODO: Evaluate if a destructive move is the best approach
-    pub fn copy_input_onto_output_stack(&mut self){
+    /// Used only by namesake hypervisor op to efficiently overwrite the output stack with a copy of the input stack
+    /// This operation is meant to streamline the process of passing the current context's input/result as input to a new call
+    /// TODO: Evaluate if a destructive move is the best approach?
+    /// TODO: Allow moving only parts of the stack?
+    pub fn move_input_to_output_costack(&mut self){
         self.stacks[self.output_stack_index] = mem::replace(&mut self.stacks[self.input_stack_index], vec![]);
     }
 

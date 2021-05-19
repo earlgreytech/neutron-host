@@ -97,9 +97,9 @@ impl NarmHypervisor {
                     codata.clear_input_stack();
                 }
 
-                //SVC 0x16: forward_input_costack()
+                //SVC 0x16: move_input_to_output_costack()
                 0x16 => {
-                    codata.copy_input_onto_output_stack();
+                    codata.move_input_to_output_costack();
                 }
 
                 //*************************//

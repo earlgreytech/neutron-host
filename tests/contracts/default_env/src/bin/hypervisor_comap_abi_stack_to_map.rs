@@ -19,7 +19,7 @@ pub unsafe extern "C" fn main() -> ! {
     // Pop ABI data bytes and cast to u32
     let mut abi_data_buf: [u8; 4] = [0; 4]; 
     let _ = __pop_costack(abi_data_buf.as_mut_ptr(), 4);
-    __forward_input_costack(); // The rest of the injected input stack -> Input for push_comap
+    __move_input_to_output_costack(); // The rest of the injected input stack -> Input for push_comap
     
     let abi_data = u32::from_ne_bytes(abi_data_buf); 
     

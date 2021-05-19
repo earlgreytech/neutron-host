@@ -21,13 +21,13 @@ pub unsafe extern "C" fn main() -> ! {
     
     // Push keys to costack
     __system_call(DEBUG_DATA_FEATURE, 1); // DebugDataFunctions::PushInputStack
-    __forward_input_costack(); // Injected input stack -> input for peek_raw_result_comap in loop
+    __move_input_to_output_costack(); // Injected input stack -> input for peek_raw_result_comap in loop
     
     // Peek all the subsets of the comap value to the costack
     for i in 0..SUBSET_COUNT {
         __peek_raw_result_comap(SUBSET_SIZE * i, SUBSET_SIZE);
     }
-    __forward_input_costack(); // Result input from peek_raw_result_comap in loop -> Output stack for assertion
+    __move_input_to_output_costack(); // Result input from peek_raw_result_comap in loop -> Output stack for assertion
 
     // Assert the result of the comap subset peeking
     __system_call(DEBUG_DATA_FEATURE, 2); // DebugDataFunctions::AssertOutputStack
