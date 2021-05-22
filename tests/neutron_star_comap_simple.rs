@@ -8,7 +8,9 @@ use neutron_star::syscalls::*;
 use common::*;
 
 const CONTRACT_WRITE_SINGLE: &'static str = "neutron_star_comap_simple_write_single";
+const CONTRACT_WRITE_ARRAY: &'static str = "neutron_star_comap_simple_write_array";
 const CONTRACT_READ_SINGLE: &'static str = "neutron_star_comap_simple_read_single";
+const CONTRACT_READ_ARRAY: &'static str = "neutron_star_comap_simple_read_array";
 
 // Write single contract
 
@@ -164,7 +166,205 @@ fn test_write_i64() {
     single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
 }
 
+// Write array contract
+
+#[test]
+fn test_write_array_u8() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u8; 5] = [1, 2, 3, 4, 5];
+    // It would be a bit pointless to convert a byte array to a byte vector...
+    let value_bytes = value;
+    let abi_data = ABI_VALUE_U8 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .expect_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
+#[test]
+fn test_write_array_u16() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u16; 5] = [1, 2, 3, 4, 5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..2 {
+            value_bytes.push(u16::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_U16 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .expect_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
+#[test]
+fn test_write_array_u32() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u32; 5] = [1, 2, 3, 4, 5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..4 {
+            value_bytes.push(u32::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .expect_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
+#[test]
+fn test_write_array_u64() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u64; 5] = [1, 2, 3, 4, 5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..8 {
+            value_bytes.push(u64::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_U64 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .expect_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
+#[test]
+fn test_write_array_i8() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [i8; 5] = [-1, -2, -3, -4, -5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        value_bytes.push(i8::to_le_bytes(value[i])[0]);
+    }
+    let abi_data = ABI_VALUE_I8 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .expect_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
+#[test]
+fn test_write_array_i16() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [i16; 5] = [-1, -2, -3, -4, -5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..2 {
+            value_bytes.push(i16::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_I16 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .expect_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
+#[test]
+fn test_write_array_i32() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [i32; 5] = [-1, -2, -3, -4, -5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..4 {
+            value_bytes.push(i32::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_I32 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .expect_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
+#[test]
+fn test_write_array_i64() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [i64; 5] = [-1, -2, -3, -4, -5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..8 {
+            value_bytes.push(i64::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_I64 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .expect_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
 // Read single contract
+// Note: Only actually test the functions for reading the result comap,
+// but since they are identical save for one line with the input map version it should be fine.
 
 #[test]
 fn test_read_u64() {
@@ -316,4 +516,216 @@ fn test_read_i8() {
         .unwrap();
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
+}
+
+// Read array contract
+
+#[test]
+fn test_read_array_u8() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u8; 5] = [1, 2, 3, 4, 5];
+    // It would be a bit pointless to convert a byte array to a byte vector...
+    let value_bytes = value;
+    let abi_data = ABI_VALUE_U8 + ABI_ARRAY_BIT;
+
+    debugdata
+        .expect_stack
+        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .inject_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
+}
+
+#[test]
+fn test_read_array_u16() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u16; 5] = [1, 2, 3, 4, 5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..2 {
+            value_bytes.push(u16::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_U16 + ABI_ARRAY_BIT;
+
+    debugdata
+        .expect_stack
+        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .inject_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
+}
+
+#[test]
+fn test_read_array_u32() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u32; 5] = [1, 2, 3, 4, 5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..4 {
+            value_bytes.push(u32::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
+
+    debugdata
+        .expect_stack
+        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .inject_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
+}
+
+#[test]
+fn test_read_array_u64() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u64; 5] = [1, 2, 3, 4, 5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..8 {
+            value_bytes.push(u64::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_U64 + ABI_ARRAY_BIT;
+
+    debugdata
+        .expect_stack
+        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .inject_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
+}
+
+#[test]
+fn test_read_array_i8() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [i8; 5] = [-1, -2, -3, -4, -5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        value_bytes.push(i8::to_le_bytes(value[i])[0]);
+    }
+    let abi_data = ABI_VALUE_I8 + ABI_ARRAY_BIT;
+
+    debugdata
+        .expect_stack
+        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .inject_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
+}
+
+#[test]
+fn test_read_array_i16() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [i16; 5] = [-1, -2, -3, -4, -5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..2 {
+            value_bytes.push(i16::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_I16 + ABI_ARRAY_BIT;
+
+    debugdata
+        .expect_stack
+        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .inject_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
+}
+
+#[test]
+fn test_read_array_i32() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [i32; 5] = [-1, -2, -3, -4, -5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..4 {
+            value_bytes.push(i32::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_I32 + ABI_ARRAY_BIT;
+
+    debugdata
+        .expect_stack
+        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .inject_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
+}
+
+#[test]
+fn test_read_array_i64() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [i64; 5] = [-1, -2, -3, -4, -5];
+    let mut value_bytes: Vec<u8> = vec![];
+    for i in 0..5 {
+        for j in 0..8 {
+            value_bytes.push(i64::to_le_bytes(value[i])[j]);
+        }
+    }
+    let abi_data = ABI_VALUE_I64 + ABI_ARRAY_BIT;
+
+    debugdata
+        .expect_stack
+        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .inject_map
+        .push_key_abi(key.as_bytes(), &value_bytes, abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
 }
