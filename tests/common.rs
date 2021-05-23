@@ -3,10 +3,7 @@
 /// Compute the path to a smart contract binary in this testing folder
 #[cfg(test)]
 pub fn get_contract_path_target(name: &str, target: &str) -> String {
-    let path_str = &format!(
-        "./tests/contracts/default_env/target/thumbv6m-none-eabi/{}/{}",
-        target, name
-    );
+    let path_str = &format!("./tests/contracts/default_env/target/thumbv6m-none-eabi/{}/{}", target, name);
     path_str.to_string()
 }
 

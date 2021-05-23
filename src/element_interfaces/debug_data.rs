@@ -382,10 +382,16 @@ macro_rules! assert_integer_array {
         let actual_len = $ACTUAL.len();
 
         if expected_len > actual_len {
-            panic!("\n\n[DebugCoData] Assertion failed: Found shorter {} array than expected on output stack\n\n", type_name::<$TYPE>());
+            panic!(
+                "\n\n[DebugCoData] Assertion failed: Found shorter {} array than expected on output stack\n\n",
+                type_name::<$TYPE>()
+            );
         }
         if expected_len < actual_len {
-            panic!("\n\n[DebugCoData] Assertion failed: Found longer {} array than expected on output stack\n\n", type_name::<$TYPE>());
+            panic!(
+                "\n\n[DebugCoData] Assertion failed: Found longer {} array than expected on output stack\n\n",
+                type_name::<$TYPE>()
+            );
         }
 
         let iteration_steps: usize = expected_len / type_size;
@@ -586,24 +592,18 @@ impl WrappedDebugCoStack {
                     for i in 0..iteration_steps {
                         let start_index = i * type_size;
                         let end_index = (i + 1) * type_size;
-                        let expected_address =
-                            NeutronAddress::from_data(&expected_data[start_index..end_index]);
-                        let actual_address =
-                            NeutronAddress::from_data(&actual_data[start_index..end_index]);
+                        let expected_address = NeutronAddress::from_data(&expected_data[start_index..end_index]);
+                        let actual_address = NeutronAddress::from_data(&actual_data[start_index..end_index]);
 
                         assert_eq!(
-                            expected_address.version,
-                            actual_address.version,
+                            expected_address.version, actual_address.version,
                             "\n\n[DebugCoData] Assertion failed on index {} of NeutronAddress array named '{}' (version field)\n\n",
-                            i,
-                            name,
+                            i, name,
                         );
                         assert_eq!(
-                            expected_address.data,
-                            actual_address.data,
+                            expected_address.data, actual_address.data,
                             "\n\n[DebugCoData] Assertion failed on index {} of NeutronAddress array named '{}' (data field)\n\n",
-                            i,
-                            name,
+                            i, name,
                         );
                     }
                 }
@@ -626,7 +626,7 @@ impl WrappedDebugCoStack {
         // Check that there is no unexpected data left on the codata stack
         match codata.pop_input_stack() {
             Ok(_v) => panic!("\n\n[DebugCoData] Assertion failed: More output stack items present than expected\n\n"),
-            Err(_e) => {},
+            Err(_e) => {}
         }
     }
 
@@ -768,10 +768,7 @@ impl DebugCoMap {
             let expected_data = self.map.get(key).unwrap();
             let actual_data = match codata.peek_input_key(key) {
                 Ok(v) => v,
-                Err(_e) => panic!(
-                    "\n\n    Assertion failed: Actual output map lacked entry for key '{}'\n\n",
-                    key_str
-                ),
+                Err(_e) => panic!("\n\n    Assertion failed: Actual output map lacked entry for key '{}'\n\n", key_str),
             };
             let expected_data_str = String::from_utf8_lossy(expected_data);
             let actual_data_str = String::from_utf8_lossy(&actual_data);
@@ -779,9 +776,7 @@ impl DebugCoMap {
             assert_eq!(
                 expected_data, &actual_data,
                 "\n\n    Assertion failed for codata entry with key '{}' and string values: \nExpected: '{}' \nActual:'{}' \n\n",
-                key_str,
-                expected_data_str,
-                actual_data_str
+                key_str, expected_data_str, actual_data_str
             );
             println!("    CoMap entry with key '{}' matched!", key_str);
         }
@@ -1001,9 +996,7 @@ mod tests {
         let mut stack = DebugCoStack::default();
 
         let version: u32 = 123456789;
-        let data: [u8; 20] = [
-            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-        ];
+        let data: [u8; 20] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
         let mut bytes = version.to_le_bytes().to_vec();
         bytes.append(&mut data.to_vec());

@@ -35,21 +35,13 @@ pub struct NeutronInstance {
 
 impl NeutronInstance {
     /// Loads the given binary at `path_str` and loads it for a "use once" execution using the given CallSystem and Context
-    pub fn execute_binary(
-        &mut self,
-        path_str: &str,
-        callsystem: &CallSystem,
-        mut context: ExecutionContext,
-    ) -> NeutronResult {
+    pub fn execute_binary(&mut self, path_str: &str, callsystem: &CallSystem, mut context: ExecutionContext) -> NeutronResult {
         self.prepare_execute(path_str, &mut context);
         let mut vmm = VMManager::default();
         let narm = || -> Box<dyn VMHypervisor> { Box::from(NarmHypervisor::default()) };
         vmm.vm_builders.insert(2, narm);
 
-        let result = self
-            .manager
-            .execute(&mut self.codata, &callsystem, &vmm)
-            .unwrap();
+        let result = self.manager.execute(&mut self.codata, &callsystem, &vmm).unwrap();
         NeutronInstance::print_results(&result);
         result
     }
@@ -71,9 +63,7 @@ impl NeutronInstance {
         //self.codata.gas_remaining = MAX_GAS;
 
         self.codata.push_context(context.clone()).unwrap();
-        self.codata
-            .push_input_key("!.c".as_bytes(), &text_scn.data)
-            .unwrap();
+        self.codata.push_input_key("!.c".as_bytes(), &text_scn.data).unwrap();
         self.codata.push_input_key("!.d".as_bytes(), &[0]).unwrap();
     }
 
@@ -94,9 +84,7 @@ impl NeutronInstance {
         //self.codata.gas_remaining = MAX_GAS;
 
         self.codata.push_context(context.clone()).unwrap();
-        self.codata
-            .push_input_key("!.c".as_bytes(), &text_scn.data)
-            .unwrap();
+        self.codata.push_input_key("!.c".as_bytes(), &text_scn.data).unwrap();
         self.codata.push_input_key("!.d".as_bytes(), &[0]).unwrap();
     }
 
@@ -109,11 +97,7 @@ impl NeutronInstance {
 
 impl TestHarness {
     /// Uses the default test CallSystem to "use once" execute the given smart contract binary
-    pub fn execute_binary_using_default_callsystem(
-        &mut self,
-        path_str: &str,
-        mut context: ExecutionContext,
-    ) -> NeutronResult {
+    pub fn execute_binary_using_default_callsystem(&mut self, path_str: &str, mut context: ExecutionContext) -> NeutronResult {
         self.instance.prepare_execute(path_str, &mut context);
         let mut vmm = VMManager::default();
         let narm = || -> Box<dyn VMHypervisor> { Box::from(NarmHypervisor::default()) };
@@ -123,14 +107,9 @@ impl TestHarness {
         let mut cs = CallSystem::default();
         cs.global_storage = Some(RefCell::new(&mut self.db));
         cs.logging = Some(RefCell::new(&mut self.logger));
-        cs.add_call(DEBUG_DATA_FEATURE, &mut self.debugdata)
-            .unwrap();
+        cs.add_call(DEBUG_DATA_FEATURE, &mut self.debugdata).unwrap();
 
-        let result = self
-            .instance
-            .manager
-            .execute(&mut self.instance.codata, &cs, &vmm)
-            .unwrap();
+        let result = self.instance.manager.execute(&mut self.instance.codata, &cs, &vmm).unwrap();
         NeutronInstance::print_results(&result);
 
         self.db.commit().unwrap();
@@ -138,11 +117,7 @@ impl TestHarness {
     }
 
     /// Loads the given smart contract binary and deploys it for multiple uses with the default test CallSystem
-    pub fn deploy_binary_using_default_callsystem(
-        &mut self,
-        path_str: &str,
-        mut context: ExecutionContext,
-    ) -> NeutronResult {
+    pub fn deploy_binary_using_default_callsystem(&mut self, path_str: &str, mut context: ExecutionContext) -> NeutronResult {
         self.instance.prepare_deploy(path_str, &mut context);
         let mut vmm = VMManager::default();
         let narm = || -> Box<dyn VMHypervisor> { Box::from(NarmHypervisor::default()) };
@@ -152,14 +127,9 @@ impl TestHarness {
         let mut cs = CallSystem::default();
         cs.global_storage = Some(RefCell::new(&mut self.db));
         cs.logging = Some(RefCell::new(&mut self.logger));
-        cs.add_call(DEBUG_DATA_FEATURE, &mut self.debugdata)
-            .unwrap();
+        cs.add_call(DEBUG_DATA_FEATURE, &mut self.debugdata).unwrap();
 
-        let result = self
-            .instance
-            .manager
-            .execute(&mut self.instance.codata, &cs, &vmm)
-            .unwrap();
+        let result = self.instance.manager.execute(&mut self.instance.codata, &cs, &vmm).unwrap();
         NeutronInstance::print_results(&result);
 
         self.db.commit().unwrap();
@@ -167,10 +137,7 @@ impl TestHarness {
     }
 
     /// Executes a previously deployed smart contract using the default test CallSystem
-    pub fn call_using_default_callsystem(
-        &mut self,
-        mut context: ExecutionContext,
-    ) -> NeutronResult {
+    pub fn call_using_default_callsystem(&mut self, mut context: ExecutionContext) -> NeutronResult {
         if context.gas_limit == 0 {
             context.gas_limit = DEFAULT_TEST_GAS;
         }
@@ -187,14 +154,9 @@ impl TestHarness {
         let mut cs = CallSystem::default();
         cs.global_storage = Some(RefCell::new(&mut self.db));
         cs.logging = Some(RefCell::new(&mut self.logger));
-        cs.add_call(DEBUG_DATA_FEATURE, &mut self.debugdata)
-            .unwrap();
+        cs.add_call(DEBUG_DATA_FEATURE, &mut self.debugdata).unwrap();
 
-        let result = self
-            .instance
-            .manager
-            .execute(&mut self.instance.codata, &cs, &vmm)
-            .unwrap();
+        let result = self.instance.manager.execute(&mut self.instance.codata, &cs, &vmm).unwrap();
         NeutronInstance::print_results(&result);
 
         self.db.commit().unwrap();

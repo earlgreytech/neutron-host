@@ -50,9 +50,7 @@ fn test_mirror_batch() {
     debugdata.expect_stack.push_i8(var_i8, "var_i8");
 
     debugdata.inject_stack.push_address(var_address);
-    debugdata
-        .expect_stack
-        .push_address(var_address, "var_address");
+    debugdata.expect_stack.push_address(var_address, "var_address");
 
     single_default_execution!(CONTRACT_MIRROR_SINGLE, debugdata);
 }
@@ -98,9 +96,7 @@ fn negtest_mirror_batch_wrong_value() {
     debugdata.expect_stack.push_i8(var_i8, "var_i8");
 
     debugdata.inject_stack.push_address(var_address);
-    debugdata
-        .expect_stack
-        .push_address(var_address, "var_address");
+    debugdata.expect_stack.push_address(var_address, "var_address");
 
     single_default_execution!(CONTRACT_MIRROR_SINGLE, debugdata);
 }
@@ -122,32 +118,20 @@ fn test_mirror_array_batch() {
     debugdata.inject_stack.push_array_u8(&array_u8);
     debugdata.expect_stack.push_array_u8(&array_u8, "array_u8");
     debugdata.inject_stack.push_array_u16(&array_u16);
-    debugdata
-        .expect_stack
-        .push_array_u16(&array_u16, "array_u16");
+    debugdata.expect_stack.push_array_u16(&array_u16, "array_u16");
     debugdata.inject_stack.push_array_u32(&array_u32);
-    debugdata
-        .expect_stack
-        .push_array_u32(&array_u32, "array_u32");
+    debugdata.expect_stack.push_array_u32(&array_u32, "array_u32");
     debugdata.inject_stack.push_array_u64(&array_u64);
-    debugdata
-        .expect_stack
-        .push_array_u64(&array_u64, "array_u64");
+    debugdata.expect_stack.push_array_u64(&array_u64, "array_u64");
 
     debugdata.inject_stack.push_array_i8(&array_i8);
     debugdata.expect_stack.push_array_i8(&array_i8, "array_i8");
     debugdata.inject_stack.push_array_i16(&array_i16);
-    debugdata
-        .expect_stack
-        .push_array_i16(&array_i16, "array_i16");
+    debugdata.expect_stack.push_array_i16(&array_i16, "array_i16");
     debugdata.inject_stack.push_array_i32(&array_i32);
-    debugdata
-        .expect_stack
-        .push_array_i32(&array_i32, "array_i32");
+    debugdata.expect_stack.push_array_i32(&array_i32, "array_i32");
     debugdata.inject_stack.push_array_i64(&array_i64);
-    debugdata
-        .expect_stack
-        .push_array_i64(&array_i64, "array_i64");
+    debugdata.expect_stack.push_array_i64(&array_i64, "array_i64");
 
     single_default_execution!(CONTRACT_MIRROR_ARRAY, debugdata);
 }
