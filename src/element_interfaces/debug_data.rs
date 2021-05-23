@@ -4,10 +4,11 @@ use crate::comap_abi_decoder::*;
 use crate::neutronerror::NeutronError::*;
 use crate::neutronerror::*;
 use neutron_common::*;
+use std::any::type_name;
 use std::collections::HashMap;
 use std::convert::TryInto;
+use std::mem::size_of;
 use std::str;
-use std::any::type_name;
 
 /*
 ## Debug Data Injector ElementAPI
@@ -347,14 +348,14 @@ pub struct WrappedDebugCoStack {
     pub variable_types: Vec<DebugDataType>,
 }
 
-// Cast bytes to integer without error chacking
+// Cast bytes to integer types
 // Accepts both slices and slice-able types like vectors
-// Expected behavior:
-// * Too many input bytes -> Extra bytes ignored
-// * Too few input bytes -> Index out of bounds error
 macro_rules! bytes_to_integer {
     ($VALUE:ident, $TYPE:tt) => {{
-        const SIZE: usize = core::mem::size_of::<$TYPE>();
+        const SIZE: usize = size_of::<$TYPE>();
+        if $VALUE.len() > SIZE || $VALUE.len() < SIZE {
+            panic!("\n\n[DebugCoData] Byte parsing failed, data was of wrong length (This should never happen...?)\n\n");
+        }
         let array: [u8; SIZE] = $VALUE[0..SIZE].try_into().unwrap();
         $TYPE::from_le_bytes(array)
     }};
@@ -376,25 +377,25 @@ macro_rules! assert_integer {
 // Macro for asserting array integer values in WrappedDebugCoStack::assert_eq()
 macro_rules! assert_integer_array {
     ($EXPECTED:ident, $ACTUAL:ident, $VALUE_NAME:expr, $TYPE:tt) => {{
-        let type_size: usize = std::mem::size_of::<$TYPE>();
+        let type_size: usize = size_of::<$TYPE>();
         let expected_len = $EXPECTED.len();
         let actual_len = $ACTUAL.len();
-        
+
         if expected_len > actual_len {
             panic!("\n\n[DebugCoData] Assertion failed: Found shorter {} array than expected on output stack\n\n", type_name::<$TYPE>());
         }
         if expected_len < actual_len {
             panic!("\n\n[DebugCoData] Assertion failed: Found longer {} array than expected on output stack\n\n", type_name::<$TYPE>());
         }
-        
+
         let iteration_steps: usize = expected_len / type_size;
-        
+
         for i in 0..iteration_steps {
             let start_index = i * type_size;
             let end_index = (i + 1) * type_size;
             let expected_bytes = $EXPECTED[start_index..end_index].to_vec();
             let actual_bytes = $ACTUAL[start_index..end_index].to_vec();
-            
+
             assert_eq!(
                 bytes_to_integer!(expected_bytes, $TYPE),
                 bytes_to_integer!(actual_bytes, $TYPE),
@@ -454,9 +455,9 @@ impl WrappedDebugCoStack {
         self.output_stack.push_address(value);
         self.push_debug_data(name, DebugDataType::ADDRESS);
     }
-    
+
     // Array values
-    
+
     pub fn push_array_u8(&mut self, slice: &[u8], name: &str) {
         self.output_stack.push_array_u8(slice);
         self.push_debug_data(name, DebugDataType::ARRAYU8);
@@ -501,7 +502,7 @@ impl WrappedDebugCoStack {
         self.output_stack.push_array_address(slice);
         self.push_debug_data(name, DebugDataType::ARRAYADDRESS);
     }
-    
+
     // Misc type values
 
     pub fn push_bytes(&mut self, value: &[u8], name: &str) {
@@ -528,7 +529,6 @@ impl WrappedDebugCoStack {
 
             match data_type {
                 // Single values
-                
                 DebugDataType::U8 => assert_integer!(expected_data, actual_data, name, u8),
                 DebugDataType::U16 => assert_integer!(expected_data, actual_data, name, u16),
                 DebugDataType::U32 => assert_integer!(expected_data, actual_data, name, u32),
@@ -543,37 +543,54 @@ impl WrappedDebugCoStack {
                     "\n\n[DebugCoData] Assertion failed for NeutronAddress named '{}'\n\n",
                     name
                 ),
-                
+
                 // Arrray values
-                
-                DebugDataType::ARRAYU8 => assert_integer_array!(expected_data, actual_data, name, u8),
-                DebugDataType::ARRAYU16 => assert_integer_array!(expected_data, actual_data, name, u16),
-                DebugDataType::ARRAYU32 => assert_integer_array!(expected_data, actual_data, name, u32),
-                DebugDataType::ARRAYU64 => assert_integer_array!(expected_data, actual_data, name, u64),
-                DebugDataType::ARRAYI8 => assert_integer_array!(expected_data, actual_data, name, i8),
-                DebugDataType::ARRAYI16 => assert_integer_array!(expected_data, actual_data, name, i16),
-                DebugDataType::ARRAYI32 => assert_integer_array!(expected_data, actual_data, name, i32),
-                DebugDataType::ARRAYI64 => assert_integer_array!(expected_data, actual_data, name, i64),
+                DebugDataType::ARRAYU8 => {
+                    assert_integer_array!(expected_data, actual_data, name, u8)
+                }
+                DebugDataType::ARRAYU16 => {
+                    assert_integer_array!(expected_data, actual_data, name, u16)
+                }
+                DebugDataType::ARRAYU32 => {
+                    assert_integer_array!(expected_data, actual_data, name, u32)
+                }
+                DebugDataType::ARRAYU64 => {
+                    assert_integer_array!(expected_data, actual_data, name, u64)
+                }
+                DebugDataType::ARRAYI8 => {
+                    assert_integer_array!(expected_data, actual_data, name, i8)
+                }
+                DebugDataType::ARRAYI16 => {
+                    assert_integer_array!(expected_data, actual_data, name, i16)
+                }
+                DebugDataType::ARRAYI32 => {
+                    assert_integer_array!(expected_data, actual_data, name, i32)
+                }
+                DebugDataType::ARRAYI64 => {
+                    assert_integer_array!(expected_data, actual_data, name, i64)
+                }
                 DebugDataType::ARRAYADDRESS => {
-                    let type_size: usize = std::mem::size_of::<NeutronAddress>();
+                    let type_size: usize = size_of::<NeutronAddress>();
                     let expected_len = expected_data.len();
                     let actual_len = actual_data.len();
-                    
+
                     if expected_len > actual_len {
                         panic!("\n\n[DebugCoData] Assertion failed: Found shorter NeutronAddress array than expected on output stack\n\n");
                     }
                     if expected_len < actual_len {
                         panic!("\n\n[DebugCoData] Assertion failed: Found longer NeutronAddress array than expected on output stack\n\n");
                     }
-                    
+
                     let iteration_steps: usize = expected_len / type_size;
-                    
+
                     for i in 0..iteration_steps {
                         let start_index = i * type_size;
                         let end_index = (i + 1) * type_size;
-                        let expected_address = NeutronAddress::from_data(&expected_data[start_index..end_index]);
-                        let actual_address = NeutronAddress::from_data(&actual_data[start_index..end_index]);
-                        
+                        let expected_address =
+                            NeutronAddress::from_data(&expected_data[start_index..end_index]);
+                        let actual_address =
+                            NeutronAddress::from_data(&actual_data[start_index..end_index]);
+
                         assert_eq!(
                             expected_address.version,
                             actual_address.version,
@@ -590,9 +607,8 @@ impl WrappedDebugCoStack {
                         );
                     }
                 }
-                
+
                 // Misc type values
-                
                 DebugDataType::BYTES => assert_eq!(
                     expected_data, actual_data,
                     "\n\n[DebugCoData] Assertion failed for byte sequence named '{}'\n\n",
@@ -631,23 +647,15 @@ pub struct DebugCoMap {
 // TODO: Add typed push functions, and maybe a wrapped version with extra debug info? (like WrappedDebugCoStack)
 impl DebugCoMap {
     // These functions mirror codata map behavior
-    pub fn push_key(&mut self, key: &[u8], value: &[u8]) -> Result<(), NeutronError> {
+    pub fn push_key(&mut self, key: &[u8], value: &[u8]) {
         if key[0] == 0 {
-            return Err(NeutronError::Recoverable(
-                RecoverableError::InvalidCoMapAccess,
-            ));
+            panic!("\n\n[DebugCoData] Error: First byte of comap key must not be 0!\n\n");
         }
         self.map.insert(key.to_vec(), value.to_vec());
-        Ok(())
     }
 
     // For u32 ABI header
-    pub fn push_key_abi(
-        &mut self,
-        key: &[u8],
-        value: &[u8],
-        abi_data: u32,
-    ) -> Result<(), NeutronError> {
+    pub fn push_key_abi(&mut self, key: &[u8], value: &[u8], abi_data: u32) {
         let (header_size, header_bytes) = comap_abi_header_from_u32(abi_data);
         let mut full_value = vec![];
         full_value.extend_from_slice(&header_bytes[0..header_size]);
@@ -974,6 +982,7 @@ mod tests {
         assert_eq!(result, 0x1122_3344_5566_7788 as u64);
     }
     #[test]
+    #[should_panic]
     fn test_bytes_to_integer_macro_too_long() {
         let bytes: &[u8] = &[0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0xFF];
         let result = bytes_to_integer!(bytes, u64);
