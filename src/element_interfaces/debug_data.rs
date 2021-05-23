@@ -646,6 +646,102 @@ pub struct DebugCoMap {
 
 // TODO: Add typed push functions, and maybe a wrapped version with extra debug info? (like WrappedDebugCoStack)
 impl DebugCoMap {
+    // Single values without abi
+
+    pub fn push_key_u8(&mut self, key: &[u8], value: u8) {
+        self.push_key(key, &[value]); // No need to cast byte to byte
+    }
+
+    pub fn push_key_u16(&mut self, key: &[u8], value: u16) {
+        self.push_key(key, &u16::to_le_bytes(value));
+    }
+
+    pub fn push_key_u32(&mut self, key: &[u8], value: u32) {
+        self.push_key(key, &u32::to_le_bytes(value));
+    }
+
+    pub fn push_key_u64(&mut self, key: &[u8], value: u64) {
+        self.push_key(key, &u64::to_le_bytes(value));
+    }
+
+    pub fn push_key_i8(&mut self, key: &[u8], value: i8) {
+        self.push_key(key, &i8::to_le_bytes(value)); // No need to cast byte to byte
+    }
+
+    pub fn push_key_i16(&mut self, key: &[u8], value: i16) {
+        self.push_key(key, &i16::to_le_bytes(value));
+    }
+
+    pub fn push_key_i32(&mut self, key: &[u8], value: i32) {
+        self.push_key(key, &i32::to_le_bytes(value));
+    }
+
+    pub fn push_key_i64(&mut self, key: &[u8], value: i64) {
+        self.push_key(key, &i64::to_le_bytes(value));
+    }
+
+    pub fn push_key_address(&mut self, key: &[u8], value: NeutronAddress) {
+        let mut bytes: Vec<u8> = vec![];
+        bytes.extend_from_slice(&u32::to_le_bytes(value.version));
+        bytes.extend_from_slice(&value.data);
+        self.push_key(key, &bytes);
+    }
+
+    // Single values with abi
+
+    pub fn push_key_abi_u8(&mut self, key: &[u8], value: u8, abi_data: u32) {
+        self.push_key_abi(key, &[value], abi_data); // No need to cast byte to byte
+    }
+
+    pub fn push_key_abi_u16(&mut self, key: &[u8], value: u16, abi_data: u32) {
+        self.push_key_abi(key, &u16::to_le_bytes(value), abi_data);
+    }
+
+    pub fn push_key_abi_u32(&mut self, key: &[u8], value: u32, abi_data: u32) {
+        self.push_key_abi(key, &u32::to_le_bytes(value), abi_data);
+    }
+
+    pub fn push_key_abi_u64(&mut self, key: &[u8], value: u64, abi_data: u32) {
+        self.push_key_abi(key, &u64::to_le_bytes(value), abi_data);
+    }
+
+    pub fn push_key_abi_i8(&mut self, key: &[u8], value: i8, abi_data: u32) {
+        self.push_key_abi(key, &i8::to_le_bytes(value), abi_data);
+    }
+
+    pub fn push_key_abi_i16(&mut self, key: &[u8], value: i16, abi_data: u32) {
+        self.push_key_abi(key, &i16::to_le_bytes(value), abi_data);
+    }
+
+    pub fn push_key_abi_i32(&mut self, key: &[u8], value: i32, abi_data: u32) {
+        self.push_key_abi(key, &i32::to_le_bytes(value), abi_data);
+    }
+
+    pub fn push_key_abi_i64(&mut self, key: &[u8], value: i64, abi_data: u32) {
+        self.push_key_abi(key, &i64::to_le_bytes(value), abi_data);
+    }
+
+    pub fn push_key_abi_address(&mut self, key: &[u8], value: NeutronAddress, abi_data: u32) {
+        let mut bytes: Vec<u8> = vec![];
+        bytes.extend_from_slice(&u32::to_le_bytes(value.version));
+        bytes.extend_from_slice(&value.data);
+        self.push_key_abi(key, &bytes, abi_data);
+    }
+
+    // Array values
+
+    // Misc value types without abi
+
+    pub fn push_key_str(&mut self, key: &[u8], value: &str) {
+        self.push_key(key, value.as_bytes());
+    }
+
+    // Misc value types with abi
+
+    pub fn push_key_abi_str(&mut self, key: &[u8], value: &str, abi_data: u32) {
+        self.push_key_abi(key, value.as_bytes(), abi_data);
+    }
+
     // These functions mirror codata map behavior
     pub fn push_key(&mut self, key: &[u8], value: &[u8]) {
         if key[0] == 0 {
@@ -661,18 +757,6 @@ impl DebugCoMap {
         full_value.extend_from_slice(&header_bytes[0..header_size]);
         full_value.extend_from_slice(&value);
         self.push_key(key, &full_value)
-    }
-
-    pub fn peek_key(&mut self, key: &[u8]) -> Result<Vec<u8>, NeutronError> {
-        if key[0] == 0 {
-            return Err(NeutronError::Recoverable(
-                RecoverableError::InvalidCoMapAccess,
-            ));
-        }
-        match self.map.get(key) {
-            Some(v) => Ok(v.to_vec()),
-            None => Err(Recoverable(RecoverableError::ItemDoesntExist)),
-        }
     }
 
     // Check contract output map against expected state
@@ -996,5 +1080,5 @@ mod tests {
         assert_eq!(result, 0x1122_3344_5566_7788 as u64);
     }
 
-    // TODO: Tests for debug comap functionality
+    // TODO: LOTS of tests missing
 }
