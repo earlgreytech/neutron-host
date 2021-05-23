@@ -22,7 +22,7 @@ fn test_peek() {
     debugdata.inject_stack.push_str(key);
     debugdata.expect_stack.push_str(value, "comap_value");
 
-    debugdata.inject_map.push_key(key.as_bytes(), value.as_bytes());
+    debugdata.inject_map.push_key_str(key.as_bytes(), value);
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -38,9 +38,9 @@ fn negtest_peek_wrong_key() {
 
     debugdata.inject_stack.push_str(key);
     debugdata.expect_stack.push_str(value, "comap_value");
-    
+
     // Push wrong key as contract input
-    debugdata.inject_map.push_key(wrong_key.as_bytes(), value.as_bytes());
+    debugdata.inject_map.push_key_str(wrong_key.as_bytes(), value);
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -58,7 +58,7 @@ fn negtest_peek_wrong_value() {
     debugdata.expect_stack.push_str(value, "comap_value");
 
     // Push wrong value as contract input
-    debugdata.inject_map.push_key(key.as_bytes(), wrong_value.as_bytes()); 
+    debugdata.inject_map.push_key_str(key.as_bytes(), wrong_value);
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -74,11 +74,9 @@ fn test_peek_trucated() {
     let value_unfitting = "this is a 25-byte value!! Except for this part!";
 
     debugdata.inject_stack.push_str(key);
-    debugdata
-        .expect_stack
-        .push_str(value_fitting, "comap_value");
+    debugdata.expect_stack.push_str(value_fitting, "comap_value");
 
-    debugdata.inject_map.push_key(key.as_bytes(), value_unfitting.as_bytes());
+    debugdata.inject_map.push_key_str(key.as_bytes(), value_unfitting);
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -95,11 +93,9 @@ fn negtest_peek_trucated() {
     let value_unfitting = "this is a 25-byte value!! Except for this part!";
 
     debugdata.inject_stack.push_str(key);
-    debugdata
-        .expect_stack
-        .push_str(value_unfitting, "comap_value"); // We expect the un-truncated value, so assertion will fail
+    debugdata.expect_stack.push_str(value_unfitting, "comap_value"); // We expect the un-truncated value, so assertion will fail
 
-    debugdata.inject_map.push_key(key.as_bytes(), value_unfitting.as_bytes());
+    debugdata.inject_map.push_key_str(key.as_bytes(), value_unfitting);
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -116,7 +112,7 @@ fn test_push() {
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(value);
 
-    debugdata.expect_map.push_key(key.as_bytes(), value.as_bytes());
+    debugdata.expect_map.push_key_str(key.as_bytes(), value);
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -133,7 +129,7 @@ fn negtest_push_wrong_key() {
     debugdata.inject_stack.push_str(wrong_key); // Push wrong key as contract input
     debugdata.inject_stack.push_str(value);
 
-    debugdata.expect_map.push_key(key.as_bytes(), value.as_bytes());
+    debugdata.expect_map.push_key_str(key.as_bytes(), value);
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -150,7 +146,7 @@ fn negtest_push_wrong_value() {
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(wrong_value); // Push wrong value as contract input
 
-    debugdata.expect_map.push_key(key.as_bytes(), value.as_bytes());
+    debugdata.expect_map.push_key_str(key.as_bytes(), value);
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -167,27 +163,22 @@ fn test_peek_subsets() {
     let value_subset_3 = "<value part 3!>";
 
     // Construct a single String from the subsets
-    let mut value = String::from(value_subset_1);
-    value.push_str(value_subset_2);
-    value.push_str(value_subset_3);
+    let mut value_string = String::from(value_subset_1);
+    value_string.push_str(value_subset_2);
+    value_string.push_str(value_subset_3);
+    let value = &value_string;
 
     // This will be used by contract to peek the comap value (one push for each subset, since a peek consumes the key it uses)
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(key);
 
-    debugdata.inject_map.push_key(key.as_bytes(), value.as_bytes());
+    debugdata.inject_map.push_key_str(key.as_bytes(), value);
 
     // We expect the contract to split the comap value into the subsets
-    debugdata
-        .expect_stack
-        .push_str(value_subset_1, "value_subset_1");
-    debugdata
-        .expect_stack
-        .push_str(value_subset_2, "value_subset_2");
-    debugdata
-        .expect_stack
-        .push_str(value_subset_3, "value_subset_3");
+    debugdata.expect_stack.push_str(value_subset_1, "value_subset_1");
+    debugdata.expect_stack.push_str(value_subset_2, "value_subset_2");
+    debugdata.expect_stack.push_str(value_subset_3, "value_subset_3");
 
     single_default_execution!(CONTRACT_SUBSETTING, debugdata);
 }
@@ -204,27 +195,22 @@ fn negtest_peek_subsets_wrong_value() {
     let value_subset_wrong = "<WRONG subset!>";
 
     // Construct a single String from the subsets, to be added to input codata
-    let mut value = String::from(value_subset_1);
-    value.push_str(value_subset_wrong);
-    value.push_str(value_subset_3);
+    let mut value_string = String::from(value_subset_1);
+    value_string.push_str(value_subset_wrong);
+    value_string.push_str(value_subset_3);
+    let value = &value_string;
 
     // This will be used by contract to peek the comap value (one push for each subset, since a peek consumes the key it uses)
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(key);
 
-    debugdata.inject_map.push_key(key.as_bytes(), value.as_bytes());
+    debugdata.inject_map.push_key_str(key.as_bytes(), value);
 
     // We expect the contract to split the comap value into the subsets
-    debugdata
-        .expect_stack
-        .push_str(value_subset_1, "value_subset_1");
-    debugdata
-        .expect_stack
-        .push_str(value_subset_2, "value_subset_2");
-    debugdata
-        .expect_stack
-        .push_str(value_subset_3, "value_subset_3");
+    debugdata.expect_stack.push_str(value_subset_1, "value_subset_1");
+    debugdata.expect_stack.push_str(value_subset_2, "value_subset_2");
+    debugdata.expect_stack.push_str(value_subset_3, "value_subset_3");
 
     single_default_execution!(CONTRACT_SUBSETTING, debugdata);
 }

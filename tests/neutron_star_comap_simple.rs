@@ -25,7 +25,7 @@ fn test_write_u8() {
     debugdata.inject_stack.push_u8(value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.expect_map.push_key_abi(key.as_bytes(), &u8::to_le_bytes(value), abi_data);
+    debugdata.expect_map.push_key_abi_u8(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
 }
@@ -41,7 +41,7 @@ fn test_write_u16() {
     debugdata.inject_stack.push_u16(value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.expect_map.push_key_abi(key.as_bytes(), &u16::to_le_bytes(value), abi_data);
+    debugdata.expect_map.push_key_abi_u16(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
 }
@@ -57,7 +57,7 @@ fn test_write_u32() {
     debugdata.inject_stack.push_u32(value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.expect_map.push_key_abi(key.as_bytes(), &u32::to_le_bytes(value), abi_data);
+    debugdata.expect_map.push_key_abi_u32(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
 }
@@ -73,7 +73,7 @@ fn test_write_u64() {
     debugdata.inject_stack.push_u64(value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.expect_map.push_key_abi(key.as_bytes(), &u64::to_le_bytes(value), abi_data);
+    debugdata.expect_map.push_key_abi_u64(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
 }
@@ -89,7 +89,7 @@ fn test_write_i8() {
     debugdata.inject_stack.push_i8(value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.expect_map.push_key_abi(key.as_bytes(), &i8::to_le_bytes(value), abi_data);
+    debugdata.expect_map.push_key_abi_i8(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
 }
@@ -105,7 +105,7 @@ fn test_write_i16() {
     debugdata.inject_stack.push_i16(value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.expect_map.push_key_abi(key.as_bytes(), &i16::to_le_bytes(value), abi_data);
+    debugdata.expect_map.push_key_abi_i16(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
 }
@@ -121,7 +121,7 @@ fn test_write_i32() {
     debugdata.inject_stack.push_i32(value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.expect_map.push_key_abi(key.as_bytes(), &i32::to_le_bytes(value), abi_data);
+    debugdata.expect_map.push_key_abi_i32(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
 }
@@ -137,7 +137,7 @@ fn test_write_i64() {
     debugdata.inject_stack.push_i64(value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.expect_map.push_key_abi(key.as_bytes(), &i64::to_le_bytes(value), abi_data);
+    debugdata.expect_map.push_key_abi_i64(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
 }
@@ -329,7 +329,7 @@ fn test_read_u8() {
     debugdata.expect_stack.push_u8(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.inject_map.push_key_abi(key.as_bytes(), &u8::to_le_bytes(value), abi_data);
+    debugdata.inject_map.push_key_abi_u8(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
 }
@@ -345,7 +345,7 @@ fn test_read_u16() {
     debugdata.expect_stack.push_u16(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.inject_map.push_key_abi(key.as_bytes(), &u16::to_le_bytes(value), abi_data);
+    debugdata.inject_map.push_key_abi_u16(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
 }
@@ -361,7 +361,7 @@ fn test_read_u32() {
     debugdata.expect_stack.push_u32(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.inject_map.push_key_abi(key.as_bytes(), &u32::to_le_bytes(value), abi_data);
+    debugdata.inject_map.push_key_abi_u32(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
 }
@@ -377,7 +377,7 @@ fn test_read_u64() {
     debugdata.expect_stack.push_u64(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.inject_map.push_key_abi(key.as_bytes(), &u64::to_le_bytes(value), abi_data);
+    debugdata.inject_map.push_key_abi_u64(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
 }
@@ -393,7 +393,7 @@ fn test_read_i8() {
     debugdata.expect_stack.push_i8(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.inject_map.push_key_abi(key.as_bytes(), &i8::to_le_bytes(value), abi_data);
+    debugdata.inject_map.push_key_abi_i8(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
 }
@@ -409,7 +409,7 @@ fn test_read_i16() {
     debugdata.expect_stack.push_i16(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.inject_map.push_key_abi(key.as_bytes(), &i16::to_le_bytes(value), abi_data);
+    debugdata.inject_map.push_key_abi_i16(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
 }
@@ -425,7 +425,7 @@ fn test_read_i32() {
     debugdata.expect_stack.push_i32(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.inject_map.push_key_abi(key.as_bytes(), &i32::to_le_bytes(value), abi_data);
+    debugdata.inject_map.push_key_abi_i32(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
 }
@@ -441,7 +441,7 @@ fn test_read_i64() {
     debugdata.expect_stack.push_i64(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata.inject_map.push_key_abi(key.as_bytes(), &i64::to_le_bytes(value), abi_data);
+    debugdata.inject_map.push_key_abi_i64(key.as_bytes(), value, abi_data);
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
 }
