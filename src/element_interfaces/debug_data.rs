@@ -316,14 +316,14 @@ impl DebugCoStack {
 
 // TODO: Make private?
 pub enum DebugDataType {
-    U64,
-    U32,
-    U16,
     U8,
-    I64,
-    I32,
-    I16,
+    U16,
+    U32,
+    U64,
     I8,
+    I16,
+    I32,
+    I64,
     ADDRESS,
     BYTES,
     STR,
