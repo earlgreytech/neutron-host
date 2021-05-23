@@ -7,7 +7,8 @@ use neutron_host::interface::*;
 
 use common::*;
 
-const CONTRACT_NAME: &'static str = "neutron_star_costack_mirror_batch";
+const CONTRACT_MIRROR_SINGLE: &'static str = "neutron_star_costack_mirror_batch";
+const CONTRACT_MIRROR_ARRAY: &'static str = "neutron_star_costack_array_mirror_batch";
 
 // TODO: Add more granulate tests?
 
@@ -53,7 +54,7 @@ fn test_mirror_batch() {
         .expect_stack
         .push_address(var_address, "var_address");
 
-    single_default_execution!(CONTRACT_NAME, debugdata);
+    single_default_execution!(CONTRACT_MIRROR_SINGLE, debugdata);
 }
 
 #[test]
@@ -101,5 +102,52 @@ fn negtest_mirror_batch_wrong_value() {
         .expect_stack
         .push_address(var_address, "var_address");
 
-    single_default_execution!(CONTRACT_NAME, debugdata);
+    single_default_execution!(CONTRACT_MIRROR_SINGLE, debugdata);
+}
+
+#[test]
+fn test_mirror_array_batch() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let array_u8: [u8; 5] = [1, 2, 3, 4, 5];
+    let array_u16: [u16; 5] = [1, 2, 4, 4, 5];
+    let array_u32: [u32; 5] = [1, 2, 4, 4, 5];
+    let array_u64: [u64; 5] = [1, 2, 4, 4, 5];
+
+    let array_i8: [i8; 5] = [1, 2, 3, 4, 5];
+    let array_i16: [i16; 5] = [1, 2, 4, 4, 5];
+    let array_i32: [i32; 5] = [1, 2, 4, 4, 5];
+    let array_i64: [i64; 5] = [1, 2, 4, 4, 5];
+
+    debugdata.inject_stack.push_array_u8(&array_u8);
+    debugdata.expect_stack.push_array_u8(&array_u8, "array_u8");
+    debugdata.inject_stack.push_array_u16(&array_u16);
+    debugdata
+        .expect_stack
+        .push_array_u16(&array_u16, "array_u16");
+    debugdata.inject_stack.push_array_u32(&array_u32);
+    debugdata
+        .expect_stack
+        .push_array_u32(&array_u32, "array_u32");
+    debugdata.inject_stack.push_array_u64(&array_u64);
+    debugdata
+        .expect_stack
+        .push_array_u64(&array_u64, "array_u64");
+
+    debugdata.inject_stack.push_array_i8(&array_i8);
+    debugdata.expect_stack.push_array_i8(&array_i8, "array_i8");
+    debugdata.inject_stack.push_array_i16(&array_i16);
+    debugdata
+        .expect_stack
+        .push_array_i16(&array_i16, "array_i16");
+    debugdata.inject_stack.push_array_i32(&array_i32);
+    debugdata
+        .expect_stack
+        .push_array_i32(&array_i32, "array_i32");
+    debugdata.inject_stack.push_array_i64(&array_i64);
+    debugdata
+        .expect_stack
+        .push_array_i64(&array_i64, "array_i64");
+
+    single_default_execution!(CONTRACT_MIRROR_ARRAY, debugdata);
 }
