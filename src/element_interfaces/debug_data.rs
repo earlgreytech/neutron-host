@@ -551,30 +551,14 @@ impl WrappedDebugCoStack {
                 ),
 
                 // Arrray values
-                DebugDataType::ARRAYU8 => {
-                    assert_integer_array!(expected_data, actual_data, name, u8)
-                }
-                DebugDataType::ARRAYU16 => {
-                    assert_integer_array!(expected_data, actual_data, name, u16)
-                }
-                DebugDataType::ARRAYU32 => {
-                    assert_integer_array!(expected_data, actual_data, name, u32)
-                }
-                DebugDataType::ARRAYU64 => {
-                    assert_integer_array!(expected_data, actual_data, name, u64)
-                }
-                DebugDataType::ARRAYI8 => {
-                    assert_integer_array!(expected_data, actual_data, name, i8)
-                }
-                DebugDataType::ARRAYI16 => {
-                    assert_integer_array!(expected_data, actual_data, name, i16)
-                }
-                DebugDataType::ARRAYI32 => {
-                    assert_integer_array!(expected_data, actual_data, name, i32)
-                }
-                DebugDataType::ARRAYI64 => {
-                    assert_integer_array!(expected_data, actual_data, name, i64)
-                }
+                DebugDataType::ARRAYU8 => assert_integer_array!(expected_data, actual_data, name, u8),
+                DebugDataType::ARRAYU16 => assert_integer_array!(expected_data, actual_data, name, u16),
+                DebugDataType::ARRAYU32 => assert_integer_array!(expected_data, actual_data, name, u32),
+                DebugDataType::ARRAYU64 => assert_integer_array!(expected_data, actual_data, name, u64),
+                DebugDataType::ARRAYI8 => assert_integer_array!(expected_data, actual_data, name, i8),
+                DebugDataType::ARRAYI16 => assert_integer_array!(expected_data, actual_data, name, i16),
+                DebugDataType::ARRAYI32 => assert_integer_array!(expected_data, actual_data, name, i32),
+                DebugDataType::ARRAYI64 => assert_integer_array!(expected_data, actual_data, name, i64),
                 DebugDataType::ARRAYADDRESS => {
                     let type_size: usize = size_of::<NeutronAddress>();
                     let expected_len = expected_data.len();
