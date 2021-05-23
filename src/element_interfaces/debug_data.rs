@@ -166,7 +166,11 @@ impl DebugCoStack {
     // These functions mostly mirror codata stack behavior
     // (adapted from neutron-star/src/syscall.rs)
 
-    pub fn push_u64(&mut self, value: u64) {
+    pub fn push_u8(&mut self, value: u8) {
+        self.stack.push([value].to_vec());
+    }
+
+    pub fn push_u16(&mut self, value: u16) {
         self.stack.push(value.to_le_bytes().to_vec());
     }
 
@@ -174,19 +178,11 @@ impl DebugCoStack {
         self.stack.push(value.to_le_bytes().to_vec());
     }
 
-    pub fn push_u16(&mut self, value: u16) {
+    pub fn push_u64(&mut self, value: u64) {
         self.stack.push(value.to_le_bytes().to_vec());
     }
 
-    pub fn push_u8(&mut self, value: u8) {
-        self.stack.push([value].to_vec());
-    }
-
-    pub fn push_i64(&mut self, value: i64) {
-        self.stack.push(value.to_le_bytes().to_vec());
-    }
-
-    pub fn push_i32(&mut self, value: i32) {
+    pub fn push_i8(&mut self, value: i8) {
         self.stack.push(value.to_le_bytes().to_vec());
     }
 
@@ -194,7 +190,11 @@ impl DebugCoStack {
         self.stack.push(value.to_le_bytes().to_vec());
     }
 
-    pub fn push_i8(&mut self, value: i8) {
+    pub fn push_i32(&mut self, value: i32) {
+        self.stack.push(value.to_le_bytes().to_vec());
+    }
+
+    pub fn push_i64(&mut self, value: i64) {
         self.stack.push(value.to_le_bytes().to_vec());
     }
 
@@ -277,14 +277,10 @@ macro_rules! bytes_to_integer {
 
 impl WrappedDebugCoStack {
     // CoStack functions
-    pub fn push_u64(&mut self, value: u64, name: &str) {
-        self.output_stack.push_u64(value);
-        self.push_debug_data(name, DebugDataType::U64);
-    }
 
-    pub fn push_u32(&mut self, value: u32, name: &str) {
-        self.output_stack.push_u32(value);
-        self.push_debug_data(name, DebugDataType::U32);
+    pub fn push_u8(&mut self, value: u8, name: &str) {
+        self.output_stack.push_u8(value);
+        self.push_debug_data(name, DebugDataType::U8);
     }
 
     pub fn push_u16(&mut self, value: u16, name: &str) {
@@ -292,19 +288,19 @@ impl WrappedDebugCoStack {
         self.push_debug_data(name, DebugDataType::U16);
     }
 
-    pub fn push_u8(&mut self, value: u8, name: &str) {
-        self.output_stack.push_u8(value);
-        self.push_debug_data(name, DebugDataType::U8);
+    pub fn push_u32(&mut self, value: u32, name: &str) {
+        self.output_stack.push_u32(value);
+        self.push_debug_data(name, DebugDataType::U32);
     }
 
-    pub fn push_i64(&mut self, value: i64, name: &str) {
-        self.output_stack.push_i64(value);
-        self.push_debug_data(name, DebugDataType::I64);
+    pub fn push_u64(&mut self, value: u64, name: &str) {
+        self.output_stack.push_u64(value);
+        self.push_debug_data(name, DebugDataType::U64);
     }
 
-    pub fn push_i32(&mut self, value: i32, name: &str) {
-        self.output_stack.push_i32(value);
-        self.push_debug_data(name, DebugDataType::I32);
+    pub fn push_i8(&mut self, value: i8, name: &str) {
+        self.output_stack.push_i8(value);
+        self.push_debug_data(name, DebugDataType::I8);
     }
 
     pub fn push_i16(&mut self, value: i16, name: &str) {
@@ -312,9 +308,14 @@ impl WrappedDebugCoStack {
         self.push_debug_data(name, DebugDataType::I16);
     }
 
-    pub fn push_i8(&mut self, value: i8, name: &str) {
-        self.output_stack.push_i8(value);
-        self.push_debug_data(name, DebugDataType::I8);
+    pub fn push_i32(&mut self, value: i32, name: &str) {
+        self.output_stack.push_i32(value);
+        self.push_debug_data(name, DebugDataType::I32);
+    }
+
+    pub fn push_i64(&mut self, value: i64, name: &str) {
+        self.output_stack.push_i64(value);
+        self.push_debug_data(name, DebugDataType::I64);
     }
 
     pub fn push_address(&mut self, value: NeutronAddress, name: &str) {
@@ -345,16 +346,10 @@ impl WrappedDebugCoStack {
             let data_type = self.variable_types.pop().unwrap();
 
             match data_type {
-                DebugDataType::U64 => assert_eq!(
-                    bytes_to_integer!(expected_data, u64),
-                    bytes_to_integer!(actual_data, u64),
-                    "\n\n[DebugCoData] Assertion failed for u64 named {}\n\n",
-                    name
-                ),
-                DebugDataType::U32 => assert_eq!(
-                    bytes_to_integer!(expected_data, u32),
-                    bytes_to_integer!(actual_data, u32),
-                    "\n\n[DebugCoData] Assertion failed for u32 named '{}'\n\n",
+                DebugDataType::U8 => assert_eq!(
+                    bytes_to_integer!(expected_data, u8),
+                    bytes_to_integer!(actual_data, u8),
+                    "\n\n[DebugCoData] Assertion failed for u8 named '{}'\n\n",
                     name
                 ),
                 DebugDataType::U16 => assert_eq!(
@@ -363,22 +358,22 @@ impl WrappedDebugCoStack {
                     "\n\n[DebugCoData] Assertion failed for u16 named '{}'\n\n",
                     name
                 ),
-                DebugDataType::U8 => assert_eq!(
-                    bytes_to_integer!(expected_data, u8),
-                    bytes_to_integer!(actual_data, u8),
-                    "\n\n[DebugCoData] Assertion failed for u8 named '{}'\n\n",
+                DebugDataType::U32 => assert_eq!(
+                    bytes_to_integer!(expected_data, u32),
+                    bytes_to_integer!(actual_data, u32),
+                    "\n\n[DebugCoData] Assertion failed for u32 named '{}'\n\n",
                     name
                 ),
-                DebugDataType::I64 => assert_eq!(
-                    bytes_to_integer!(expected_data, i64),
-                    bytes_to_integer!(actual_data, i64),
-                    "\n\n[DebugCoData] Assertion failed for i64 named {}\n\n",
+                DebugDataType::U64 => assert_eq!(
+                    bytes_to_integer!(expected_data, u64),
+                    bytes_to_integer!(actual_data, u64),
+                    "\n\n[DebugCoData] Assertion failed for u64 named {}\n\n",
                     name
                 ),
-                DebugDataType::I32 => assert_eq!(
-                    bytes_to_integer!(expected_data, i32),
-                    bytes_to_integer!(actual_data, i32),
-                    "\n\n[DebugCoData] Assertion failed for i32 named '{}'\n\n",
+                DebugDataType::I8 => assert_eq!(
+                    bytes_to_integer!(expected_data, i8),
+                    bytes_to_integer!(actual_data, i8),
+                    "\n\n[DebugCoData] Assertion failed for i8 named '{}'\n\n",
                     name
                 ),
                 DebugDataType::I16 => assert_eq!(
@@ -387,10 +382,16 @@ impl WrappedDebugCoStack {
                     "\n\n[DebugCoData] Assertion failed for i16 named '{}'\n\n",
                     name
                 ),
-                DebugDataType::I8 => assert_eq!(
-                    bytes_to_integer!(expected_data, i8),
-                    bytes_to_integer!(actual_data, i8),
-                    "\n\n[DebugCoData] Assertion failed for i8 named '{}'\n\n",
+                DebugDataType::I32 => assert_eq!(
+                    bytes_to_integer!(expected_data, i32),
+                    bytes_to_integer!(actual_data, i32),
+                    "\n\n[DebugCoData] Assertion failed for i32 named '{}'\n\n",
+                    name
+                ),
+                DebugDataType::I64 => assert_eq!(
+                    bytes_to_integer!(expected_data, i64),
+                    bytes_to_integer!(actual_data, i64),
+                    "\n\n[DebugCoData] Assertion failed for i64 named {}\n\n",
                     name
                 ),
                 DebugDataType::ADDRESS => assert_eq!(
@@ -516,21 +517,12 @@ impl DebugCoMap {
 mod tests {
     use super::*;
 
-    // DebugCoStack::push_u64(u64)
+    // DebugCoStack::push_u8(u8)
     #[test]
-    fn test_debugcostack_push_u64() {
+    fn test_debugcostack_push_u8() {
         let mut stack = DebugCoStack::default();
-        stack.push_u64(0x1122_3344_5566_7788 as u64);
-        let expected_bytes: Vec<u8> = vec![0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11];
-        assert_eq!(stack.stack[0], expected_bytes);
-    }
-
-    // DebugCoStack::push_u32(u32)
-    #[test]
-    fn test_debugcostack_push_u32() {
-        let mut stack = DebugCoStack::default();
-        stack.push_u32(0x1122_3344 as u32);
-        let expected_bytes: Vec<u8> = vec![0x44, 0x33, 0x22, 0x11];
+        stack.push_u8(0x11 as u8);
+        let expected_bytes: Vec<u8> = vec![0x11];
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
@@ -543,31 +535,30 @@ mod tests {
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
-    // DebugCoStack::push_u8(u8)
+    // DebugCoStack::push_u32(u32)
     #[test]
-    fn test_debugcostack_push_u8() {
+    fn test_debugcostack_push_u32() {
         let mut stack = DebugCoStack::default();
-        stack.push_u8(0x11 as u8);
-        let expected_bytes: Vec<u8> = vec![0x11];
+        stack.push_u32(0x1122_3344 as u32);
+        let expected_bytes: Vec<u8> = vec![0x44, 0x33, 0x22, 0x11];
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
-    // DebugCoStack::push_i64(i64)
+    // DebugCoStack::push_u64(u64)
     #[test]
-    fn test_debugcostack_push_i64() {
+    fn test_debugcostack_push_u64() {
         let mut stack = DebugCoStack::default();
-        let num: i64 = i64::MIN / 2;
-        stack.push_i64(num);
-        let expected_bytes: Vec<u8> = num.to_le_bytes().to_vec();
+        stack.push_u64(0x1122_3344_5566_7788 as u64);
+        let expected_bytes: Vec<u8> = vec![0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11];
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
-    // DebugCoStack::push_i32(i32)
+    // DebugCoStack::push_i8(i8)
     #[test]
-    fn test_debugcostack_push_i32() {
+    fn test_debugcostack_push_i8() {
         let mut stack = DebugCoStack::default();
-        let num: i32 = i32::MIN / 2;
-        stack.push_i32(num);
+        let num: i8 = i8::MIN / 2;
+        stack.push_i8(num);
         let expected_bytes: Vec<u8> = num.to_le_bytes().to_vec();
         assert_eq!(stack.stack[0], expected_bytes);
     }
@@ -582,12 +573,22 @@ mod tests {
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
-    // DebugCoStack::push_i8(i8)
+    // DebugCoStack::push_i32(i32)
     #[test]
-    fn test_debugcostack_push_i8() {
+    fn test_debugcostack_push_i32() {
         let mut stack = DebugCoStack::default();
-        let num: i8 = i8::MIN / 2;
-        stack.push_i8(num);
+        let num: i32 = i32::MIN / 2;
+        stack.push_i32(num);
+        let expected_bytes: Vec<u8> = num.to_le_bytes().to_vec();
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_i64(i64)
+    #[test]
+    fn test_debugcostack_push_i64() {
+        let mut stack = DebugCoStack::default();
+        let num: i64 = i64::MIN / 2;
+        stack.push_i64(num);
         let expected_bytes: Vec<u8> = num.to_le_bytes().to_vec();
         assert_eq!(stack.stack[0], expected_bytes);
     }
