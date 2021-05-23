@@ -22,10 +22,7 @@ fn test_peek() {
     debugdata.inject_stack.push_str(key);
     debugdata.expect_stack.push_str(value, "comap_value");
 
-    debugdata
-        .inject_map
-        .push_key(key.as_bytes(), value.as_bytes())
-        .unwrap();
+    debugdata.inject_map.push_key(key.as_bytes(), value.as_bytes());
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -41,11 +38,9 @@ fn negtest_peek_wrong_key() {
 
     debugdata.inject_stack.push_str(key);
     debugdata.expect_stack.push_str(value, "comap_value");
-
-    debugdata
-        .inject_map
-        .push_key(wrong_key.as_bytes(), value.as_bytes())
-        .unwrap(); // Push wrong key as contract input
+    
+    // Push wrong key as contract input
+    debugdata.inject_map.push_key(wrong_key.as_bytes(), value.as_bytes());
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -62,10 +57,8 @@ fn negtest_peek_wrong_value() {
     debugdata.inject_stack.push_str(key);
     debugdata.expect_stack.push_str(value, "comap_value");
 
-    debugdata
-        .inject_map
-        .push_key(key.as_bytes(), wrong_value.as_bytes())
-        .unwrap(); // Push wrong value as contract input
+    // Push wrong value as contract input
+    debugdata.inject_map.push_key(key.as_bytes(), wrong_value.as_bytes()); 
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -85,10 +78,7 @@ fn test_peek_trucated() {
         .expect_stack
         .push_str(value_fitting, "comap_value");
 
-    debugdata
-        .inject_map
-        .push_key(key.as_bytes(), value_unfitting.as_bytes())
-        .unwrap();
+    debugdata.inject_map.push_key(key.as_bytes(), value_unfitting.as_bytes());
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -109,10 +99,7 @@ fn negtest_peek_trucated() {
         .expect_stack
         .push_str(value_unfitting, "comap_value"); // We expect the un-truncated value, so assertion will fail
 
-    debugdata
-        .inject_map
-        .push_key(key.as_bytes(), value_unfitting.as_bytes())
-        .unwrap();
+    debugdata.inject_map.push_key(key.as_bytes(), value_unfitting.as_bytes());
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -129,10 +116,7 @@ fn test_push() {
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(value);
 
-    debugdata
-        .expect_map
-        .push_key(key.as_bytes(), value.as_bytes())
-        .unwrap();
+    debugdata.expect_map.push_key(key.as_bytes(), value.as_bytes());
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -149,10 +133,7 @@ fn negtest_push_wrong_key() {
     debugdata.inject_stack.push_str(wrong_key); // Push wrong key as contract input
     debugdata.inject_stack.push_str(value);
 
-    debugdata
-        .expect_map
-        .push_key(key.as_bytes(), value.as_bytes())
-        .unwrap();
+    debugdata.expect_map.push_key(key.as_bytes(), value.as_bytes());
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -169,10 +150,7 @@ fn negtest_push_wrong_value() {
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(wrong_value); // Push wrong value as contract input
 
-    debugdata
-        .expect_map
-        .push_key(key.as_bytes(), value.as_bytes())
-        .unwrap();
+    debugdata.expect_map.push_key(key.as_bytes(), value.as_bytes());
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -198,10 +176,7 @@ fn test_peek_subsets() {
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(key);
 
-    debugdata
-        .inject_map
-        .push_key(key.as_bytes(), value.as_bytes())
-        .unwrap();
+    debugdata.inject_map.push_key(key.as_bytes(), value.as_bytes());
 
     // We expect the contract to split the comap value into the subsets
     debugdata
@@ -238,10 +213,7 @@ fn negtest_peek_subsets_wrong_value() {
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(key);
 
-    debugdata
-        .inject_map
-        .push_key(key.as_bytes(), value.as_bytes())
-        .unwrap();
+    debugdata.inject_map.push_key(key.as_bytes(), value.as_bytes());
 
     // We expect the contract to split the comap value into the subsets
     debugdata

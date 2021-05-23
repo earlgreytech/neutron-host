@@ -25,10 +25,7 @@ fn test_peek_header_size_1() {
     debugdata.expect_stack.push_str(raw_value, "comap_value");
     debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
-    debugdata
-        .inject_map
-        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.inject_map.push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data);
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -45,10 +42,7 @@ fn test_peek_header_size_2() {
     debugdata.expect_stack.push_str(raw_value, "comap_value");
     debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
-    debugdata
-        .inject_map
-        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.inject_map.push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data);
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -65,10 +59,7 @@ fn test_peek_header_size_4() {
     debugdata.expect_stack.push_str(raw_value, "comap_value");
     debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
-    debugdata
-        .inject_map
-        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.inject_map.push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data);
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -87,10 +78,7 @@ fn negtest_peek_header_wrong_key() {
     debugdata.expect_stack.push_str(raw_value, "comap_value");
     debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
-    debugdata
-        .inject_map
-        .push_key_abi(wrong_key.as_bytes(), raw_value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.inject_map.push_key_abi(wrong_key.as_bytes(), raw_value.as_bytes(), abi_data);
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -109,10 +97,7 @@ fn negtest_peek_header_wrong_value() {
     debugdata.expect_stack.push_str(raw_value, "comap_value");
     debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
-    debugdata
-        .inject_map
-        .push_key_abi(key.as_bytes(), wrong_raw_value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.inject_map.push_key_abi(key.as_bytes(), wrong_raw_value.as_bytes(), abi_data);
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -131,10 +116,7 @@ fn negtest_peek_header_wrong_size() {
     debugdata.expect_stack.push_str(raw_value, "comap_value");
     debugdata.expect_stack.push_u32(abi_data, "abi_data");
 
-    debugdata
-        .inject_map
-        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), wrong_abi_data)
-        .unwrap();
+    debugdata.inject_map.push_key_abi(key.as_bytes(), raw_value.as_bytes(), wrong_abi_data);
 
     single_default_execution!(CONTRACT_MAP_TO_STACK, debugdata);
 }
@@ -153,10 +135,7 @@ fn test_push_header_size_1() {
     debugdata.inject_stack.push_str(raw_value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata
-        .expect_map
-        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.expect_map.push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data);
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -173,10 +152,7 @@ fn test_push_header_size_2() {
     debugdata.inject_stack.push_str(raw_value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata
-        .expect_map
-        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.expect_map.push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data);
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -193,10 +169,7 @@ fn test_push_header_size_4() {
     debugdata.inject_stack.push_str(raw_value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata
-        .expect_map
-        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.expect_map.push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data);
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -215,10 +188,7 @@ fn negtest_push_header_wrong_key() {
     debugdata.inject_stack.push_str(raw_value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata
-        .expect_map
-        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.expect_map.push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data);
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -237,10 +207,7 @@ fn negtest_push_header_wrong_value() {
     debugdata.inject_stack.push_str(wrong_raw_value);
     debugdata.inject_stack.push_u32(abi_data);
 
-    debugdata
-        .expect_map
-        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.expect_map.push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data);
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -259,10 +226,7 @@ fn negtest_push_header_wrong_size() {
     debugdata.inject_stack.push_str(raw_value);
     debugdata.inject_stack.push_u32(wrong_abi_data);
 
-    debugdata
-        .expect_map
-        .push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.expect_map.push_key_abi(key.as_bytes(), raw_value.as_bytes(), abi_data);
 
     single_default_execution!(CONTRACT_STACK_TO_MAP, debugdata);
 }
@@ -289,10 +253,7 @@ fn test_peek_header_subsets() {
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(key);
 
-    debugdata
-        .inject_map
-        .push_key_abi(key.as_bytes(), value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.inject_map.push_key_abi(key.as_bytes(), value.as_bytes(), abi_data);
 
     // We expect the contract to split the comap value into the subsets
     // Note: Values and ABI data are separated to avoid costack conflicts in the contract!
@@ -335,10 +296,7 @@ fn negtest_peek_header_subsets_wrong_value() {
     debugdata.inject_stack.push_str(key);
     debugdata.inject_stack.push_str(key);
 
-    debugdata
-        .inject_map
-        .push_key_abi(key.as_bytes(), value.as_bytes(), abi_data)
-        .unwrap();
+    debugdata.inject_map.push_key_abi(key.as_bytes(), value.as_bytes(), abi_data);
 
     // We expect the contract to split the comap value into the subsets
     // Note: Values and ABI data are separated to avoid costack conflicts in the contract!
