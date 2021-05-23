@@ -178,7 +178,7 @@ fn test_write_array_u8() {
     let value_bytes = value;
     let abi_data = ABI_VALUE_U8 + ABI_ARRAY_BIT;
 
-    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_array_u8(&value);
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -203,7 +203,7 @@ fn test_write_array_u16() {
     }
     let abi_data = ABI_VALUE_U16 + ABI_ARRAY_BIT;
 
-    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_array_u16(&value);
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -228,7 +228,7 @@ fn test_write_array_u32() {
     }
     let abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
 
-    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_array_u32(&value);
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -253,7 +253,7 @@ fn test_write_array_u64() {
     }
     let abi_data = ABI_VALUE_U64 + ABI_ARRAY_BIT;
 
-    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_array_u64(&value);
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -276,7 +276,7 @@ fn test_write_array_i8() {
     }
     let abi_data = ABI_VALUE_I8 + ABI_ARRAY_BIT;
 
-    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_array_i8(&value);
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -301,7 +301,7 @@ fn test_write_array_i16() {
     }
     let abi_data = ABI_VALUE_I16 + ABI_ARRAY_BIT;
 
-    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_array_i16(&value);
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -326,7 +326,7 @@ fn test_write_array_i32() {
     }
     let abi_data = ABI_VALUE_I32 + ABI_ARRAY_BIT;
 
-    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_array_i32(&value);
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -351,7 +351,7 @@ fn test_write_array_i64() {
     }
     let abi_data = ABI_VALUE_I64 + ABI_ARRAY_BIT;
 
-    debugdata.inject_stack.push_bytes(&value_bytes);
+    debugdata.inject_stack.push_array_i64(&value);
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -530,9 +530,7 @@ fn test_read_array_u8() {
     let value_bytes = value;
     let abi_data = ABI_VALUE_U8 + ABI_ARRAY_BIT;
 
-    debugdata
-        .expect_stack
-        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.expect_stack.push_array_u8(&value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -557,9 +555,7 @@ fn test_read_array_u16() {
     }
     let abi_data = ABI_VALUE_U16 + ABI_ARRAY_BIT;
 
-    debugdata
-        .expect_stack
-        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.expect_stack.push_array_u16(&value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -584,9 +580,7 @@ fn test_read_array_u32() {
     }
     let abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
 
-    debugdata
-        .expect_stack
-        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.expect_stack.push_array_u32(&value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -611,9 +605,7 @@ fn test_read_array_u64() {
     }
     let abi_data = ABI_VALUE_U64 + ABI_ARRAY_BIT;
 
-    debugdata
-        .expect_stack
-        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.expect_stack.push_array_u64(&value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -636,9 +628,7 @@ fn test_read_array_i8() {
     }
     let abi_data = ABI_VALUE_I8 + ABI_ARRAY_BIT;
 
-    debugdata
-        .expect_stack
-        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.expect_stack.push_array_i8(&value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -663,9 +653,7 @@ fn test_read_array_i16() {
     }
     let abi_data = ABI_VALUE_I16 + ABI_ARRAY_BIT;
 
-    debugdata
-        .expect_stack
-        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.expect_stack.push_array_i16(&value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -690,9 +678,7 @@ fn test_read_array_i32() {
     }
     let abi_data = ABI_VALUE_I32 + ABI_ARRAY_BIT;
 
-    debugdata
-        .expect_stack
-        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.expect_stack.push_array_i32(&value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
@@ -717,9 +703,7 @@ fn test_read_array_i64() {
     }
     let abi_data = ABI_VALUE_I64 + ABI_ARRAY_BIT;
 
-    debugdata
-        .expect_stack
-        .push_bytes(&value_bytes, "value_bytes");
+    debugdata.expect_stack.push_array_i64(&value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
