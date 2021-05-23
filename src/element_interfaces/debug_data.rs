@@ -166,6 +166,8 @@ impl DebugCoStack {
     // These functions mostly mirror codata stack behavior
     // (adapted from neutron-star/src/syscall.rs)
 
+    // Single values
+
     pub fn push_u8(&mut self, value: u8) {
         self.stack.push([value].to_vec());
     }
@@ -203,6 +205,79 @@ impl DebugCoStack {
         bytes.append(&mut value.data.to_vec());
         self.stack.push(bytes);
     }
+
+    // Array values
+
+    pub fn push_array_u8(&mut self, slice: &[u8]) {
+        self.stack.push(slice.to_vec()); // No need to cast byte to byte
+    }
+
+    pub fn push_array_u16(&mut self, slice: &[u16]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..slice.len() {
+            bytes.extend_from_slice(&slice[i].to_le_bytes());
+        }
+        self.stack.push(bytes);
+    }
+
+    pub fn push_array_u32(&mut self, slice: &[u32]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..slice.len() {
+            bytes.extend_from_slice(&slice[i].to_le_bytes());
+        }
+        self.stack.push(bytes);
+    }
+
+    pub fn push_array_u64(&mut self, slice: &[u64]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..slice.len() {
+            bytes.extend_from_slice(&slice[i].to_le_bytes());
+        }
+        self.stack.push(bytes);
+    }
+
+    pub fn push_array_i8(&mut self, slice: &[i8]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..slice.len() {
+            bytes.extend_from_slice(&slice[i].to_le_bytes());
+        }
+        self.stack.push(bytes);
+    }
+
+    pub fn push_array_i16(&mut self, slice: &[i16]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..slice.len() {
+            bytes.extend_from_slice(&slice[i].to_le_bytes());
+        }
+        self.stack.push(bytes);
+    }
+
+    pub fn push_array_i32(&mut self, slice: &[i32]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..slice.len() {
+            bytes.extend_from_slice(&slice[i].to_le_bytes());
+        }
+        self.stack.push(bytes);
+    }
+
+    pub fn push_array_i64(&mut self, slice: &[i64]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..slice.len() {
+            bytes.extend_from_slice(&slice[i].to_le_bytes());
+        }
+        self.stack.push(bytes);
+    }
+
+    pub fn push_array_address(&mut self, slice: &[NeutronAddress]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..slice.len() {
+            bytes.extend_from_slice(&slice[i].version.to_le_bytes());
+            bytes.extend_from_slice(&slice[i].data);
+        }
+        self.stack.push(bytes);
+    }
+
+    // Misc type values
 
     pub fn push_bytes(&mut self, value: &[u8]) {
         self.stack.push(value.to_vec());
@@ -435,8 +510,7 @@ pub struct DebugCoMap {
     pub map: HashMap<Vec<u8>, Vec<u8>>,
 }
 
-// TODO: Currently it is assumed that every codata key/data value can be converted to a str for display,
-//       so if that turns out to not be the case this needs refactoring
+// TODO: Add typed push functions, and maybe a wrapped version with extra debug info? (like WrappedDebugCoStack)
 impl DebugCoMap {
     // These functions mirror codata map behavior
     pub fn push_key(&mut self, key: &[u8], value: &[u8]) -> Result<(), NeutronError> {
@@ -526,12 +600,40 @@ mod tests {
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
+    // DebugCoStack::push_array_u8(&[u8])
+    #[test]
+    fn test_debugcostack_push_array_u8() {
+        let mut stack = DebugCoStack::default();
+        let array: [u8; 3] = [1, 2, 3];
+
+        let mut expected_bytes: Vec<u8> = vec![];
+        expected_bytes.extend_from_slice(&array);
+
+        stack.push_array_u8(&array);
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
     // DebugCoStack::push_u16(u16)
     #[test]
     fn test_debugcostack_push_u16() {
         let mut stack = DebugCoStack::default();
         stack.push_u16(0x1122 as u16);
         let expected_bytes: Vec<u8> = vec![0x22, 0x11];
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_array_u16(&[u16])
+    #[test]
+    fn test_debugcostack_push_array_u16() {
+        let mut stack = DebugCoStack::default();
+        let array: [u16; 3] = [1, 2, 3];
+
+        let mut expected_bytes: Vec<u8> = vec![];
+        expected_bytes.extend_from_slice(&array[0].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[1].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[2].to_le_bytes());
+
+        stack.push_array_u16(&array);
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
@@ -544,12 +646,42 @@ mod tests {
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
+    // DebugCoStack::push_array_u32(&[u32])
+    #[test]
+    fn test_debugcostack_push_array_u32() {
+        let mut stack = DebugCoStack::default();
+        let array: [u32; 3] = [1, 2, 3];
+
+        let mut expected_bytes: Vec<u8> = vec![];
+        expected_bytes.extend_from_slice(&array[0].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[1].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[2].to_le_bytes());
+
+        stack.push_array_u32(&array);
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
     // DebugCoStack::push_u64(u64)
     #[test]
     fn test_debugcostack_push_u64() {
         let mut stack = DebugCoStack::default();
         stack.push_u64(0x1122_3344_5566_7788 as u64);
         let expected_bytes: Vec<u8> = vec![0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11];
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_array_u64(&[u64])
+    #[test]
+    fn test_debugcostack_push_array_u64() {
+        let mut stack = DebugCoStack::default();
+        let array: [u64; 3] = [1, 2, 3];
+
+        let mut expected_bytes: Vec<u8> = vec![];
+        expected_bytes.extend_from_slice(&array[0].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[1].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[2].to_le_bytes());
+
+        stack.push_array_u64(&array);
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
@@ -563,6 +695,21 @@ mod tests {
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
+    // DebugCoStack::push_array_i8(&[i8])
+    #[test]
+    fn test_debugcostack_push_array_i8() {
+        let mut stack = DebugCoStack::default();
+        let array: [i8; 3] = [-1, -2, -3];
+
+        let mut expected_bytes: Vec<u8> = vec![];
+        expected_bytes.extend_from_slice(&array[0].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[1].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[2].to_le_bytes());
+
+        stack.push_array_i8(&array);
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
     // DebugCoStack::push_i16(i16)
     #[test]
     fn test_debugcostack_push_i16() {
@@ -570,6 +717,21 @@ mod tests {
         let num: i16 = i16::MIN / 2;
         stack.push_i16(num);
         let expected_bytes: Vec<u8> = num.to_le_bytes().to_vec();
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_array_i16(&[i16])
+    #[test]
+    fn test_debugcostack_push_array_i16() {
+        let mut stack = DebugCoStack::default();
+        let array: [i16; 3] = [-1, -2, -3];
+
+        let mut expected_bytes: Vec<u8> = vec![];
+        expected_bytes.extend_from_slice(&array[0].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[1].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[2].to_le_bytes());
+
+        stack.push_array_i16(&array);
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
@@ -583,6 +745,21 @@ mod tests {
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
+    // DebugCoStack::push_array_i32(&[i32])
+    #[test]
+    fn test_debugcostack_push_array_i32() {
+        let mut stack = DebugCoStack::default();
+        let array: [i32; 3] = [-1, -2, -3];
+
+        let mut expected_bytes: Vec<u8> = vec![];
+        expected_bytes.extend_from_slice(&array[0].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[1].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[2].to_le_bytes());
+
+        stack.push_array_i32(&array);
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
     // DebugCoStack::push_i64(i64)
     #[test]
     fn test_debugcostack_push_i64() {
@@ -590,6 +767,21 @@ mod tests {
         let num: i64 = i64::MIN / 2;
         stack.push_i64(num);
         let expected_bytes: Vec<u8> = num.to_le_bytes().to_vec();
+        assert_eq!(stack.stack[0], expected_bytes);
+    }
+
+    // DebugCoStack::push_array_i64(&[i64])
+    #[test]
+    fn test_debugcostack_push_array_i64() {
+        let mut stack = DebugCoStack::default();
+        let array: [i64; 3] = [-1, -2, -3];
+
+        let mut expected_bytes: Vec<u8> = vec![];
+        expected_bytes.extend_from_slice(&array[0].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[1].to_le_bytes());
+        expected_bytes.extend_from_slice(&array[2].to_le_bytes());
+
+        stack.push_array_i64(&array);
         assert_eq!(stack.stack[0], expected_bytes);
     }
 
@@ -607,6 +799,34 @@ mod tests {
         bytes.append(&mut data.to_vec());
         stack.push_address(NeutronAddress::from_data(&bytes));
         assert_eq!(stack.stack[0], bytes);
+    }
+
+    // DebugCoStack::push_array_address(&[NeutronAddress])
+    #[test]
+    fn test_debugcostack_push_array_address() {
+        let mut stack = DebugCoStack::default();
+
+        // For simplicity we just create a byte sequence with the same length as the address struct
+        let mut version_and_data: [[u8; 24]; 3] = [[0; 24], [0; 24], [0; 24]];
+        for i in 0..24 {
+            version_and_data[0][i] = (i + 1) as u8;
+            version_and_data[1][i] = (i + 11) as u8;
+            version_and_data[2][i] = (i + 101) as u8;
+        }
+
+        let array: [NeutronAddress; 3] = [
+            NeutronAddress::from_data(&version_and_data[0]),
+            NeutronAddress::from_data(&version_and_data[1]),
+            NeutronAddress::from_data(&version_and_data[2]),
+        ];
+
+        let mut expected_bytes: Vec<u8> = vec![];
+        expected_bytes.extend_from_slice(&version_and_data[0]);
+        expected_bytes.extend_from_slice(&version_and_data[1]);
+        expected_bytes.extend_from_slice(&version_and_data[2]);
+
+        stack.push_array_address(&array);
+        assert_eq!(stack.stack[0], expected_bytes);
     }
 
     // DebugCoStack::push_bytes(&[u8])
