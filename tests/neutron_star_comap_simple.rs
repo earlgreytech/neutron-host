@@ -367,38 +367,19 @@ fn test_write_array_i64() {
 // but since they are identical save for one line with the input map version it should be fine.
 
 #[test]
-fn test_read_u64() {
+fn test_read_u8() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = ".namespace.keyname";
-    let value = u64::MAX / 2;
-    let abi_data = ABI_VALUE_U64;
+    let value = u8::MAX / 2;
+    let abi_data = ABI_VALUE_U8;
 
-    debugdata.expect_stack.push_u64(value, "value");
+    debugdata.expect_stack.push_u8(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
         .inject_map
-        .push_key_abi(key.as_bytes(), &u64::to_le_bytes(value), abi_data)
-        .unwrap();
-
-    single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
-}
-
-#[test]
-fn test_read_u32() {
-    let mut debugdata = DebugDataInjector::default();
-
-    let key = ".namespace.keyname";
-    let value = u32::MAX / 2;
-    let abi_data = ABI_VALUE_U32;
-
-    debugdata.expect_stack.push_u32(value, "value");
-    debugdata.inject_stack.push_u32(abi_data);
-
-    debugdata
-        .inject_map
-        .push_key_abi(key.as_bytes(), &u32::to_le_bytes(value), abi_data)
+        .push_key_abi(key.as_bytes(), &u8::to_le_bytes(value), abi_data)
         .unwrap();
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
@@ -424,57 +405,57 @@ fn test_read_u16() {
 }
 
 #[test]
-fn test_read_u8() {
+fn test_read_u32() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = ".namespace.keyname";
-    let value = u8::MAX / 2;
-    let abi_data = ABI_VALUE_U8;
+    let value = u32::MAX / 2;
+    let abi_data = ABI_VALUE_U32;
 
-    debugdata.expect_stack.push_u8(value, "value");
+    debugdata.expect_stack.push_u32(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
         .inject_map
-        .push_key_abi(key.as_bytes(), &u8::to_le_bytes(value), abi_data)
+        .push_key_abi(key.as_bytes(), &u32::to_le_bytes(value), abi_data)
         .unwrap();
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
 }
 
 #[test]
-fn test_read_i64() {
+fn test_read_u64() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = ".namespace.keyname";
-    let value = i64::MIN / 2;
-    let abi_data = ABI_VALUE_I64;
+    let value = u64::MAX / 2;
+    let abi_data = ABI_VALUE_U64;
 
-    debugdata.expect_stack.push_i64(value, "value");
+    debugdata.expect_stack.push_u64(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
         .inject_map
-        .push_key_abi(key.as_bytes(), &i64::to_le_bytes(value), abi_data)
+        .push_key_abi(key.as_bytes(), &u64::to_le_bytes(value), abi_data)
         .unwrap();
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
 }
 
 #[test]
-fn test_read_i32() {
+fn test_read_i8() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = ".namespace.keyname";
-    let value = i32::MIN / 2;
-    let abi_data = ABI_VALUE_I32;
+    let value = i8::MIN / 2;
+    let abi_data = ABI_VALUE_I8;
 
-    debugdata.expect_stack.push_i32(value, "value");
+    debugdata.expect_stack.push_i8(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
         .inject_map
-        .push_key_abi(key.as_bytes(), &i32::to_le_bytes(value), abi_data)
+        .push_key_abi(key.as_bytes(), &i8::to_le_bytes(value), abi_data)
         .unwrap();
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
@@ -500,19 +481,38 @@ fn test_read_i16() {
 }
 
 #[test]
-fn test_read_i8() {
+fn test_read_i32() {
     let mut debugdata = DebugDataInjector::default();
 
     let key = ".namespace.keyname";
-    let value = i8::MIN / 2;
-    let abi_data = ABI_VALUE_I8;
+    let value = i32::MIN / 2;
+    let abi_data = ABI_VALUE_I32;
 
-    debugdata.expect_stack.push_i8(value, "value");
+    debugdata.expect_stack.push_i32(value, "value");
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata
         .inject_map
-        .push_key_abi(key.as_bytes(), &i8::to_le_bytes(value), abi_data)
+        .push_key_abi(key.as_bytes(), &i32::to_le_bytes(value), abi_data)
+        .unwrap();
+
+    single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
+}
+
+#[test]
+fn test_read_i64() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value = i64::MIN / 2;
+    let abi_data = ABI_VALUE_I64;
+
+    debugdata.expect_stack.push_i64(value, "value");
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata
+        .inject_map
+        .push_key_abi(key.as_bytes(), &i64::to_le_bytes(value), abi_data)
         .unwrap();
 
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
