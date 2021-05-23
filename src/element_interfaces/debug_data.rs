@@ -7,6 +7,7 @@ use neutron_common::*;
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::str;
+use std::any::type_name;
 
 /*
 ## Debug Data Injector ElementAPI
@@ -325,6 +326,15 @@ pub enum DebugDataType {
     I32,
     I64,
     ADDRESS,
+    ARRAYU8,
+    ARRAYU16,
+    ARRAYU32,
+    ARRAYU64,
+    ARRAYI8,
+    ARRAYI16,
+    ARRAYI32,
+    ARRAYI64,
+    ARRAYADDRESS,
     BYTES,
     STR,
 }
@@ -350,8 +360,55 @@ macro_rules! bytes_to_integer {
     }};
 }
 
+// Macro for asserting single integer values in WrappedDebugCoStack::assert_eq()
+macro_rules! assert_integer {
+    ($EXPECTED:ident, $ACTUAL:ident, $VALUE_NAME:expr, $TYPE:tt) => {{
+        assert_eq!(
+            bytes_to_integer!($EXPECTED, $TYPE),
+            bytes_to_integer!($ACTUAL, $TYPE),
+            "\n\n[DebugCoData] Assertion failed for {} named '{}'\n\n",
+            type_name::<$TYPE>(),
+            $VALUE_NAME,
+        );
+    }};
+}
+
+// Macro for asserting array integer values in WrappedDebugCoStack::assert_eq()
+macro_rules! assert_integer_array {
+    ($EXPECTED:ident, $ACTUAL:ident, $VALUE_NAME:expr, $TYPE:tt) => {{
+        let type_size: usize = std::mem::size_of::<$TYPE>();
+        let expected_len = $EXPECTED.len();
+        let actual_len = $ACTUAL.len();
+        
+        if expected_len > actual_len {
+            panic!("\n\n[DebugCoData] Assertion failed: Found shorter {} array than expected on output stack\n\n", type_name::<$TYPE>());
+        }
+        if expected_len < actual_len {
+            panic!("\n\n[DebugCoData] Assertion failed: Found longer {} array than expected on output stack\n\n", type_name::<$TYPE>());
+        }
+        
+        let iteration_steps: usize = expected_len / type_size;
+        
+        for i in 0..iteration_steps {
+            let start_index = i * type_size;
+            let end_index = (i + 1) * type_size;
+            let expected_bytes = $EXPECTED[start_index..end_index].to_vec();
+            let actual_bytes = $ACTUAL[start_index..end_index].to_vec();
+            
+            assert_eq!(
+                bytes_to_integer!(expected_bytes, $TYPE),
+                bytes_to_integer!(actual_bytes, $TYPE),
+                "\n\n[DebugCoData] Assertion failed for value on index {} of {} array named '{}'\n\n",
+                i,
+                type_name::<$TYPE>(),
+                $VALUE_NAME,
+            );
+        }
+    }};
+}
+
 impl WrappedDebugCoStack {
-    // CoStack functions
+    // Single values
 
     pub fn push_u8(&mut self, value: u8, name: &str) {
         self.output_stack.push_u8(value);
@@ -397,6 +454,55 @@ impl WrappedDebugCoStack {
         self.output_stack.push_address(value);
         self.push_debug_data(name, DebugDataType::ADDRESS);
     }
+    
+    // Array values
+    
+    pub fn push_array_u8(&mut self, slice: &[u8], name: &str) {
+        self.output_stack.push_array_u8(slice);
+        self.push_debug_data(name, DebugDataType::ARRAYU8);
+    }
+
+    pub fn push_array_u16(&mut self, slice: &[u16], name: &str) {
+        self.output_stack.push_array_u16(slice);
+        self.push_debug_data(name, DebugDataType::ARRAYU16);
+    }
+
+    pub fn push_array_u32(&mut self, slice: &[u32], name: &str) {
+        self.output_stack.push_array_u32(slice);
+        self.push_debug_data(name, DebugDataType::ARRAYU32);
+    }
+
+    pub fn push_array_u64(&mut self, slice: &[u64], name: &str) {
+        self.output_stack.push_array_u64(slice);
+        self.push_debug_data(name, DebugDataType::ARRAYU64);
+    }
+
+    pub fn push_array_i8(&mut self, slice: &[i8], name: &str) {
+        self.output_stack.push_array_i8(slice);
+        self.push_debug_data(name, DebugDataType::ARRAYI8);
+    }
+
+    pub fn push_array_i16(&mut self, slice: &[i16], name: &str) {
+        self.output_stack.push_array_i16(slice);
+        self.push_debug_data(name, DebugDataType::ARRAYI16);
+    }
+
+    pub fn push_array_i32(&mut self, slice: &[i32], name: &str) {
+        self.output_stack.push_array_i32(slice);
+        self.push_debug_data(name, DebugDataType::ARRAYI32);
+    }
+
+    pub fn push_array_i64(&mut self, slice: &[i64], name: &str) {
+        self.output_stack.push_array_i64(slice);
+        self.push_debug_data(name, DebugDataType::ARRAYI64);
+    }
+
+    pub fn push_array_address(&mut self, slice: &[NeutronAddress], name: &str) {
+        self.output_stack.push_array_address(slice);
+        self.push_debug_data(name, DebugDataType::ARRAYADDRESS);
+    }
+    
+    // Misc type values
 
     pub fn push_bytes(&mut self, value: &[u8], name: &str) {
         self.output_stack.push_bytes(value);
@@ -414,67 +520,79 @@ impl WrappedDebugCoStack {
             let expected_data = self.output_stack.pop().unwrap();
             let actual_data = match codata.pop_input_stack() {
                 Ok(v) => v,
-                Err(_e) => panic!("\n\n[DebugCoData] Assertion failed: Output stack was exhausted before expected stack\n\n"),
+                Err(_e) => panic!("\n\n[DebugCoData] Assertion failed: Fewer output stack items present than expected\n\n"),
             };
 
             let name = self.variable_names.pop().unwrap();
             let data_type = self.variable_types.pop().unwrap();
 
             match data_type {
-                DebugDataType::U8 => assert_eq!(
-                    bytes_to_integer!(expected_data, u8),
-                    bytes_to_integer!(actual_data, u8),
-                    "\n\n[DebugCoData] Assertion failed for u8 named '{}'\n\n",
-                    name
-                ),
-                DebugDataType::U16 => assert_eq!(
-                    bytes_to_integer!(expected_data, u16),
-                    bytes_to_integer!(actual_data, u16),
-                    "\n\n[DebugCoData] Assertion failed for u16 named '{}'\n\n",
-                    name
-                ),
-                DebugDataType::U32 => assert_eq!(
-                    bytes_to_integer!(expected_data, u32),
-                    bytes_to_integer!(actual_data, u32),
-                    "\n\n[DebugCoData] Assertion failed for u32 named '{}'\n\n",
-                    name
-                ),
-                DebugDataType::U64 => assert_eq!(
-                    bytes_to_integer!(expected_data, u64),
-                    bytes_to_integer!(actual_data, u64),
-                    "\n\n[DebugCoData] Assertion failed for u64 named {}\n\n",
-                    name
-                ),
-                DebugDataType::I8 => assert_eq!(
-                    bytes_to_integer!(expected_data, i8),
-                    bytes_to_integer!(actual_data, i8),
-                    "\n\n[DebugCoData] Assertion failed for i8 named '{}'\n\n",
-                    name
-                ),
-                DebugDataType::I16 => assert_eq!(
-                    bytes_to_integer!(expected_data, i16),
-                    bytes_to_integer!(actual_data, i16),
-                    "\n\n[DebugCoData] Assertion failed for i16 named '{}'\n\n",
-                    name
-                ),
-                DebugDataType::I32 => assert_eq!(
-                    bytes_to_integer!(expected_data, i32),
-                    bytes_to_integer!(actual_data, i32),
-                    "\n\n[DebugCoData] Assertion failed for i32 named '{}'\n\n",
-                    name
-                ),
-                DebugDataType::I64 => assert_eq!(
-                    bytes_to_integer!(expected_data, i64),
-                    bytes_to_integer!(actual_data, i64),
-                    "\n\n[DebugCoData] Assertion failed for i64 named {}\n\n",
-                    name
-                ),
+                // Single values
+                
+                DebugDataType::U8 => assert_integer!(expected_data, actual_data, name, u8),
+                DebugDataType::U16 => assert_integer!(expected_data, actual_data, name, u16),
+                DebugDataType::U32 => assert_integer!(expected_data, actual_data, name, u32),
+                DebugDataType::U64 => assert_integer!(expected_data, actual_data, name, u64),
+                DebugDataType::I8 => assert_integer!(expected_data, actual_data, name, i8),
+                DebugDataType::I16 => assert_integer!(expected_data, actual_data, name, i16),
+                DebugDataType::I32 => assert_integer!(expected_data, actual_data, name, i32),
+                DebugDataType::I64 => assert_integer!(expected_data, actual_data, name, i64),
                 DebugDataType::ADDRESS => assert_eq!(
                     NeutronAddress::from_data(&expected_data),
                     NeutronAddress::from_data(&actual_data),
                     "\n\n[DebugCoData] Assertion failed for NeutronAddress named '{}'\n\n",
                     name
                 ),
+                
+                // Arrray values
+                
+                DebugDataType::ARRAYU8 => assert_integer_array!(expected_data, actual_data, name, u8),
+                DebugDataType::ARRAYU16 => assert_integer_array!(expected_data, actual_data, name, u16),
+                DebugDataType::ARRAYU32 => assert_integer_array!(expected_data, actual_data, name, u32),
+                DebugDataType::ARRAYU64 => assert_integer_array!(expected_data, actual_data, name, u64),
+                DebugDataType::ARRAYI8 => assert_integer_array!(expected_data, actual_data, name, i8),
+                DebugDataType::ARRAYI16 => assert_integer_array!(expected_data, actual_data, name, i16),
+                DebugDataType::ARRAYI32 => assert_integer_array!(expected_data, actual_data, name, i32),
+                DebugDataType::ARRAYI64 => assert_integer_array!(expected_data, actual_data, name, i64),
+                DebugDataType::ARRAYADDRESS => {
+                    let type_size: usize = std::mem::size_of::<NeutronAddress>();
+                    let expected_len = expected_data.len();
+                    let actual_len = actual_data.len();
+                    
+                    if expected_len > actual_len {
+                        panic!("\n\n[DebugCoData] Assertion failed: Found shorter NeutronAddress array than expected on output stack\n\n");
+                    }
+                    if expected_len < actual_len {
+                        panic!("\n\n[DebugCoData] Assertion failed: Found longer NeutronAddress array than expected on output stack\n\n");
+                    }
+                    
+                    let iteration_steps: usize = expected_len / type_size;
+                    
+                    for i in 0..iteration_steps {
+                        let start_index = i * type_size;
+                        let end_index = (i + 1) * type_size;
+                        let expected_address = NeutronAddress::from_data(&expected_data[start_index..end_index]);
+                        let actual_address = NeutronAddress::from_data(&actual_data[start_index..end_index]);
+                        
+                        assert_eq!(
+                            expected_address.version,
+                            actual_address.version,
+                            "\n\n[DebugCoData] Assertion failed on index {} of NeutronAddress array named '{}' (version field)\n\n",
+                            i,
+                            name,
+                        );
+                        assert_eq!(
+                            expected_address.data,
+                            actual_address.data,
+                            "\n\n[DebugCoData] Assertion failed on index {} of NeutronAddress array named '{}' (data field)\n\n",
+                            i,
+                            name,
+                        );
+                    }
+                }
+                
+                // Misc type values
+                
                 DebugDataType::BYTES => assert_eq!(
                     expected_data, actual_data,
                     "\n\n[DebugCoData] Assertion failed for byte sequence named '{}'\n\n",
@@ -491,7 +609,7 @@ impl WrappedDebugCoStack {
 
         // Check that there is no unexpected data left on the codata stack
         match codata.pop_input_stack() {
-            Ok(_v) => panic!("\n\n[DebugCoData] Assertion failed: Additional data found on output stack after expected stack was exhausted\n\n"),
+            Ok(_v) => panic!("\n\n[DebugCoData] Assertion failed: More output stack items present than expected\n\n"),
             Err(_e) => {},
         }
     }
