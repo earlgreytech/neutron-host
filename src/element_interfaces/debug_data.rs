@@ -630,47 +630,6 @@ pub struct DebugCoMap {
 
 // TODO: Add typed push functions, and maybe a wrapped version with extra debug info? (like WrappedDebugCoStack)
 impl DebugCoMap {
-    // Single values without abi
-
-    pub fn push_key_u8(&mut self, key: &[u8], value: u8) {
-        self.push_key(key, &[value]); // No need to cast byte to byte
-    }
-
-    pub fn push_key_u16(&mut self, key: &[u8], value: u16) {
-        self.push_key(key, &u16::to_le_bytes(value));
-    }
-
-    pub fn push_key_u32(&mut self, key: &[u8], value: u32) {
-        self.push_key(key, &u32::to_le_bytes(value));
-    }
-
-    pub fn push_key_u64(&mut self, key: &[u8], value: u64) {
-        self.push_key(key, &u64::to_le_bytes(value));
-    }
-
-    pub fn push_key_i8(&mut self, key: &[u8], value: i8) {
-        self.push_key(key, &i8::to_le_bytes(value)); // No need to cast byte to byte
-    }
-
-    pub fn push_key_i16(&mut self, key: &[u8], value: i16) {
-        self.push_key(key, &i16::to_le_bytes(value));
-    }
-
-    pub fn push_key_i32(&mut self, key: &[u8], value: i32) {
-        self.push_key(key, &i32::to_le_bytes(value));
-    }
-
-    pub fn push_key_i64(&mut self, key: &[u8], value: i64) {
-        self.push_key(key, &i64::to_le_bytes(value));
-    }
-
-    pub fn push_key_address(&mut self, key: &[u8], value: NeutronAddress) {
-        let mut bytes: Vec<u8> = vec![];
-        bytes.extend_from_slice(&u32::to_le_bytes(value.version));
-        bytes.extend_from_slice(&value.data);
-        self.push_key(key, &bytes);
-    }
-
     // Single values with abi
 
     pub fn push_key_abi_u8(&mut self, key: &[u8], value: u8) {
