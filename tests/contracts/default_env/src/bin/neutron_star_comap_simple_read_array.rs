@@ -60,8 +60,8 @@ pub unsafe extern "C" fn main() -> ! {
         match read_result_comap_fixed_array_u64(".namespace.keyname", &mut value) {
             Ok(()) => push_costack_array_u64(&value),
             Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_fixed_array_u64(): {}", ERR_STR_ITEMDOESNTEXIST),
-            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_fixed_array_u64(): {}", ERR_STR_STACKITEMTOOLARGE)
-            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_fixed_array_u64(): {}", ERR_STR_STACKITEMTOOSMALL)
+            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_fixed_array_u64(): {}", ERR_STR_STACKITEMTOOLARGE),
+            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_fixed_array_u64(): {}", ERR_STR_STACKITEMTOOSMALL),
             _ => println!("Error in read_result_comap_fixed_array_u64(): {}", ERR_STR_UNHANDLED),
         }
     } else if abi_data == ABI_VALUE_I8 + ABI_ARRAY_BIT {
@@ -70,7 +70,7 @@ pub unsafe extern "C" fn main() -> ! {
             Ok(()) => push_costack_array_i8(&value),
             Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_fixed_array_i8(): {}", ERR_STR_ITEMDOESNTEXIST),
             Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_fixed_array_i8(): {}", ERR_STR_STACKITEMTOOLARGE),
-            Err(RecoverableError::StackItemTooSmall) => {println!("Error in read_result_comap_fixed_array_i8(): {}", ERR_STR_STACKITEMTOOSMALL),
+            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_fixed_array_i8(): {}", ERR_STR_STACKITEMTOOSMALL),
             _ => println!("Error in read_result_comap_fixed_array_i8(): {}", ERR_STR_UNHANDLED),
         }
     } else if abi_data == ABI_VALUE_I16 + ABI_ARRAY_BIT {
