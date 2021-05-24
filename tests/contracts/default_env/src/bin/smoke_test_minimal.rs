@@ -4,10 +4,9 @@
 #![no_main]
 #![no_std]
 
-use neutron_star_rt::*;
 use neutron_star::*;
+use neutron_star_rt::*;
 extern crate panic_halt;
-
 
 #[no_mangle]
 pub unsafe extern "C" fn main() -> ! {

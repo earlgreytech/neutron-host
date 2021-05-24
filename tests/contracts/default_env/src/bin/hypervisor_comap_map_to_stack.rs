@@ -18,16 +18,16 @@ const DEBUG_DATA_FEATURE: u32 = 0x4000_0001;
 #[no_mangle]
 pub unsafe extern "C" fn main() -> ! {
     __system_call(DEBUG_DATA_FEATURE, 3); // DebugDataFunctions::PushResultMap
-    
+
     // Load key into costack and use it as parameter for comap lookup
     __system_call(DEBUG_DATA_FEATURE, 1); // DebugDataFunctions::PushInputStack
     __move_input_to_output_costack(); // Injected input stack -> Input for peek_raw_result_comap
-    
+
     __peek_raw_result_comap(DATA_READ_START, MAX_RESULT_SIZE);
     __move_input_to_output_costack(); // Result input from peek_raw_result_comap -> Output stack for assertion
-    
+
     // Assert the result of the comap lookup
     __system_call(DEBUG_DATA_FEATURE, 2); // DebugDataFunctions::AssertOutputStack
-    
+
     __exit(5);
 }
