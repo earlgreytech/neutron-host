@@ -51,6 +51,8 @@ functions:
 
 */
 
+// TODO: Add functionality to expect specific errors in contract execution, so negtests can be more complex that "execution didn't finish"
+
 // IDs >= 0x8000_0000 are meant for "internal" usage within the project, e.g. for unit/integration testing.
 pub const DEBUG_DATA_FEATURE: u32 = 0x4000_0001;
 
@@ -668,7 +670,6 @@ impl DebugCoMap {
 
     pub fn push_key_array_u8(&mut self, key: &[u8], value: &[u8]) {
         self.push_key_abi(key, &value, ABI_INTEGER_TYPE_U8 | ABI_IS_ARRAY_TRUE);
-        // No need to cast byte to byte
     }
 
     pub fn push_key_array_u16(&mut self, key: &[u8], value: &[u16]) {
