@@ -632,46 +632,40 @@ pub struct DebugCoMap {
 impl DebugCoMap {
     // Single values with abi
 
-    pub fn push_key_abi_u8(&mut self, key: &[u8], value: u8) {
+    pub fn push_key_u8(&mut self, key: &[u8], value: u8) {
         self.push_key_abi(key, &[value], ABI_INTEGER_TYPE_U8); // No need to cast byte to byte
     }
 
-    pub fn push_key_abi_u16(&mut self, key: &[u8], value: u16) {
-        self.push_key_abi(key, &u16::to_le_bytes(value), ABI_INTEGER_TYPE_U16);
+    pub fn push_key_u16(&mut self, key: &[u8], value: u16) {
+        self.push_key_abi(key, &value.to_le_bytes(), ABI_INTEGER_TYPE_U16);
     }
 
-    pub fn push_key_abi_u32(&mut self, key: &[u8], value: u32) {
-        self.push_key_abi(key, &u32::to_le_bytes(value), ABI_INTEGER_TYPE_U32);
+    pub fn push_key_u32(&mut self, key: &[u8], value: u32) {
+        self.push_key_abi(key, &value.to_le_bytes(), ABI_INTEGER_TYPE_U32);
     }
 
-    pub fn push_key_abi_u64(&mut self, key: &[u8], value: u64) {
-        self.push_key_abi(key, &u64::to_le_bytes(value), ABI_INTEGER_TYPE_U64);
+    pub fn push_key_u64(&mut self, key: &[u8], value: u64) {
+        self.push_key_abi(key, &value.to_le_bytes(), ABI_INTEGER_TYPE_U64);
     }
 
-    pub fn push_key_abi_i8(&mut self, key: &[u8], value: i8) {
-        self.push_key_abi(key, &i8::to_le_bytes(value), ABI_INTEGER_TYPE_I8);
+    pub fn push_key_i8(&mut self, key: &[u8], value: i8) {
+        self.push_key_abi(key, &value.to_le_bytes(), ABI_INTEGER_TYPE_I8);
     }
 
-    pub fn push_key_abi_i16(&mut self, key: &[u8], value: i16) {
-        self.push_key_abi(key, &i16::to_le_bytes(value), ABI_INTEGER_TYPE_I16);
+    pub fn push_key_i16(&mut self, key: &[u8], value: i16) {
+        self.push_key_abi(key, &value.to_le_bytes(), ABI_INTEGER_TYPE_I16);
     }
 
-    pub fn push_key_abi_i32(&mut self, key: &[u8], value: i32) {
-        self.push_key_abi(key, &i32::to_le_bytes(value), ABI_INTEGER_TYPE_I32);
+    pub fn push_key_i32(&mut self, key: &[u8], value: i32) {
+        self.push_key_abi(key, &value.to_le_bytes(), ABI_INTEGER_TYPE_I32);
     }
 
-    pub fn push_key_abi_i64(&mut self, key: &[u8], value: i64) {
-        self.push_key_abi(key, &i64::to_le_bytes(value), ABI_INTEGER_TYPE_I64);
+    pub fn push_key_i64(&mut self, key: &[u8], value: i64) {
+        self.push_key_abi(key, &value.to_le_bytes(), ABI_INTEGER_TYPE_I64);
     }
 
-    pub fn push_key_abi_address(&mut self, key: &[u8], value: NeutronAddress, abi_data: u32) {
-        let mut bytes: Vec<u8> = vec![];
-        bytes.extend_from_slice(&u32::to_le_bytes(value.version));
-        bytes.extend_from_slice(&value.data);
-        self.push_key_abi(key, &bytes, abi_data);
-    }
-
-    // Array values
+    // Array values with abi
+    
 
     // Misc value types without abi
 
