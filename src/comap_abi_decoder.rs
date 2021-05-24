@@ -31,17 +31,21 @@ const HEX_OR_BIGNUM_TRUE: u8    = 0b00010000;
 const IS_ARRAY_MASK: u8         = 0b00001000;
 const IS_ARRAY_FALSE: u8        = 0b00000000;
 const IS_ARRAY_TRUE: u8         = 0b00001000;
+*/
 
-const NUMERIC_TYPE_MASK: u8     = 0b00000111;
-const NUMERIC_TYPE_U8: u8       = 0b00000000;
-const NUMERIC_TYPE_I8: u8       = 0b00000100;
-const NUMERIC_TYPE_U16: u8      = 0b00000010;
-const NUMERIC_TYPE_I16: u8      = 0b00000110;
-const NUMERIC_TYPE_U32: u8      = 0b00000001;
-const NUMERIC_TYPE_I32: u8      = 0b00000101;
-const NUMERIC_TYPE_U64: u8      = 0b00000011;
-const NUMERIC_TYPE_I64: u8      = 0b00000111;
+// TODO: Create a more unified library for comap ABI stuff? (Exists both here and in neutron-star currently)
+pub const ABI_INTEGER_TYPE_U8: u32 = 0b0000_0000;
+pub const ABI_INTEGER_TYPE_I8: u32 = 0b0000_0100;
+pub const ABI_INTEGER_TYPE_U16: u32 = 0b0000_0010;
+pub const ABI_INTEGER_TYPE_I16: u32 = 0b0000_0110;
+pub const ABI_INTEGER_TYPE_U32: u32 = 0b0000_0001;
+pub const ABI_INTEGER_TYPE_I32: u32 = 0b0000_0101;
+pub const ABI_INTEGER_TYPE_U64: u32 = 0b0000_0011;
+pub const ABI_INTEGER_TYPE_I64: u32 = 0b0000_0111;
 
+pub const ABI_IS_ARRAY_TRUE: u32 = 0b0000_1000;
+
+/*
 #[derive(PartialEq)]
 pub enum ComapDataType {
     U8,
