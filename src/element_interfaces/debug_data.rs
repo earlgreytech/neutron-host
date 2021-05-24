@@ -665,7 +665,67 @@ impl DebugCoMap {
     }
 
     // Array values with abi
-    
+
+    pub fn push_key_array_u8(&mut self, key: &[u8], value: &[u8]) {
+        self.push_key_abi(key, &value, ABI_INTEGER_TYPE_U8 | ABI_IS_ARRAY_TRUE);
+        // No need to cast byte to byte
+    }
+
+    pub fn push_key_array_u16(&mut self, key: &[u8], value: &[u16]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..value.len() {
+            bytes.extend_from_slice(&value[i].to_le_bytes());
+        }
+        self.push_key_abi(key, &bytes, ABI_INTEGER_TYPE_U16 | ABI_IS_ARRAY_TRUE);
+    }
+
+    pub fn push_key_array_u32(&mut self, key: &[u8], value: &[u32]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..value.len() {
+            bytes.extend_from_slice(&value[i].to_le_bytes());
+        }
+        self.push_key_abi(key, &bytes, ABI_INTEGER_TYPE_U32 | ABI_IS_ARRAY_TRUE);
+    }
+
+    pub fn push_key_array_u64(&mut self, key: &[u8], value: &[u64]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..value.len() {
+            bytes.extend_from_slice(&value[i].to_le_bytes());
+        }
+        self.push_key_abi(key, &bytes, ABI_INTEGER_TYPE_U64 | ABI_IS_ARRAY_TRUE);
+    }
+
+    pub fn push_key_array_i8(&mut self, key: &[u8], value: &[i8]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..value.len() {
+            bytes.extend_from_slice(&value[i].to_le_bytes());
+        }
+        self.push_key_abi(key, &bytes, ABI_INTEGER_TYPE_I8 | ABI_IS_ARRAY_TRUE);
+    }
+
+    pub fn push_key_array_i16(&mut self, key: &[u8], value: &[i16]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..value.len() {
+            bytes.extend_from_slice(&value[i].to_le_bytes());
+        }
+        self.push_key_abi(key, &bytes, ABI_INTEGER_TYPE_I16 | ABI_IS_ARRAY_TRUE);
+    }
+
+    pub fn push_key_array_i32(&mut self, key: &[u8], value: &[i32]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..value.len() {
+            bytes.extend_from_slice(&value[i].to_le_bytes());
+        }
+        self.push_key_abi(key, &bytes, ABI_INTEGER_TYPE_I32 | ABI_IS_ARRAY_TRUE);
+    }
+
+    pub fn push_key_array_i64(&mut self, key: &[u8], value: &[i64]) {
+        let mut bytes: Vec<u8> = vec![];
+        for i in 0..value.len() {
+            bytes.extend_from_slice(&value[i].to_le_bytes());
+        }
+        self.push_key_abi(key, &bytes, ABI_INTEGER_TYPE_I64 | ABI_IS_ARRAY_TRUE);
+    }
 
     // Misc value types without abi
 
