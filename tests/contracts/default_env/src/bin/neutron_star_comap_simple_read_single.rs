@@ -28,21 +28,13 @@ pub unsafe extern "C" fn main() -> ! {
     let abi_data = u32::from_le_bytes(abi_data_buf);
 
     // NOTE: This was a match statement originally, but a bug was messing that up
-    if abi_data == ABI_VALUE_U64 {
-        match read_result_comap_u64(".namespace.keyname") {
-            Ok(v) => push_costack_u64(v),
-            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_u64(): {}", ERR_STR_ITEMDOESNTEXIST),
-            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_u64(): {}", ERR_STR_STACKITEMTOOLARGE),
-            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_u64(): {}", ERR_STR_STACKITEMTOOSMALL),
-            _ => println!("Error in read_result_comap_u64(): {}", ERR_STR_UNHANDLED),
-        }
-    } else if abi_data == ABI_VALUE_U32 {
-        match read_result_comap_u32(".namespace.keyname") {
-            Ok(v) => push_costack_u32(v),
-            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_u32(): {}", ERR_STR_ITEMDOESNTEXIST),
-            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_u32(): {}", ERR_STR_STACKITEMTOOLARGE),
-            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_u32(): {}", ERR_STR_STACKITEMTOOSMALL),
-            _ => println!("Error in read_result_comap_u32(): {}", ERR_STR_UNHANDLED),
+    if abi_data == ABI_VALUE_U8 {
+        match read_result_comap_u8(".namespace.keyname") {
+            Ok(v) => push_costack_u8(v),
+            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_u8(): {}", ERR_STR_ITEMDOESNTEXIST),
+            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_u8(): {}", ERR_STR_STACKITEMTOOLARGE),
+            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_u8(): {}", ERR_STR_STACKITEMTOOSMALL),
+            _ => println!("Error in read_result_comap_u8(): {}", ERR_STR_UNHANDLED),
         }
     } else if abi_data == ABI_VALUE_U16 {
         match read_result_comap_u16(".namespace.keyname") {
@@ -52,29 +44,29 @@ pub unsafe extern "C" fn main() -> ! {
             Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_u16(): {}", ERR_STR_STACKITEMTOOSMALL),
             _ => println!("Error in read_result_comap_u16(): {}", ERR_STR_UNHANDLED),
         }
-    } else if abi_data == ABI_VALUE_U8 {
-        match read_result_comap_u8(".namespace.keyname") {
-            Ok(v) => push_costack_u8(v),
-            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_u8(): {}", ERR_STR_ITEMDOESNTEXIST),
-            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_u8(): {}", ERR_STR_STACKITEMTOOLARGE),
-            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_u8(): {}", ERR_STR_STACKITEMTOOSMALL),
-            _ => println!("Error in read_result_comap_u8(): {}", ERR_STR_UNHANDLED),
+    } else if abi_data == ABI_VALUE_U32 {
+        match read_result_comap_u32(".namespace.keyname") {
+            Ok(v) => push_costack_u32(v),
+            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_u32(): {}", ERR_STR_ITEMDOESNTEXIST),
+            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_u32(): {}", ERR_STR_STACKITEMTOOLARGE),
+            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_u32(): {}", ERR_STR_STACKITEMTOOSMALL),
+            _ => println!("Error in read_result_comap_u32(): {}", ERR_STR_UNHANDLED),
         }
-    } else if abi_data == ABI_VALUE_I64 {
-        match read_result_comap_i64(".namespace.keyname") {
-            Ok(v) => push_costack_i64(v),
-            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_i64(): {}", ERR_STR_ITEMDOESNTEXIST),
-            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_i64(): {}", ERR_STR_STACKITEMTOOLARGE),
-            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_i64(): {}", ERR_STR_STACKITEMTOOSMALL),
-            _ => println!("Error in read_result_comap_i64(): {}", ERR_STR_UNHANDLED),
+    } else if abi_data == ABI_VALUE_U64 {
+        match read_result_comap_u64(".namespace.keyname") {
+            Ok(v) => push_costack_u64(v),
+            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_u64(): {}", ERR_STR_ITEMDOESNTEXIST),
+            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_u64(): {}", ERR_STR_STACKITEMTOOLARGE),
+            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_u64(): {}", ERR_STR_STACKITEMTOOSMALL),
+            _ => println!("Error in read_result_comap_u64(): {}", ERR_STR_UNHANDLED),
         }
-    } else if abi_data == ABI_VALUE_I32 {
-        match read_result_comap_i32(".namespace.keyname") {
-            Ok(v) => push_costack_i32(v),
-            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_i32(): {}", ERR_STR_ITEMDOESNTEXIST),
-            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_i32(): {}", ERR_STR_STACKITEMTOOLARGE),
-            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_i32(): {}", ERR_STR_STACKITEMTOOSMALL),
-            _ => println!("Error in read_result_comap_i32(): {}", ERR_STR_UNHANDLED),
+    } else if abi_data == ABI_VALUE_I8 {
+        match read_result_comap_i8(".namespace.keyname") {
+            Ok(v) => push_costack_i8(v),
+            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_i8(): {}", ERR_STR_ITEMDOESNTEXIST),
+            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_i8(): {}", ERR_STR_STACKITEMTOOLARGE),
+            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_i8(): {}", ERR_STR_STACKITEMTOOSMALL),
+            _ => println!("Error in read_result_comap_i8(): {}", ERR_STR_UNHANDLED),
         }
     } else if abi_data == ABI_VALUE_I16 {
         match read_result_comap_i16(".namespace.keyname") {
@@ -84,13 +76,21 @@ pub unsafe extern "C" fn main() -> ! {
             Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_i16(): {}", ERR_STR_STACKITEMTOOSMALL),
             _ => println!("Error in read_result_comap_i16(): {}", ERR_STR_UNHANDLED),
         }
-    } else if abi_data == ABI_VALUE_I8 {
-        match read_result_comap_i8(".namespace.keyname") {
-            Ok(v) => push_costack_i8(v),
-            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_i8(): {}", ERR_STR_ITEMDOESNTEXIST),
-            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_i8(): {}", ERR_STR_STACKITEMTOOLARGE),
-            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_i8(): {}", ERR_STR_STACKITEMTOOSMALL),
-            _ => println!("Error in read_result_comap_i8(): {}", ERR_STR_UNHANDLED),
+    } else if abi_data == ABI_VALUE_I32 {
+        match read_result_comap_i32(".namespace.keyname") {
+            Ok(v) => push_costack_i32(v),
+            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_i32(): {}", ERR_STR_ITEMDOESNTEXIST),
+            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_i32(): {}", ERR_STR_STACKITEMTOOLARGE),
+            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_i32(): {}", ERR_STR_STACKITEMTOOSMALL),
+            _ => println!("Error in read_result_comap_i32(): {}", ERR_STR_UNHANDLED),
+        }
+    } else if abi_data == ABI_VALUE_I64 {
+        match read_result_comap_i64(".namespace.keyname") {
+            Ok(v) => push_costack_i64(v),
+            Err(RecoverableError::ItemDoesntExist) => println!("Error in read_result_comap_i64(): {}", ERR_STR_ITEMDOESNTEXIST),
+            Err(RecoverableError::StackItemTooLarge) => println!("Error in read_result_comap_i64(): {}", ERR_STR_STACKITEMTOOLARGE),
+            Err(RecoverableError::StackItemTooSmall) => println!("Error in read_result_comap_i64(): {}", ERR_STR_STACKITEMTOOSMALL),
+            _ => println!("Error in read_result_comap_i64(): {}", ERR_STR_UNHANDLED),
         }
     } else {
         println!("Error: Invalid ABI data (This should never happen)");
