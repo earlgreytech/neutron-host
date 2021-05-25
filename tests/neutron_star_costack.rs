@@ -106,14 +106,14 @@ fn test_mirror_array_batch() {
     let mut debugdata = DebugDataInjector::default();
 
     let array_u8: [u8; 5] = [1, 2, 3, 4, 5];
-    let array_u16: [u16; 5] = [1, 2, 4, 4, 5];
-    let array_u32: [u32; 5] = [1, 2, 4, 4, 5];
-    let array_u64: [u64; 5] = [1, 2, 4, 4, 5];
+    let array_u16: [u16; 5] = [1, 2, 3, 4, 5];
+    let array_u32: [u32; 5] = [1, 2, 3, 4, 5];
+    let array_u64: [u64; 5] = [1, 2, 3, 4, 5];
 
     let array_i8: [i8; 5] = [1, 2, 3, 4, 5];
-    let array_i16: [i16; 5] = [1, 2, 4, 4, 5];
-    let array_i32: [i32; 5] = [1, 2, 4, 4, 5];
-    let array_i64: [i64; 5] = [1, 2, 4, 4, 5];
+    let array_i16: [i16; 5] = [1, 2, 3, 4, 5];
+    let array_i32: [i32; 5] = [1, 2, 3, 4, 5];
+    let array_i64: [i64; 5] = [1, 2, 3, 4, 5];
 
     let array_address: [NeutronAddress; 5] = [
         NeutronAddress::from_data(&[1; 24]),
@@ -137,6 +137,55 @@ fn test_mirror_array_batch() {
     debugdata.inject_stack.push_array_i16(&array_i16);
     debugdata.expect_stack.push_array_i16(&array_i16, "array_i16");
     debugdata.inject_stack.push_array_i32(&array_i32);
+    debugdata.expect_stack.push_array_i32(&array_i32, "array_i32");
+    debugdata.inject_stack.push_array_i64(&array_i64);
+    debugdata.expect_stack.push_array_i64(&array_i64, "array_i64");
+
+    debugdata.inject_stack.push_array_address(&array_address);
+    debugdata.expect_stack.push_array_address(&array_address, "array_address");
+
+    single_default_execution!(CONTRACT_MIRROR_ARRAY, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_mirror_array_batch_wrong_value() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let array_u8: [u8; 5] = [1, 2, 3, 4, 5];
+    let array_u16: [u16; 5] = [1, 2, 3, 4, 5];
+    let array_u32: [u32; 5] = [1, 2, 3, 4, 5];
+    let array_u64: [u64; 5] = [1, 2, 3, 4, 5];
+
+    let array_i8: [i8; 5] = [1, 2, 3, 4, 5];
+    let array_i16: [i16; 5] = [1, 2, 3, 4, 5];
+    let array_i32: [i32; 5] = [1, 2, 3, 4, 5];
+    let array_i64: [i64; 5] = [1, 2, 3, 4, 5];
+
+    let wrong_array_i32: [i32; 5] = [1, 2, 42, 4, 5];
+
+    let array_address: [NeutronAddress; 5] = [
+        NeutronAddress::from_data(&[1; 24]),
+        NeutronAddress::from_data(&[2; 24]),
+        NeutronAddress::from_data(&[3; 24]),
+        NeutronAddress::from_data(&[4; 24]),
+        NeutronAddress::from_data(&[5; 24]),
+    ];
+
+    debugdata.inject_stack.push_array_u8(&array_u8);
+    debugdata.expect_stack.push_array_u8(&array_u8, "array_u8");
+    debugdata.inject_stack.push_array_u16(&array_u16);
+    debugdata.expect_stack.push_array_u16(&array_u16, "array_u16");
+    debugdata.inject_stack.push_array_u32(&array_u32);
+    debugdata.expect_stack.push_array_u32(&array_u32, "array_u32");
+    debugdata.inject_stack.push_array_u64(&array_u64);
+    debugdata.expect_stack.push_array_u64(&array_u64, "array_u64");
+
+    debugdata.inject_stack.push_array_i8(&array_i8);
+    debugdata.expect_stack.push_array_i8(&array_i8, "array_i8");
+    debugdata.inject_stack.push_array_i16(&array_i16);
+    debugdata.expect_stack.push_array_i16(&array_i16, "array_i16");
+    debugdata.inject_stack.push_array_i32(&wrong_array_i32);
     debugdata.expect_stack.push_array_i32(&array_i32, "array_i32");
     debugdata.inject_stack.push_array_i64(&array_i64);
     debugdata.expect_stack.push_array_i64(&array_i64, "array_i64");
