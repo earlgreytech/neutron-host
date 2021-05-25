@@ -16,11 +16,11 @@ pub struct NeutronVMResult{
     pub extra_data: u64
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, FromPrimitive)]
 pub enum ExecutionType{
     Call = 0,
-    Deploy,
-    BareExecution
+    Deploy = 1,
+    BareExecution = 2
 }
 
 impl Default for ExecutionType{
