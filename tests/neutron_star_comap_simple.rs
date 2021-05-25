@@ -142,6 +142,78 @@ fn test_write_i64() {
     single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
 }
 
+#[test]
+#[should_panic]
+fn negtest_write_wrong_value() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value = u32::MAX / 2;
+    let wrong_value = value + 42;
+    let abi_data = ABI_VALUE_U32;
+
+    debugdata.inject_stack.push_u32(wrong_value);
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata.expect_map.push_key_u32(key.as_bytes(), value);
+
+    single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_write_wrong_abi_same_length() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value = u32::MAX / 2;
+    let _abi_data = ABI_VALUE_U32;
+    let wrong_abi_data = ABI_VALUE_I32;
+
+    debugdata.inject_stack.push_u32(value);
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.expect_map.push_key_u32(key.as_bytes(), value);
+
+    single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_write_wrong_abi_shorter() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value = u32::MAX / 2;
+    let _abi_data = ABI_VALUE_U32;
+    let wrong_abi_data = ABI_VALUE_U16;
+
+    debugdata.inject_stack.push_u32(value);
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.expect_map.push_key_u32(key.as_bytes(), value);
+
+    single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_write_wrong_abi_longer() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value = u32::MAX / 2;
+    let _abi_data = ABI_VALUE_U32;
+    let wrong_abi_data = ABI_VALUE_U64;
+
+    debugdata.inject_stack.push_u32(value);
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.expect_map.push_key_u32(key.as_bytes(), value);
+
+    single_default_execution!(CONTRACT_WRITE_SINGLE, debugdata);
+}
+
 // Write array contract
 
 #[test]
@@ -268,6 +340,78 @@ fn test_write_array_i64() {
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata.expect_map.push_key_array_i64(key.as_bytes(), &value);
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_write_array_wrong_value() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u32; 5] = [1, 2, 3, 4, 5];
+    let wrong_value: [u32; 5] = [1, 2, 42, 4, 5];
+    let abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_array_u32(&wrong_value);
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata.expect_map.push_key_array_u32(key.as_bytes(), &value);
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_write_array_wrong_abi_same_length() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u32; 5] = [1, 2, 3, 4, 5];
+    let _abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
+    let wrong_abi_data = ABI_VALUE_I32 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_array_u32(&value);
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.expect_map.push_key_array_u32(key.as_bytes(), &value);
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_write_array_wrong_abi_shorter() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u32; 5] = [1, 2, 3, 4, 5];
+    let _abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
+    let wrong_abi_data = ABI_VALUE_U16 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_array_u32(&value);
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.expect_map.push_key_array_u32(key.as_bytes(), &value);
+
+    single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_write_array_wrong_abi_longer() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u32; 5] = [1, 2, 3, 4, 5];
+    let _abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
+    let wrong_abi_data = ABI_VALUE_U64 + ABI_ARRAY_BIT;
+
+    debugdata.inject_stack.push_array_u32(&value);
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.expect_map.push_key_array_u32(key.as_bytes(), &value);
 
     single_default_execution!(CONTRACT_WRITE_ARRAY, debugdata);
 }
@@ -404,6 +548,78 @@ fn test_read_i64() {
     single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
 }
 
+#[test]
+#[should_panic]
+fn negtest_read_wrong_value() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value = u32::MAX / 2;
+    let wrong_value = value + 42;
+    let abi_data = ABI_VALUE_U32;
+
+    debugdata.expect_stack.push_u32(value, "value");
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata.inject_map.push_key_u32(key.as_bytes(), wrong_value);
+
+    single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_read_wrong_abi_same_length() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value = u32::MAX / 2;
+    let _abi_data = ABI_VALUE_U32;
+    let wrong_abi_data = ABI_VALUE_I32;
+
+    debugdata.expect_stack.push_u32(value, "value");
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.inject_map.push_key_u32(key.as_bytes(), value);
+
+    single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_read_wrong_abi_shorter() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value = u32::MAX / 2;
+    let _abi_data = ABI_VALUE_U32;
+    let wrong_abi_data = ABI_VALUE_U16;
+
+    debugdata.expect_stack.push_u32(value, "value");
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.inject_map.push_key_u32(key.as_bytes(), value);
+
+    single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_read_wrong_abi_longer() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value = u32::MAX / 2;
+    let _abi_data = ABI_VALUE_U32;
+    let wrong_abi_data = ABI_VALUE_U64;
+
+    debugdata.expect_stack.push_u32(value, "value");
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.inject_map.push_key_u32(key.as_bytes(), value);
+
+    single_default_execution!(CONTRACT_READ_SINGLE, debugdata);
+}
+
 // Read array contract
 
 #[test]
@@ -530,6 +746,78 @@ fn test_read_array_i64() {
     debugdata.inject_stack.push_u32(abi_data);
 
     debugdata.inject_map.push_key_array_i64(key.as_bytes(), &value);
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_read_array_wrong_value() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u32; 5] = [1, 2, 3, 4, 5];
+    let wrong_value: [u32; 5] = [1, 2, 42, 4, 5];
+    let abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
+
+    debugdata.expect_stack.push_array_u32(&value, "value");
+    debugdata.inject_stack.push_u32(abi_data);
+
+    debugdata.inject_map.push_key_array_u32(key.as_bytes(), &wrong_value);
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_read_array_wrong_abi_same_length() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u32; 5] = [1, 2, 3, 4, 5];
+    let _abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
+    let wrong_abi_data = ABI_VALUE_I32 + ABI_ARRAY_BIT;
+
+    debugdata.expect_stack.push_array_u32(&value, "value");
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.inject_map.push_key_array_u32(key.as_bytes(), &value);
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_read_array_wrong_abi_shorter() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u32; 5] = [1, 2, 3, 4, 5];
+    let _abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
+    let wrong_abi_data = ABI_VALUE_U16 + ABI_ARRAY_BIT;
+
+    debugdata.expect_stack.push_array_u32(&value, "value");
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.inject_map.push_key_array_u32(key.as_bytes(), &value);
+
+    single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
+}
+
+#[test]
+#[should_panic]
+fn negtest_read_array_wrong_abi_longer() {
+    let mut debugdata = DebugDataInjector::default();
+
+    let key = ".namespace.keyname";
+    let value: [u32; 5] = [1, 2, 3, 4, 5];
+    let _abi_data = ABI_VALUE_U32 + ABI_ARRAY_BIT;
+    let wrong_abi_data = ABI_VALUE_U64 + ABI_ARRAY_BIT;
+
+    debugdata.expect_stack.push_array_u32(&value, "value");
+    debugdata.inject_stack.push_u32(wrong_abi_data);
+
+    debugdata.inject_map.push_key_array_u32(key.as_bytes(), &value);
 
     single_default_execution!(CONTRACT_READ_ARRAY, debugdata);
 }
