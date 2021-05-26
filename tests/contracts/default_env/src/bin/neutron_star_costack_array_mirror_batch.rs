@@ -13,8 +13,7 @@ extern crate panic_halt;
 const DEBUG_DATA_FEATURE: u32 = 0x4000_0001;
 
 const ERR_STR_ITEMDOESNTEXIST: &str = "ItemDoesntExist (Failed to pop value from costack)";
-const ERR_STR_STACKITEMTOOLARGE: &str = "StackItemTooLarge (The costack value was larger than this function's data type or array size)";
-const ERR_STR_STACKITEMTOOSMALL: &str = "StackItemTooSmall (The costack value was smaller than this function's data type or array size)";
+const ERR_STR_STACKITEMTOOLARGE: &str = "StackItemTooLarge (Placeholder name - The costack array wasn't aligned to the requested data type)";
 const ERR_STR_UNHANDLED: &str = "Unhandled";
 
 #[no_mangle]
@@ -36,66 +35,66 @@ pub unsafe extern "C" fn main() -> ! {
     let mut array_address: [NeutronAddress; 5] = [NeutronAddress::default(); 5];
 
     match pop_costack_fixed_array_u8(&mut array_u8) {
-        Ok(()) => {}
+        Ok(5) => {}
+        Ok(actual_size) => println!("Error in pop_costack_fixed_array_u8(): Expected array size 5, got {}", actual_size),
         Err(RecoverableError::ItemDoesntExist) => println!("Error in pop_costack_fixed_array_u8(): {}", ERR_STR_ITEMDOESNTEXIST),
         Err(RecoverableError::StackItemTooLarge) => println!("Error in pop_costack_fixed_array_u8(): {}", ERR_STR_STACKITEMTOOLARGE),
-        Err(RecoverableError::StackItemTooSmall) => println!("Error in pop_costack_fixed_array_u8(): {}", ERR_STR_STACKITEMTOOSMALL),
         _ => println!("Error in pop_costack_fixed_array_u8: {}", ERR_STR_UNHANDLED),
     }
     match pop_costack_fixed_array_u16(&mut array_u16) {
-        Ok(()) => {}
+        Ok(5) => {}
+        Ok(actual_size) => println!("Error in pop_costack_fixed_array_u16(): Expected array size 5, got {}", actual_size),
         Err(RecoverableError::ItemDoesntExist) => println!("Error in pop_costack_fixed_array_u16(): {}", ERR_STR_ITEMDOESNTEXIST),
         Err(RecoverableError::StackItemTooLarge) => println!("Error in pop_costack_fixed_array_u16(): {}", ERR_STR_STACKITEMTOOLARGE),
-        Err(RecoverableError::StackItemTooSmall) => println!("Error in pop_costack_fixed_array_u16(): {}", ERR_STR_STACKITEMTOOSMALL),
         _ => println!("Error in pop_costack_fixed_array_u16: {}", ERR_STR_UNHANDLED),
     }
     match pop_costack_fixed_array_u32(&mut array_u32) {
-        Ok(()) => {}
+        Ok(5) => {}
+        Ok(actual_size) => println!("Error in pop_costack_fixed_array_u32(): Expected array size 5, got {}", actual_size),
         Err(RecoverableError::ItemDoesntExist) => println!("Error in pop_costack_fixed_array_u32(): {}", ERR_STR_ITEMDOESNTEXIST),
         Err(RecoverableError::StackItemTooLarge) => println!("Error in pop_costack_fixed_array_u32(): {}", ERR_STR_STACKITEMTOOLARGE),
-        Err(RecoverableError::StackItemTooSmall) => println!("Error in pop_costack_fixed_array_u32(): {}", ERR_STR_STACKITEMTOOSMALL),
         _ => println!("Error in pop_costack_fixed_array_u32: {}", ERR_STR_UNHANDLED),
     }
     match pop_costack_fixed_array_u64(&mut array_u64) {
-        Ok(()) => {}
+        Ok(5) => {}
+        Ok(actual_size) => println!("Error in pop_costack_fixed_array_u64(): Expected array size 5, got {}", actual_size),
         Err(RecoverableError::ItemDoesntExist) => println!("Error in pop_costack_fixed_array_u64(): {}", ERR_STR_ITEMDOESNTEXIST),
         Err(RecoverableError::StackItemTooLarge) => println!("Error in pop_costack_fixed_array_u64(): {}", ERR_STR_STACKITEMTOOLARGE),
-        Err(RecoverableError::StackItemTooSmall) => println!("Error in pop_costack_fixed_array_u64(): {}", ERR_STR_STACKITEMTOOSMALL),
         _ => println!("Error in pop_costack_fixed_array_u64: {}", ERR_STR_UNHANDLED),
     }
     match pop_costack_fixed_array_i8(&mut array_i8) {
-        Ok(()) => {}
+        Ok(5) => {}
+        Ok(actual_size) => println!("Error in pop_costack_fixed_array_i8(): Expected array size 5, got {}", actual_size),
         Err(RecoverableError::ItemDoesntExist) => println!("Error in pop_costack_fixed_array_i8(): {}", ERR_STR_ITEMDOESNTEXIST),
         Err(RecoverableError::StackItemTooLarge) => println!("Error in pop_costack_fixed_array_i8(): {}", ERR_STR_STACKITEMTOOLARGE),
-        Err(RecoverableError::StackItemTooSmall) => println!("Error in pop_costack_fixed_array_i8(): {}", ERR_STR_STACKITEMTOOSMALL),
         _ => println!("Error in pop_costack_fixed_array_i8: {}", ERR_STR_UNHANDLED),
     }
     match pop_costack_fixed_array_i16(&mut array_i16) {
-        Ok(()) => {}
+        Ok(5) => {}
+        Ok(actual_size) => println!("Error in pop_costack_fixed_array_i16(): Expected array size 5, got {}", actual_size),
         Err(RecoverableError::ItemDoesntExist) => println!("Error in pop_costack_fixed_array_i16(): {}", ERR_STR_ITEMDOESNTEXIST),
         Err(RecoverableError::StackItemTooLarge) => println!("Error in pop_costack_fixed_array_i16(): {}", ERR_STR_STACKITEMTOOLARGE),
-        Err(RecoverableError::StackItemTooSmall) => println!("Error in pop_costack_fixed_array_i16(): {}", ERR_STR_STACKITEMTOOSMALL),
         _ => println!("Error in pop_costack_fixed_array_i16: {}", ERR_STR_UNHANDLED),
     }
     match pop_costack_fixed_array_i32(&mut array_i32) {
-        Ok(()) => {}
+        Ok(5) => {}
+        Ok(actual_size) => println!("Error in pop_costack_fixed_array_i32(): Expected array size 5, got {}", actual_size),
         Err(RecoverableError::ItemDoesntExist) => println!("Error in pop_costack_fixed_array_i32(): {}", ERR_STR_ITEMDOESNTEXIST),
         Err(RecoverableError::StackItemTooLarge) => println!("Error in pop_costack_fixed_array_i32(): {}", ERR_STR_STACKITEMTOOLARGE),
-        Err(RecoverableError::StackItemTooSmall) => println!("Error in pop_costack_fixed_array_i32(): {}", ERR_STR_STACKITEMTOOSMALL),
         _ => println!("Error in pop_costack_fixed_array_i32: {}", ERR_STR_UNHANDLED),
     }
     match pop_costack_fixed_array_i64(&mut array_i64) {
-        Ok(()) => {}
+        Ok(5) => {}
+        Ok(actual_size) => println!("Error in pop_costack_fixed_array_i64(): Expected array size 5, got {}", actual_size),
         Err(RecoverableError::ItemDoesntExist) => println!("Error in pop_costack_fixed_array_i64(): {}", ERR_STR_ITEMDOESNTEXIST),
         Err(RecoverableError::StackItemTooLarge) => println!("Error in pop_costack_fixed_array_i64(): {}", ERR_STR_STACKITEMTOOLARGE),
-        Err(RecoverableError::StackItemTooSmall) => println!("Error in pop_costack_fixed_array_i64(): {}", ERR_STR_STACKITEMTOOSMALL),
         _ => println!("Error in pop_costack_fixed_array_i64: {}", ERR_STR_UNHANDLED),
     }
     match pop_costack_fixed_array_address(&mut array_address) {
-        Ok(()) => {}
+        Ok(5) => {}
+        Ok(actual_size) => println!("Error in pop_costack_fixed_array_address(): Expected array size 5, got {}", actual_size),
         Err(RecoverableError::ItemDoesntExist) => println!("Error in pop_costack_fixed_array_address(): {}", ERR_STR_ITEMDOESNTEXIST),
         Err(RecoverableError::StackItemTooLarge) => println!("Error in pop_costack_fixed_array_address(): {}", ERR_STR_STACKITEMTOOLARGE),
-        Err(RecoverableError::StackItemTooSmall) => println!("Error in pop_costack_fixed_array_address(): {}", ERR_STR_STACKITEMTOOSMALL),
         _ => println!("Error in pop_costack_fixed_array_address: {}", ERR_STR_UNHANDLED),
     }
 
