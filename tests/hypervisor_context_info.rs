@@ -50,10 +50,8 @@ fn test_execution_type_bare_execution() {
 fn test_execution_type_deploy() {
     let mut harness = TestHarness::default();
     let context = ExecutionContext::create_default_random_context();
-    let result = harness.deploy_binary_using_default_callsystem(
-        &get_contract_path("hypervisor_context_info_execution_type"),
-        context.clone(),
-    );
+    let result =
+        harness.deploy_binary_using_default_callsystem(&get_contract_path("hypervisor_context_info_execution_type"), context.clone());
 
     // Only 0, 1, and 2 are defined for ExecutionType
     if result.status > 2 {
@@ -81,15 +79,10 @@ fn test_self_address() {
     // Create a context with random self address
     let context = ExecutionContext::create_default_random_context();
 
-    debugdata
-        .expect_stack
-        .push_address(context.self_address, "self_address");
+    debugdata.expect_stack.push_address(context.self_address, "self_address");
 
     harness.debugdata = debugdata;
-    harness.execute_binary_using_default_callsystem(
-        &get_contract_path("hypervisor_context_info_self_address"),
-        context,
-    );
+    harness.execute_binary_using_default_callsystem(&get_contract_path("hypervisor_context_info_self_address"), context);
 }
 
 #[test]
@@ -101,15 +94,10 @@ fn test_origin() {
     let mut context = ExecutionContext::create_default_random_context();
     context.origin = context.self_address;
 
-    debugdata
-        .expect_stack
-        .push_address(context.origin, "origin");
+    debugdata.expect_stack.push_address(context.origin, "origin");
 
     harness.debugdata = debugdata;
-    harness.execute_binary_using_default_callsystem(
-        &get_contract_path("hypervisor_context_info_origin"),
-        context,
-    );
+    harness.execute_binary_using_default_callsystem(&get_contract_path("hypervisor_context_info_origin"), context);
 }
 
 #[test]
@@ -121,13 +109,8 @@ fn test_sender() {
     let mut context = ExecutionContext::create_default_random_context();
     context.sender = context.self_address;
 
-    debugdata
-        .expect_stack
-        .push_address(context.sender, "sender");
+    debugdata.expect_stack.push_address(context.sender, "sender");
 
     harness.debugdata = debugdata;
-    harness.execute_binary_using_default_callsystem(
-        &get_contract_path("hypervisor_context_info_sender"),
-        context,
-    );
+    harness.execute_binary_using_default_callsystem(&get_contract_path("hypervisor_context_info_sender"), context);
 }

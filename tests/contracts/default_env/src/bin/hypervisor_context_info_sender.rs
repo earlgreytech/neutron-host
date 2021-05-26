@@ -12,8 +12,8 @@ const DEBUG_DATA_FEATURE: u32 = 0x4000_0001;
 #[no_mangle]
 pub unsafe extern "C" fn main() -> ! {
     __sender();
-    
+
     __system_call(DEBUG_DATA_FEATURE, 2); // DebugDataFunctions::AssertOutputStack
-    
+
     __exit(0);
 }
