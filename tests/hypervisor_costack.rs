@@ -15,9 +15,7 @@ fn test_mirror_bytes() {
 
     let var_bytes = "testbytes";
     debugdata.inject_stack.push_bytes(var_bytes.as_bytes());
-    debugdata
-        .expect_stack
-        .push_bytes(var_bytes.as_bytes(), "var_bytes");
+    debugdata.expect_stack.push_bytes(var_bytes.as_bytes(), "var_bytes");
 
     single_default_execution!(CONTRACT_NAME, debugdata);
 }
@@ -30,12 +28,8 @@ fn negtest_mirror_wrong_bytes() {
 
     let var_bytes = "testbytes";
     let var_bytes_wrong = "bytestest";
-    debugdata
-        .inject_stack
-        .push_bytes(var_bytes_wrong.as_bytes());
-    debugdata
-        .expect_stack
-        .push_bytes(var_bytes.as_bytes(), "var_bytes");
+    debugdata.inject_stack.push_bytes(var_bytes_wrong.as_bytes());
+    debugdata.expect_stack.push_bytes(var_bytes.as_bytes(), "var_bytes");
 
     single_default_execution!(CONTRACT_NAME, debugdata);
 }
@@ -49,9 +43,7 @@ fn negtest_mirror_too_many_bytes() {
     let var_bytes = "testbytes";
     debugdata.inject_stack.push_bytes(var_bytes.as_bytes());
     debugdata.inject_stack.push_bytes(var_bytes.as_bytes());
-    debugdata
-        .expect_stack
-        .push_bytes(var_bytes.as_bytes(), "var_bytes");
+    debugdata.expect_stack.push_bytes(var_bytes.as_bytes(), "var_bytes");
 
     single_default_execution!(CONTRACT_NAME, debugdata);
 }
@@ -64,12 +56,8 @@ fn negtest_mirror_too_few_bytes() {
 
     let var_bytes = "testbytes";
     debugdata.inject_stack.push_bytes(var_bytes.as_bytes());
-    debugdata
-        .expect_stack
-        .push_bytes(var_bytes.as_bytes(), "var_bytes");
-    debugdata
-        .expect_stack
-        .push_bytes(var_bytes.as_bytes(), "var_bytes");
+    debugdata.expect_stack.push_bytes(var_bytes.as_bytes(), "var_bytes");
+    debugdata.expect_stack.push_bytes(var_bytes.as_bytes(), "var_bytes");
 
     single_default_execution!(CONTRACT_NAME, debugdata);
 }

@@ -31,17 +31,21 @@ const HEX_OR_BIGNUM_TRUE: u8    = 0b00010000;
 const IS_ARRAY_MASK: u8         = 0b00001000;
 const IS_ARRAY_FALSE: u8        = 0b00000000;
 const IS_ARRAY_TRUE: u8         = 0b00001000;
+*/
 
-const NUMERIC_TYPE_MASK: u8     = 0b00000111;
-const NUMERIC_TYPE_U8: u8       = 0b00000000;
-const NUMERIC_TYPE_I8: u8       = 0b00000100;
-const NUMERIC_TYPE_U16: u8      = 0b00000010;
-const NUMERIC_TYPE_I16: u8      = 0b00000110;
-const NUMERIC_TYPE_U32: u8      = 0b00000001;
-const NUMERIC_TYPE_I32: u8      = 0b00000101;
-const NUMERIC_TYPE_U64: u8      = 0b00000011;
-const NUMERIC_TYPE_I64: u8      = 0b00000111;
+// TODO: Create a more unified library for comap ABI stuff? (Exists both here and in neutron-star currently)
+pub const ABI_INTEGER_TYPE_U8: u32 = 0b0000_0000;
+pub const ABI_INTEGER_TYPE_I8: u32 = 0b0000_0100;
+pub const ABI_INTEGER_TYPE_U16: u32 = 0b0000_0010;
+pub const ABI_INTEGER_TYPE_I16: u32 = 0b0000_0110;
+pub const ABI_INTEGER_TYPE_U32: u32 = 0b0000_0001;
+pub const ABI_INTEGER_TYPE_I32: u32 = 0b0000_0101;
+pub const ABI_INTEGER_TYPE_U64: u32 = 0b0000_0011;
+pub const ABI_INTEGER_TYPE_I64: u32 = 0b0000_0111;
 
+pub const ABI_IS_ARRAY_TRUE: u32 = 0b0000_1000;
+
+/*
 #[derive(PartialEq)]
 pub enum ComapDataType {
     U8,
@@ -79,9 +83,7 @@ pub fn comap_abi_header_to_u32(data: &[u8]) -> (usize, u32) {
             header_u32 = u32::from_le_bytes([first_byte, data[1], data[2], data[3]]);
         }
         HEADER_SIZE_RESERVED => panic!("Reserved codata size type isn't implemented yet!"),
-        _ => println!(
-            "Failed to match comap header data to a valid pattern (This should never happen)"
-        ),
+        _ => println!("Failed to match comap header data to a valid pattern (This should never happen)"),
     }
 
     (header_size, header_u32)
@@ -108,9 +110,7 @@ pub fn comap_abi_header_from_u32(header_u32: u32) -> (usize, [u8; 4]) {
             header_size = 4;
         }
         HEADER_SIZE_RESERVED => panic!("Reserved codata size type isn't implemented yet!"),
-        _ => println!(
-            "Failed to match comap header data to a valid pattern (This should never happen)"
-        ),
+        _ => println!("Failed to match comap header data to a valid pattern (This should never happen)"),
     }
 
     (header_size, header_bytes)
@@ -140,10 +140,7 @@ mod tests {
         let (header_size, header_u32) = comap_abi_header_to_u32(&data);
         assert_eq!(header_size, 1, "abi return value 'header_size' was wrong");
         let expected_header = (HEADER_SIZE_1 as u32) + EMPTY_U32_2 + EMPTY_U32_3 + EMPTY_U32_4;
-        assert_eq!(
-            header_u32, expected_header,
-            "abi return value 'header_u32' was wrong"
-        );
+        assert_eq!(header_u32, expected_header, "abi return value 'header_u32' was wrong");
     }
     #[test]
     fn test_get_header_u32_2() {
@@ -151,27 +148,15 @@ mod tests {
         let (header_size, header_u32) = comap_abi_header_to_u32(&data);
         assert_eq!(header_size, 2, "abi return value 'header_size' was wrong");
         let expected_header = (HEADER_SIZE_2 as u32) + HEADER_U32_2 + EMPTY_U32_3 + EMPTY_U32_4;
-        assert_eq!(
-            header_u32, expected_header,
-            "abi return value 'header_u32' was wrong"
-        );
+        assert_eq!(header_u32, expected_header, "abi return value 'header_u32' was wrong");
     }
     #[test]
     fn test_get_header_u32_4() {
-        let data: Vec<u8> = vec![
-            HEADER_SIZE_4,
-            HEADER_BYTE,
-            HEADER_BYTE,
-            HEADER_BYTE,
-            VALUE_BYTE,
-        ];
+        let data: Vec<u8> = vec![HEADER_SIZE_4, HEADER_BYTE, HEADER_BYTE, HEADER_BYTE, VALUE_BYTE];
         let (header_size, header_u32) = comap_abi_header_to_u32(&data);
         assert_eq!(header_size, 4, "abi return value 'header_size' was wrong");
         let expected_header = (HEADER_SIZE_4 as u32) + HEADER_U32_2 + HEADER_U32_3 + HEADER_U32_4;
-        assert_eq!(
-            header_u32, expected_header,
-            "abi return value 'header_u32' was wrong"
-        );
+        assert_eq!(header_u32, expected_header, "abi return value 'header_u32' was wrong");
     }
     #[test]
     #[should_panic]

@@ -17,4 +17,5 @@ bench = false
 [dependencies]
 neutron-star-rt = { path = "../../../../neutron-star-rt" }
 neutron-star = { path = "../../../../neutron-star" }
+neutron-common = { path = "../../../../neutron-common" }
 panic-halt = "0.2.0"

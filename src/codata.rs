@@ -4,6 +4,7 @@ use crate::neutronerror::*;
 use crate::neutronerror::NeutronError::*;
 use std::collections::HashMap;
 use std::convert::*;
+use std::mem;
 
 #[derive(Default)]
 pub struct GasSchedule{
@@ -221,13 +222,28 @@ impl CoData{
         Ok(value)
     }
 
-    /// Should only be used by Element APIs. Flip stacks once when entering an Element API and once more when leaving and returning to a contract.
-    /// Used so that contract outputs become Element inputs at first, then so that Element outputs becomes contract inputs
-    fn flip_stacks(&mut self){
+    /// Should only be used by hypervisor ops that utilize costack arguments. Flip stacks once when entering the op and once more before leaving. 
+    /// Used so that ops can actually read its inputs, and so the calling contract can read its outputs. 
+    pub fn flip_stacks(&mut self){
         let tmp = self.input_stack_index;
         self.input_stack_index = self.output_stack_index;
         self.output_stack_index = tmp;
+    }
+
+    /// Should only be used by Element APIs. Flip stacks once when entering an Element API and once more when leaving and returning to a contract.
+    /// Used so that contract outputs become Element inputs at first, then so that Element outputs becomes contract inputs
+    /// This function clears the old input/new output stack on each flipping, which means an Element API will always leave the stacks empty save for its outputs (if any)
+    fn flip_stacks_clear_output(&mut self){
+        self.flip_stacks();
         self.stacks[self.output_stack_index].clear(); //outputs are cleared with each flipping (clears caller's outputs on entry, then callers inputs upon exit)
+    }
+
+    /// Used only by namesake hypervisor op to efficiently overwrite the output stack with a copy of the input stack
+    /// This operation is meant to streamline the process of passing the current context's input/result as input to a new call
+    /// TODO: Evaluate if a destructive move is the best approach?
+    /// TODO: Allow moving only parts of the stack?
+    pub fn move_input_to_output_costack(&mut self){
+        self.stacks[self.output_stack_index] = mem::replace(&mut self.stacks[self.input_stack_index], vec![]);
     }
 
     /*
@@ -264,14 +280,14 @@ impl CoData{
         self.top_input_map_index = self.top_output_map_index; //one below top of stack
         self.top_input_map_index = self.top_output_map_index; //one below top of stack
         self.top_output_map_index = self.top_result_map_index; //top of stack
-        self.flip_stacks();
+        self.flip_stacks_clear_output();
         //note: elements can not access result map 
     }
     pub fn exit_element(&mut self){
         let c = self.context_stack.last().unwrap();
         self.top_output_map_index = c.output_map;
         self.top_input_map_index = c.input_map;
-        self.flip_stacks();
+        self.flip_stacks_clear_output();
     }
     /// Removes the top execution context from the stack
     pub fn pop_context(&mut self) -> Result<(), NeutronError>{

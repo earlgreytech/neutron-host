@@ -28,11 +28,9 @@ fn test_new_element() {
         cs.logging = Some(RefCell::new(&mut harness.logger));
         let mut file_element = FileElement {};
         cs.add_call(FILE_ELEMENT_ID, &mut file_element).unwrap();
-        let result = harness.instance.execute_binary(
-            &get_contract_path_target(CONTRACT_NAME, target),
-            &cs,
-            context,
-        );
+        let result = harness
+            .instance
+            .execute_binary(&get_contract_path_target(CONTRACT_NAME, target), &cs, context);
         harness.db.commit().unwrap();
         assert_eq!(result.status, 0);
     }
@@ -64,9 +62,7 @@ impl ElementAPI for FileElement {
         }
         let f = num::FromPrimitive::from_u32(function);
         if f.is_none() {
-            return Err(NeutronError::Recoverable(
-                RecoverableError::InvalidSystemFunction,
-            ));
+            return Err(NeutronError::Recoverable(RecoverableError::InvalidSystemFunction));
         }
         let function = f.unwrap();
         let result = match function {
